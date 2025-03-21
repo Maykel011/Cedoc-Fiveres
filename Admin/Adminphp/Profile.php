@@ -56,6 +56,60 @@
 <div class="main-content">
     <h1 class="main-title">Update Profile</h1>
 
+    <div class="main-container">
+    <!-- Profile Information Container -->
+    <div class="profile-container">
+        <h2>Profile Information</h2>
+        <p>Update your account's profile information and email address.</p>
+        <form onsubmit="handleSubmit(event)">
+            <label for="name">Name</label>
+            <input type="text" id="name" name="name" placeholder="User Name" required>
+            
+            <label for="email">Email</label>
+            <input type="email" id="email" name="email" placeholder="Enter Email" required>
+            
+            <button type="submit" class="custom-save-button">Save</button>
+
+        </form>
+    </div>
+
+    <!-- Update Password Container -->
+    <div class="update-password-container">
+        <h2>Update Password</h2>
+        <p>Ensure your account is using a long, random password to stay secure.</p>
+        <form onsubmit="handleSubmit(event)">
+            <label for="current-password">Current Password</label>
+            <input type="password" id="current-password" placeholder="Enter current password" required>
+            
+            <label for="new-password">New Password</label>
+            <input type="password" id="new-password" placeholder="Enter new password" required>
+            
+            <label for="confirm-password">Confirm Password</label>
+            <input type="password" id="confirm-password" placeholder="Confirm password" required>
+            <button type="submit" class="custom-save-button">Save</button>
+
+        </form>
+    </div>
+
+    <!-- Delete Passkey Container -->
+    <div class="delete-passkey-container">
+        <h2>Delete Passkey</h2>
+        <form onsubmit="handleSubmit(event)">
+            <label for="confirm-passkey">Confirm Passkey</label>
+            <input type="password" id="confirm-passkey" placeholder="Confirm passkey" required>
+            
+            <label for="new-passkey">New Passkey</label>
+            <input type="password" id="new-passkey" placeholder="Input new passkey" required>
+            
+            <label for="confirm-new-passkey">Confirm New Passkey</label>
+            <input type="password" id="confirm-new-passkey" placeholder="Confirm new passkey" required>
+            
+            <button type="submit" class="custom-save-button">Save</button>
+
+        </form>
+    </div>
+</div>
+    </div>
    
 
 <script src="../../js/profile.js"></script>
