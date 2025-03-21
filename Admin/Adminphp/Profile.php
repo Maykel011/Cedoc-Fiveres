@@ -54,10 +54,10 @@
 </aside>
 
 <div class="main-content">
-    <h1 class="main-title">Update Profile</h1>
 
-    <div class="main-container">
+<div class="main-container">
     <!-- Profile Information Container -->
+
     <div class="profile-container">
         <h2>Profile Information</h2>
         <p>Update your account's profile information and email address.</p>
@@ -69,7 +69,6 @@
             <input type="email" id="email" name="email" placeholder="Enter Email" required>
             
             <button type="submit" class="custom-save-button">Save</button>
-
         </form>
     </div>
 
@@ -86,29 +85,29 @@
             
             <label for="confirm-password">Confirm Password</label>
             <input type="password" id="confirm-password" placeholder="Confirm password" required>
+            
             <button type="submit" class="custom-save-button">Save</button>
-
         </form>
     </div>
 
-    <!-- Delete Passkey Container -->
+    <!-- Update Passkey Container -->
     <div class="delete-passkey-container">
-        <h2>Delete Passkey</h2>
+        <h2>Update Passkey</h2>
         <form onsubmit="handleSubmit(event)">
             <label for="confirm-passkey">Confirm Passkey</label>
             <input type="password" id="confirm-passkey" placeholder="Confirm passkey" required>
             
             <label for="new-passkey">New Passkey</label>
-            <input type="password" id="new-passkey" placeholder="Input new passkey" required>
+            <input type="password" id="new-passkey" placeholder="Input new passkey">
             
             <label for="confirm-new-passkey">Confirm New Passkey</label>
-            <input type="password" id="confirm-new-passkey" placeholder="Confirm new passkey" required>
+            <input type="password" id="confirm-new-passkey" placeholder="Confirm new passkey">
             
             <button type="submit" class="custom-save-button">Save</button>
-
         </form>
     </div>
 </div>
+
     </div>
    
 

@@ -14,10 +14,15 @@
     /* font-family: 'SerpentineBold', sans-serif; */
 }
 
-body {
+
+body,html {
     margin: 0;
     font-family: Arial, sans-serif;
+    height: 100%;
+    overflow: hidden; /* Prevent full page scrolling */
+
 }
+
 
 
 /* HEADER */
@@ -44,11 +49,15 @@ body {
 
 /* MAIN CONTENT */
 .main-content {
-    margin-left: 250px; /* Adjust for sidebar */
+    margin-left: 250px; /* Ensure content doesn't overlap sidebar */
     padding: 20px;
-    text-align: center; /* Centers content inside the div */
-    position: relative;
+    flex-grow: 1; /* Allow content to expand */
+    height: 100vh;
+    overflow-y: auto; /* Enable scrolling for main content only */
+    background-color: #f9f9f9;
 }
+
+
 
 /* Centered Title */
 .main-title {
@@ -102,7 +111,10 @@ body {
     padding-top: 10px;
     min-width: 250px;
     max-width: 250px;
+    height: 100vh; /* Fixed full height */
+    overflow-y: auto; /* Allows scrolling inside the sidebar */
 }
+
 
 .sidebar ul {
     font-family: 'Akrobat', sans-serif;
@@ -142,7 +154,7 @@ body {
 
 /* Hover Effect with Zoom */
 .sidebar a:hover, .dropdown-btn:hover {
-    background-color: #ff0000;
+    background: linear-gradient(135deg, #ff3d3d, #b30000);
     border-radius: 5px;
     color: white;
     transform: scale(1.05);
@@ -237,7 +249,7 @@ body {
 
 /* Hover Effect */
 .user-dropdown a:hover {
-    background: #e40000;
+   background: linear-gradient(135deg, #ff3d3d, #b30000);
     color: white;
 }
 
@@ -257,3 +269,104 @@ body {
 .user-dropdown a:not(:last-child) {
     border-bottom: 1px solid #eee;
 }
+
+/* Main container styling */
+/* Main container styling */
+.main-container {
+    max-width: 1200px; /* Increased width */
+    margin: 0 auto;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    /* Enable scrolling */
+    max-height: 600px; /* Adjust as needed */
+    overflow-y: auto; /* Allows scrolling when content overflows */
+}
+
+
+/* Common container styling */
+.profile-container, 
+.update-password-container, 
+.delete-passkey-container {
+    margin-bottom: 30px;
+    padding: 25px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+}
+
+.profile-container:hover, 
+.update-password-container:hover, 
+.delete-passkey-container:hover {
+    transform: translateY(-5px);
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 24px;
+    font-weight: 700;
+    text-align: left; /* Ensure alignment */
+    display: block;
+}
+
+label {
+    display: block;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+
+p {
+    color: #666;
+    font-size: 14px;
+}
+
+input {
+    padding: 12px;
+    margin-top: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease-in-out;
+    display: block;
+    width: 100%; /* Ensure it takes up correct width */
+    max-width: 400px; /* Prevents stretching too much */
+}
+
+input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Custom save button styling */
+.custom-save-button {
+    display: block;
+    width: 15%;
+    padding: 12px;
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+
+
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: background 0.3s ease-in-out;
+}
+
+.custom-save-button:hover {
+    background: linear-gradient(135deg, #ff3d3d, #b30000);
+
+}
+
+
+
