@@ -186,6 +186,7 @@ body,html {
 
 /* USER DROPDOWN */
 .user {
+    font-family: 'Akrobat', sans-serif;
     position: relative;
     cursor: pointer;
     display: flex;

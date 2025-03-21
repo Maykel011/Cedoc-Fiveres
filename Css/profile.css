@@ -1,6 +1,6 @@
 @font-face {
     font-family: 'Akrobat';
-    src: url('Akrobat.otf') format('opentype');
+    src: url('AkrobatB.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
     /* font-family: 'Akrobat', sans-serif; */
@@ -8,7 +8,7 @@
 
 @font-face {
     font-family: 'SerpentineBold';
-    src: url('Serpentinebold.otf') format('opentype');
+    src: url('SerpentineBold.otf') format('opentype');
     font-weight: bold;
     font-style: normal;
     /* font-family: 'SerpentineBold', sans-serif; */
@@ -100,7 +100,6 @@ body,html {
 
 /* SIDEBAR */
 .sidebar {
-    font-family: 'AkrobatB', sans-serif;
     height: calc(100vh - 100px);
     background: #2c3e50;
     position: fixed;
@@ -117,7 +116,6 @@ body,html {
 
 
 .sidebar ul {
-    font-family: 'Akrobat', sans-serif;
     list-style: none;
     padding: 0px;
     margin: 0;
@@ -190,6 +188,7 @@ body,html {
 
 /* USER DROPDOWN */
 .user {
+    font-family: 'Akrobat', sans-serif;
     position: relative;
     cursor: pointer;
     display: flex;
