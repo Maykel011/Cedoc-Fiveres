@@ -287,7 +287,8 @@ body,html {
 /* Common container styling */
 .profile-container, 
 .update-password-container, 
-.delete-passkey-container {
+.delete-pincode-container {
+    font-family: 'Akrobat', sans-serif;
     margin-bottom: 30px;
     padding: 25px;
     background: white;
@@ -298,7 +299,7 @@ body,html {
 
 .profile-container:hover, 
 .update-password-container:hover, 
-.delete-passkey-container:hover {
+.delete-pincode-container:hover {
     transform: translateY(-5px);
 }
 
@@ -325,6 +326,7 @@ p {
 }
 
 input {
+    font-family: 'Akrobat', sans-serif;
     padding: 12px;
     margin-top: 8px;
     margin-bottom: 15px;
@@ -345,6 +347,7 @@ input:focus {
 
 /* Custom save button styling */
 .custom-save-button {
+    font-family: 'Akrobat', sans-serif;
     display: block;
     width: 15%;
     padding: 12px;

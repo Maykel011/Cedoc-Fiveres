@@ -90,18 +90,20 @@
         </form>
     </div>
 
-    <!-- Update Passkey Container -->
-    <div class="delete-passkey-container">
-        <h2>Update Passkey</h2>
+    <!-- Update PIN CODE Container -->
+    <div class="delete-pincode-container">
+        <h2>Update PIN code</h2>
+        <p>For security purposes, please enter your current 6-digit PIN code before setting a new one.</p>
         <form onsubmit="handleSubmit(event)">
-            <label for="confirm-passkey">Confirm Passkey</label>
-            <input type="password" id="confirm-passkey" placeholder="Confirm passkey" required>
-            
-            <label for="new-passkey">New Passkey</label>
-            <input type="password" id="new-passkey" placeholder="Input new passkey">
-            
-            <label for="confirm-new-passkey">Confirm New Passkey</label>
-            <input type="password" id="confirm-new-passkey" placeholder="Confirm new passkey">
+        <label for="confirm-pincode">Current 6-Digit PIN</label>
+            <input type="password" id="confirm-pincode" placeholder="Enter current PIN" required maxlength="6">
+
+            <label for="new-pincode">New 6-Digit PIN</label>
+            <input type="password" id="new-pincode" placeholder="Enter new PIN" required maxlength="6">
+
+            <label for="confirm-new-pincode">Confirm New 6-Digit PIN</label>
+            <input type="password" id="confirm-new-pincode" placeholder="Confirm new PIN" required maxlength="6">
+
             
             <button type="submit" class="custom-save-button">Save</button>
         </form>
@@ -111,6 +113,6 @@
     </div>
    
 
-<script src="../../js/profile.js"></script>
+<script src="../../js/profiles.js"></script>
 </body>
 </html>
