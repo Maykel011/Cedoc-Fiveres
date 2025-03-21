@@ -14,9 +14,12 @@
     /* font-family: 'SerpentineBold', sans-serif; */
 }
 
-body {
+body,html {
     margin: 0;
-    font-family: 'Akrobat', sans-serif;
+    font-family: Arial, sans-serif;
+    height: 100%;
+    overflow: hidden; /* Prevent full page scrolling */
+
 }
 
 
@@ -105,6 +108,8 @@ body {
     padding-top: 10px;
     min-width: 250px;
     max-width: 250px;
+    height: 100vh; /* Fixed full height */
+    overflow-y: auto; /* Allows scrolling inside the sidebar */
 }
 
 .sidebar ul {
