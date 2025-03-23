@@ -109,10 +109,7 @@
         </form>
     </div>
 </div>
-
     </div>
-   
-
 <script src="../../js/profiles.js"></script>
 </body>
 </html>
