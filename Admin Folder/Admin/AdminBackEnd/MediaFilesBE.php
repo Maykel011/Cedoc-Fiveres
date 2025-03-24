@@ -6,7 +6,12 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
     $action = $_POST['action'];
 
     if ($action === "create") {
-        $folderName = $_POST['folder_name'];
+        $folderName = trim($_POST['folder_name']);
+
+        if (empty($folderName)) {
+            echo json_encode(["status" => "error", "message" => "Folder name is required"]);
+            exit;
+        }
 
         $stmt = $conn->prepare("INSERT INTO media_folders (folder_name, num_contents) VALUES (?, 0)");
         $stmt->bind_param("s", $folderName);
@@ -18,6 +23,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
         }
         $stmt->close();
     }
+
 
     // Handle folder renaming
     elseif ($action === "rename") {

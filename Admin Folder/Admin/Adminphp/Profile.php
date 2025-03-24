@@ -93,7 +93,7 @@
     <!-- Update PIN CODE Container -->
     <div class="delete-pincode-container">
         <h2>Update PIN code</h2>
-        <p>For security purposes, please enter your current 6-digit PIN code before setting a new one.</p>
+        <p>Please enter your current 6-digit PIN code before setting a new one.</p>
         <form onsubmit="handleSubmit(event)">
         <label for="confirm-pincode">Current 6-Digit PIN</label>
             <input type="password" id="confirm-pincode" placeholder="Enter current PIN" required maxlength="6">

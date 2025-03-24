@@ -58,12 +58,13 @@ include '../AdminBackEnd/MediaFilesBE.php';
         <h1 class="main-title">Media Files</h1>
 
         <div class="top-controls">
-            <div class="search-container">
-                <input type="text" class="search-input" placeholder="Search Folder">
-                <select class="filter-select">
-                    <option>Filter by Name</option>
-                </select>
-            </div>
+    <div class="search-container">
+        <input type="text" class="search-input" placeholder="Search Folder">
+        <select class="filter-select">
+            <option value="name">Sort by Name</option>
+            <option value="date">Sort by Date Modified</option>
+        </select>
+</div>
 
             <div class="folder-container">
                 <input type="text" class="folder-name-input" placeholder="Enter folder name">
@@ -102,7 +103,10 @@ while ($row = $result->fetch_assoc()) {
             </tbody>
         </table>
     </div>
+    
 </div>
+
+
 
 
 
@@ -129,7 +133,7 @@ while ($row = $result->fetch_assoc()) {
         <h2>Delete Folder</h2>
         <p id="deleteFolderName"></p>
         <p>Are you sure you want to delete this folder?</p>
-        <button id="deleteFolderBtn">Yes, Delete</button>
+        <button id="deleteFolderBtn">Delete</button>
         <button onclick="closeModal('deleteModal')">Cancel</button>
     </div>
 </div>
@@ -137,14 +141,23 @@ while ($row = $result->fetch_assoc()) {
 <!-- Success Rename Modal -->
 <div id="renameSuccessModal" class="success-modal">
     <div class="success-modal-content">
-        <h3>✅Folder Renamed Successfully!</h3>
+        <h3>Folder Renamed Successfully!</h3>
     </div>
 </div>
 
 <!-- Success Delete Modal -->
 <div id="deleteSuccessModal" class="success-modal">
     <div class="success-modal-content">
-        <h3>✅Folder Deleted Successfully!</h3>
+        <h3>Folder Deleted Successfully!</h3>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div id="errorModal" class="custom-modal error-modal">
+    <div class="custom-modal-content">
+        <h2 class="modal-title">Error</h2>
+        <p class="modal-message">Please enter a folder name.</p>
+        <button class="close-btn" onclick="closeModal('errorModal')">OK</button>
     </div>
 </div>
 
