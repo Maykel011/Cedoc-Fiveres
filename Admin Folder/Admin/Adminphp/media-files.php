@@ -10,7 +10,7 @@ include '../AdminBackEnd/MediaFilesBE.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES</title>
-    <link rel="stylesheet" href="../../Css/media-files.css">
+    <link rel="stylesheet" href="../../Css/media-file.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -99,7 +99,6 @@ while ($row = $result->fetch_assoc()) {
     </tr>";
 }
 ?>
-
             </tbody>
         </table>
     </div>
@@ -107,6 +106,51 @@ while ($row = $result->fetch_assoc()) {
 
 
 
-<script src="../../js/mediafile.js"></script>
+<!-- Rename Modal -->
+<div id="renameModal" class="custom-modal">
+    <div class="rename-modal-content">
+        <span class="close" onclick="ModalManager.closeModal('renameModal')"></span>
+        <h2>Rename Folder</h2>
+        <p id="renameFolderName"></p>
+        <input type="text" id="newFolderName" placeholder="Enter new folder name">
+        <p id="renameError" style="color: red; display: none; font-size: 14px;"></p> <!-- Error Message Field -->
+        <button id="renameFolderBtn">Rename</button>
+        <button onclick="ModalManager.closeModal('renameModal')">Cancel</button>
+    </div>
+</div>
+
+
+
+
+<!-- Delete Modal -->
+<div id="deleteModal" class="custom-modal">
+    <div class="delete-modal-content">
+        <span class="close" onclick="closeModal('deleteModal')"></span>
+        <h2>Delete Folder</h2>
+        <p id="deleteFolderName"></p>
+        <p>Are you sure you want to delete this folder?</p>
+        <button id="deleteFolderBtn">Yes, Delete</button>
+        <button onclick="closeModal('deleteModal')">Cancel</button>
+    </div>
+</div>
+
+<!-- Success Rename Modal -->
+<div id="renameSuccessModal" class="success-modal">
+    <div class="success-modal-content">
+        <h3>✅Folder Renamed Successfully!</h3>
+    </div>
+</div>
+
+<!-- Success Delete Modal -->
+<div id="deleteSuccessModal" class="success-modal">
+    <div class="success-modal-content">
+        <h3>✅Folder Deleted Successfully!</h3>
+    </div>
+</div>
+
+
+
+
+<script src="../../js/mediafiles.js"></script>
 </body>
 </html>
