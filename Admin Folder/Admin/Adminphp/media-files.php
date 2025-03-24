@@ -54,57 +54,64 @@ include '../AdminBackEnd/MediaFilesBE.php';
 </aside>
 
 <div class="main-content">
-    <div class="table-container">
-        <h1 class="main-title">Media Files</h1>
+<div class="table-container">
+    <h1 class="main-title">Media Files</h1>
 
-        <div class="top-controls">
-    <div class="search-container">
-        <input type="text" class="search-input" placeholder="Search Folder">
-        <select class="filter-select">
-            <option value="name">Sort by Name</option>
-            <option value="date">Sort by Date Modified</option>
-        </select>
-</div>
-
-            <div class="folder-container">
-                <input type="text" class="folder-name-input" placeholder="Enter folder name">
-                <button class="create-folder-btn">Create Folder</button>
-            </div>
+    <div class="top-controls">
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Search Folder">
+            <select class="filter-select">
+                <option value="name">Sort by Name</option>
+                <option value="date">Sort by Date Modified</option>
+            </select>
         </div>
 
-        <table>
-            <thead>
-                <tr>
-                    <th>Folder Name</th>
-                    <th>Date Modified</th>
-                    <th>Type</th>
-                    <th>Number of Contents</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-            <tbody>
-            <?php
-$query = "SELECT * FROM media_folders ORDER BY date_modified DESC";
-$result = $conn->query($query);
-
-while ($row = $result->fetch_assoc()) {
-    echo "<tr>
-        <td>📁 {$row['folder_name']}</td>
-        <td>{$row['date_modified']}</td>
-        <td>Folder</td> <!-- Replacing 'type' column -->
-        <td>{$row['num_contents']}</td>
-        <td>
-            <button class='rename-btn' data-id='{$row['id']}'>Rename</button>
-            <button class='delete-btn' data-id='{$row['id']}'>Delete</button>
-        </td>
-    </tr>";
-}
-?>
-            </tbody>
-        </table>
+        <div class="folder-container">
+            <input type="text" class="folder-name-input" placeholder="Enter folder name">
+            <button class="create-folder-btn">Create Folder</button>
+        </div>
     </div>
-    
+            <table>
+                <thead>
+                    <tr>
+                        <th>Folder Name</th>
+                        <th>Date Modified</th>
+                        <th>Type</th>
+                        <th>Number of Contents</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody >
+                <?php
+                $query = "SELECT * FROM media_folders ORDER BY date_modified DESC";
+                $result = $conn->query($query);
+
+                while ($row = $result->fetch_assoc()) {
+                    echo "<tr>
+                        <td>📁 {$row['folder_name']}</td>
+                        <td>{$row['date_modified']}</td>
+                        <td>Folder</td>
+                        <td>{$row['num_contents']}</td>
+                        <td>
+                            <button class='rename-btn' data-id='{$row['id']}'>Rename</button>
+                            <button class='delete-btn' data-id='{$row['id']}'>Delete</button>
+                        </td>
+                    </tr>";
+                }
+                ?>
+            </tbody>
+        
+        </table>
+
+    </div>
+                <!-- Pagination Controls -->
+                <div class="pagination">
+        <button onclick="prevPage()" id="prev-btn" disabled>« Previous</button>
+        <span id="page-number">Page 1</span>
+        <button onclick="nextPage()" id="next-btn">Next »</button>
+    </div>
 </div>
+
 
 
 

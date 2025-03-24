@@ -268,13 +268,34 @@ body,html {
 
 
 
-/*  Table input container */
+/* Table container */
 .table-container {
     padding: 20px;
     background: #f9f9f9;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow-x: auto; /* Horizontal scroll */
+    overflow-y: auto; /* Vertical scroll */
+    max-width: 100%;
+    max-height: 70vh; /* Responsive height */
+    display: block;
 }
+
+
+/* Adjust for smaller screens */
+@media (max-height: 600px) {
+    .table-container {
+        max-height: 50vh; /* Reduce height on smaller screens */
+    }
+}
+
+@media (max-height: 400px) {
+    .table-container {
+        max-height: 40vh; /* Further reduction for very small screens */
+    }
+}
+
+
 
 /* Align top controls */
 .top-controls {
@@ -283,6 +304,7 @@ body,html {
     align-items: center;
     margin-bottom: 15px;
 }
+
 
 /* Group search & filter */
 .search-container {
@@ -319,20 +341,29 @@ button:hover {
     background: #002244;
 }
 
-
+/* Table */
 table {
     width: 100%;
     border-collapse: collapse;
     background: white;
     border-radius: 10px;
     overflow: hidden;
-    margin-top: 10px;
-    table-layout: fixed; /* Prevents table from resizing */
+    table-layout: fixed;
 }
 
+/* Normal thead (No sticky) */
 thead {
     background: #003366;
     color: white;
+}
+
+/* Sticky thead */
+thead {
+    background: #003366;
+    color: white;
+    position: sticky;
+    top: 0; /* Keeps it at the top inside .table-container */
+    z-index: 10;
 }
 
 th, td {
@@ -687,5 +718,54 @@ button:hover {
     }
 
     /* Pagination */ 
+/* Pagination Container */
+.pagination {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+/* Pagination Buttons */
+.pagination button {
+    background-color: #007bff; /* Primary Blue */
+    color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 6px;
+    font-size: 16px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease-in-out;
+}
+
+/* Hover Effect */
+.pagination button:hover {
+    background-color: #0056b3; /* Darker Blue */
+    transform: scale(1.05);
+}
+
+/* Disabled Button */
+.pagination button:disabled {
+    background-color: #ccc;
+    cursor: not-allowed;
+    transform: none;
+}
+
+/* Active Page Display */
+.pagination span {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+}
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+    .pagination button {
+        padding: 8px 12px;
+        font-size: 14px;
+    }
+}
 
     

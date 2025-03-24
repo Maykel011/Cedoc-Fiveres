@@ -300,3 +300,59 @@ document.addEventListener("DOMContentLoaded", function () {
 
 // Pagination
 
+document.addEventListener("DOMContentLoaded", function () {
+    const rowsPerPage = 10;
+    let currentPage = 1;
+    const tableBody = document.getElementById("media-table-body");
+    const rows = Array.from(tableBody.getElementsByTagName("tr"));
+    let filteredRows = [...rows]; 
+    let totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+
+    function showPage(page) {
+        if (filteredRows.length === 0) {
+            tableBody.innerHTML = "<tr><td colspan='5'>No results found</td></tr>";
+            document.getElementById("page-number").innerText = "No results";
+            document.getElementById("prev-btn").disabled = true;
+            document.getElementById("next-btn").disabled = true;
+            return;
+        }
+
+        rows.forEach(row => (row.style.display = "none"));
+
+        let start = (page - 1) * rowsPerPage;
+        let end = start + rowsPerPage;
+        filteredRows.slice(start, end).forEach(row => (row.style.display = "table-row"));
+
+        document.getElementById("page-number").innerText = `Page ${page} of ${totalPages}`;
+        document.getElementById("prev-btn").disabled = page === 1;
+        document.getElementById("next-btn").disabled = page === totalPages;
+    }
+
+    function nextPage() {
+        if (currentPage < totalPages) {
+            currentPage++;
+            showPage(currentPage);
+        }
+    }
+
+    function prevPage() {
+        if (currentPage > 1) {
+            currentPage--;
+            showPage(currentPage);
+        }
+    }
+
+    function searchTable() {
+        const query = document.getElementById("search-input").value.toLowerCase();
+        filteredRows = rows.filter(row => row.textContent.toLowerCase().includes(query));
+        currentPage = 1;
+        totalPages = Math.ceil(filteredRows.length / rowsPerPage);
+        showPage(currentPage);
+    }
+
+    showPage(currentPage);
+    window.nextPage = nextPage;
+    window.prevPage = prevPage;
+    window.searchTable = searchTable;
+});
+
