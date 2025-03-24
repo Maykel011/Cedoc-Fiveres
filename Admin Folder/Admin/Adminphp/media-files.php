@@ -81,7 +81,7 @@ include '../AdminBackEnd/MediaFilesBE.php';
                         <th>Actions</th>
                     </tr>
                 </thead>
-                <tbody >
+                <tbody id="media-table-body">
                 <?php
                 $query = "SELECT * FROM media_folders ORDER BY date_modified DESC";
                 $result = $conn->query($query);
