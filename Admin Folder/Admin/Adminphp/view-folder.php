@@ -1,7 +1,8 @@
 <?php
 include '../connection/Connection.php'; 
-include '../AdminBackEnd/MediaFilesBE.php';
+include '../AdminBackEnd/ViewFolderBE.php';
 
+// Get folder name from the URL
 ?>
 
 <!DOCTYPE html>
@@ -9,8 +10,8 @@ include '../AdminBackEnd/MediaFilesBE.php';
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>CEDOC FIVERES</title>
-    <link rel="stylesheet" href="../../Css/mediafile.css">
+    <title>CEDOC FIVERES - View Folder</title>
+    <link rel="stylesheet" href="../../Css/ViewFolder.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -25,7 +26,7 @@ include '../AdminBackEnd/MediaFilesBE.php';
                 <img src="../../assets/icon/users.png" alt="User" class="icon" id="userIcon">
                 <span class="admin-text">Admin</span>
                 <div class="user-dropdown" id="userDropdown">
-                <a href="profile.php"><img src="../../assets/icon/updateuser.png" alt="Profile Icon" class="dropdown-icon"> Profile</a>
+                    <a href="profile.php"><img src="../../assets/icon/updateuser.png" alt="Profile Icon" class="dropdown-icon"> Profile</a>
                     <a href="#"><img src="../../assets/icon/logout.png" alt="Logout Icon" class="dropdown-icon"> Logout</a>
                 </div>
             </div>
@@ -54,10 +55,9 @@ include '../AdminBackEnd/MediaFilesBE.php';
 </aside>
 
 <div class="main-content">
-<div class="table-container">
-    <h1 class="main-title">Media Files</h1>
-
-    <div class="top-controls">
+    <div class="table-container">
+        <h1 class="main-title"><?php echo htmlspecialchars($folderName); ?></h1>
+        <div class="top-controls">
         <div class="search-container">
             <input type="text" class="search-input" placeholder="Search Folder">
             <select class="filter-select">
@@ -65,49 +65,69 @@ include '../AdminBackEnd/MediaFilesBE.php';
                 <option value="date">Sort by Date Modified</option>
             </select>
         </div>
+         <!-- Upload Button -->
+    <button id="uploadBtn" class="upload-button">Upload File</button>
+        </div>
+        <table>
+    <thead>
+        <tr>
+            <th>Select</th>
+            <th>Name</th>
+            <th>Date Modified</th>
+            <th>Type</th>
+            <th>Temperature</th>
+            <th>Water Level</th>
+            <th>Air Quality</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td><input type="checkbox" class="select-checkbox"></td>
+            <td>Sample File</td>
+            <td>2025-03-25</td>
+            <td>File</td>
+            <td>25°C</td>
+            <td>Normal</td>
+            <td>Good</td>
+            <td>
+                <button class='rename-btn'>Rename</button>
+                <button class='delete-btn'>Delete</button>
+            </td>
+        </tr>
+    </tbody>
+</table>
 
-        <div class="folder-container">
-            <input type="text" class="folder-name-input" placeholder="Enter folder name">
-            <button class="create-folder-btn">Create Folder</button>
+<!-- Upload Modal -->
+<div id="uploadModal" class="custom-modal">
+        <div class="upload-modal-content">
+            <span class="close" onclick="closeModal('uploadModal')">&times;</span>
+            <h2>Upload File</h2>
+            <form id="uploadForm">
+                <div class="form-group">
+                    <label for="fileInput">Choose File:</label>
+                    <input type="file" id="fileInput" name="file">
+                </div>
+                
+                <div class="form-group">
+                    <label for="temperature">Temperature:</label>
+                    <input type="text" id="temperature" name="temperature" placeholder="Enter Temperature">
+                </div>
+                
+                <div class="form-group">
+                    <label for="waterLevel">Water Level:</label>
+                    <input type="text" id="waterLevel" name="waterLevel" placeholder="Enter Water Level">
+                </div>
+                
+                <div class="form-group">
+                    <label for="airQuality">Air Quality:</label>
+                    <input type="text" id="airQuality" name="airQuality" placeholder="Enter Air Quality">
+                </div>
+                
+                <button type="submit">Upload</button>
+            </form>
         </div>
     </div>
-            <table>
-                <thead>
-                    <tr>
-                        <th>Folder Name</th>
-                        <th>Date Modified</th>
-                        <th>Type</th>
-                        <th>Number of Contents</th>
-                        <th>Actions</th>
-                    </tr>
-                </thead>
-                <tbody id="media-table-body">
-                <?php
-                $query = "SELECT * FROM media_folders ORDER BY date_modified DESC";
-                $result = $conn->query($query);
-
-                while ($row = $result->fetch_assoc()) {
-                    echo "<tr>
-                        <td> 📁 <a href='view-folder.php?folder={$row['folder_name']}' class='folder-link'>{$row['folder_name']}</a> </td>
-                        <td>{$row['date_modified']}</td>
-                        <td>Folder</td>
-                        <td>{$row['num_contents']}</td>
-                        <td>
-                            <button class='rename-btn' data-id='{$row['id']}'>Rename</button>
-                            <button class='delete-btn' data-id='{$row['id']}'>Delete</button>
-                        </td>
-                    </tr>";
-                }
-                ?>
-            </tbody>
-        
-        </table>
-
-    </div>
-</div>
-
-
-
 
 <!-- Rename Modal -->
 <div id="renameModal" class="custom-modal">
@@ -121,8 +141,6 @@ include '../AdminBackEnd/MediaFilesBE.php';
         <button onclick="ModalManager.closeModal('renameModal')">Cancel</button>
     </div>
 </div>
-
-
 
 
 <!-- Delete Modal -->
@@ -151,18 +169,6 @@ include '../AdminBackEnd/MediaFilesBE.php';
     </div>
 </div>
 
-<!-- Error Modal -->
-<div id="errorModal" class="custom-modal error-modal">
-    <div class="custom-modal-content">
-        <h2 class="modal-title">Error</h2>
-        <p class="modal-message">Please enter a folder name.</p>
-        <button class="close-btn" onclick="closeModal('errorModal')">OK</button>
-    </div>
-</div>
-
-
-
-
-<script src="../../js/mediafiles1.js"></script>
+<script src="../../js/ViewFolder.js"></script>
 </body>
 </html>

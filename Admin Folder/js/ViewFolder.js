@@ -297,3 +297,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
     ModalManager.attachEventListeners();
 });
+
+document.getElementById("uploadBtn").addEventListener("click", function() {
+    document.getElementById("uploadModal").style.display = "flex";
+});
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = "none";
+}

@@ -1,10 +1,11 @@
 @font-face {
     font-family: 'Akrobat';
-    src: url('Akrobat.otf') format('opentype');
+    src: url('AkrobatB.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
     /* font-family: 'Akrobat', sans-serif; */
 }
+
 
 @font-face {
     font-family: 'SerpentineBold';

@@ -1,10 +1,11 @@
 @font-face {
     font-family: 'Akrobat';
-    src: url('Akrobat.otf') format('opentype');
+    src: url('AkrobatB.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
     /* font-family: 'Akrobat', sans-serif; */
 }
+
 
 @font-face {
     font-family: 'SerpentineBold';
@@ -55,6 +56,7 @@ body,html {
 
 /* Centered Title */
 .main-title {
+    font-family: 'Akrobat', sans-serif;
     font-size: 20px;
     font-weight: bold;
     color: rgb(0, 0, 0); /* Adjust for visibility */
