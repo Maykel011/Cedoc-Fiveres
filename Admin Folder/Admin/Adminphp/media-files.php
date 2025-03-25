@@ -104,15 +104,7 @@ include '../AdminBackEnd/MediaFilesBE.php';
         </table>
 
     </div>
-                <!-- Pagination Controls -->
-                <div class="pagination">
-        <button onclick="prevPage()" id="prev-btn" disabled>« Previous</button>
-        <span id="page-number">Page 1</span>
-        <button onclick="nextPage()" id="next-btn">Next »</button>
-    </div>
 </div>
-
-
 
 
 
@@ -171,6 +163,6 @@ include '../AdminBackEnd/MediaFilesBE.php';
 
 
 
-<script src="../../js/mediafiles.js"></script>
+<script src="../../js/mediafiles1.js"></script>
 </body>
 </html>
