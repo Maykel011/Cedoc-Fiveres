@@ -1,0 +1,176 @@
+<?php
+include '../connection/Connection.php'; 
+include '../AdminBackEnd/MediaFilesBE.php';
+
+?>
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CEDOC FIVERES</title>
+    <link rel="stylesheet" href="../../Css/media-file.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+</head>
+
+<body>
+<header class="header">
+    <div class="header-content">
+        <div class="left-side">
+            <img src="../../assets/img/Logo.png" alt="Logo" class="logo">
+        </div>
+        <div class="right-side">
+            <div class="user" id="userContainer">
+                <img src="../../assets/icon/users.png" alt="User" class="icon" id="userIcon">
+                <span class="admin-text">Admin</span>
+                <div class="user-dropdown" id="userDropdown">
+                <a href="profile.php"><img src="../../assets/icon/updateuser.png" alt="Profile Icon" class="dropdown-icon"> Profile</a>
+                    <a href="#"><img src="../../assets/icon/logout.png" alt="Logout Icon" class="dropdown-icon"> Logout</a>
+                </div>
+            </div>
+        </div>
+    </div>
+</header>
+
+<aside class="sidebar">
+    <ul>
+        <li class="dashboard">
+            <a href="adminDashboard.php"><img src="../../Assets/Icon/Analysis.png" alt="Dashboard Icon" class="sidebar-icon"> Admin Dashboard</a>
+        </li>
+        <li class="media-files">
+            <a href="media-files.php"><img src="../../Assets/Icon/file.png" alt="Media Files Icon" class="sidebar-icon"> Media Files</a>
+        </li>
+        <li class="resume">
+            <a href="resume.php"><img src="../../Assets/Icon/Resume.png" alt="Resume Icon" class="sidebar-icon"> Resume</a>
+        </li>
+        <li class="vehicle-runs">
+            <a href="vehicle-runs.php"><img src="../../assets/icon/vruns.png" alt="Vehicle Runs Icon" class="sidebar-icon"> Vehicle Runs</a>
+        </li>
+        <li class="manage-users">
+            <a href="manage-users.php"><img src="../../Assets/Icon/user-management.png" alt="Manage Users Icon" class="sidebar-icon"> Manage Users</a>
+        </li>
+    </ul>
+</aside>
+
+<div class="main-content">
+<div class="table-container">
+    <h1 class="main-title">Media Files</h1>
+
+    <div class="top-controls">
+        <div class="search-container">
+            <input type="text" class="search-input" placeholder="Search Folder">
+            <select class="filter-select">
+                <option value="name">Sort by Name</option>
+                <option value="date">Sort by Date Modified</option>
+            </select>
+        </div>
+
+        <div class="folder-container">
+            <input type="text" class="folder-name-input" placeholder="Enter folder name">
+            <button class="create-folder-btn">Create Folder</button>
+        </div>
+    </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Folder Name</th>
+                        <th>Date Modified</th>
+                        <th>Type</th>
+                        <th>Number of Contents</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody id="media-table-body">
+                <?php
+                $query = "SELECT * FROM media_folders ORDER BY date_modified DESC";
+                $result = $conn->query($query);
+
+                while ($row = $result->fetch_assoc()) {
+                    echo "<tr>
+                        <td>📁 {$row['folder_name']}</td>
+                        <td>{$row['date_modified']}</td>
+                        <td>Folder</td>
+                        <td>{$row['num_contents']}</td>
+                        <td>
+                            <button class='rename-btn' data-id='{$row['id']}'>Rename</button>
+                            <button class='delete-btn' data-id='{$row['id']}'>Delete</button>
+                        </td>
+                    </tr>";
+                }
+                ?>
+            </tbody>
+        
+        </table>
+
+    </div>
+                <!-- Pagination Controls -->
+                <div class="pagination">
+        <button onclick="prevPage()" id="prev-btn" disabled>« Previous</button>
+        <span id="page-number">Page 1</span>
+        <button onclick="nextPage()" id="next-btn">Next »</button>
+    </div>
+</div>
+
+
+
+
+
+
+<!-- Rename Modal -->
+<div id="renameModal" class="custom-modal">
+    <div class="rename-modal-content">
+        <span class="close" onclick="ModalManager.closeModal('renameModal')"></span>
+        <h2>Rename Folder</h2>
+        <p id="renameFolderName"></p>
+        <input type="text" id="newFolderName" placeholder="Enter new folder name">
+        <p id="renameError" style="color: red; display: none; font-size: 14px;"></p> <!-- Error Message Field -->
+        <button id="renameFolderBtn">Rename</button>
+        <button onclick="ModalManager.closeModal('renameModal')">Cancel</button>
+    </div>
+</div>
+
+
+
+
+<!-- Delete Modal -->
+<div id="deleteModal" class="custom-modal">
+    <div class="delete-modal-content">
+        <span class="close" onclick="closeModal('deleteModal')"></span>
+        <h2>Delete Folder</h2>
+        <p id="deleteFolderName"></p>
+        <p>Are you sure you want to delete this folder?</p>
+        <button id="deleteFolderBtn">Delete</button>
+        <button onclick="closeModal('deleteModal')">Cancel</button>
+    </div>
+</div>
+
+<!-- Success Rename Modal -->
+<div id="renameSuccessModal" class="success-modal">
+    <div class="success-modal-content">
+        <h3>Folder Renamed Successfully!</h3>
+    </div>
+</div>
+
+<!-- Success Delete Modal -->
+<div id="deleteSuccessModal" class="success-modal">
+    <div class="success-modal-content">
+        <h3>Folder Deleted Successfully!</h3>
+    </div>
+</div>
+
+<!-- Error Modal -->
+<div id="errorModal" class="custom-modal error-modal">
+    <div class="custom-modal-content">
+        <h2 class="modal-title">Error</h2>
+        <p class="modal-message">Please enter a folder name.</p>
+        <button class="close-btn" onclick="closeModal('errorModal')">OK</button>
+    </div>
+</div>
+
+
+
+
+<script src="../../js/mediafiles.js"></script>
+</body>
+</html>
