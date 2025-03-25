@@ -56,8 +56,11 @@ $folderName = isset($_GET['folder']) ? $_GET['folder'] : 'Unknown Folder';
 </aside>
 
 <div class="main-content">
+    
     <div class="table-container">
         <h1 class="main-title"><?php echo htmlspecialchars($folderName); ?></h1>
+             <!-- Back Button -->
+    <button onclick="window.location.href='media-files.php'" class="back-button">Back</button>
         <div class="top-controls">
         <div class="search-container">
             <input type="text" class="search-input" placeholder="Search Folder">
@@ -66,6 +69,7 @@ $folderName = isset($_GET['folder']) ? $_GET['folder'] : 'Unknown Folder';
                 <option value="date">Sort by Date Modified</option>
             </select>
         </div>
+
          <!-- Upload Button -->
     <button id="uploadBtn" class="upload-button">Upload File</button>
         </div>
@@ -76,9 +80,9 @@ $folderName = isset($_GET['folder']) ? $_GET['folder'] : 'Unknown Folder';
             <th>Name</th>
             <th>Date Modified</th>
             <th>Type</th>
-            <th>Temperature</th>
-            <th>Water Level</th>
-            <th>Air Quality</th>
+            <th>Temperature (°C)</th>
+            <th>Water Level (M)</th>
+            <th>Air Quality (PM2.5)</th>
             <th>Actions</th>
         </tr>
     </thead>
@@ -101,34 +105,37 @@ $folderName = isset($_GET['folder']) ? $_GET['folder'] : 'Unknown Folder';
 
 <!-- Upload Modal -->
 <div id="uploadModal" class="custom-modal">
-        <div class="upload-modal-content">
-            <span class="close" onclick="closeModal('uploadModal')">&times;</span>
-            <h2>Upload File</h2>
-            <form id="uploadForm">
-                <div class="form-group">
-                    <label for="fileInput">Choose File:</label>
-                    <input type="file" id="fileInput" name="file">
-                </div>
-                
-                <div class="form-group">
-                    <label for="temperature">Temperature:</label>
-                    <input type="text" id="temperature" name="temperature" placeholder="Enter Temperature">
-                </div>
-                
-                <div class="form-group">
-                    <label for="waterLevel">Water Level:</label>
-                    <input type="text" id="waterLevel" name="waterLevel" placeholder="Enter Water Level">
-                </div>
-                
-                <div class="form-group">
-                    <label for="airQuality">Air Quality:</label>
-                    <input type="text" id="airQuality" name="airQuality" placeholder="Enter Air Quality">
-                </div>
-                
+    <div class="upload-modal-content">
+        <span class="close" onclick="closeModal('uploadModal')"></span>
+        <h2>Upload File</h2>
+        <form id="uploadForm">
+            <div class="form-group">
+                <label for="fileInput">Choose File:</label>
+                <input type="file" id="fileInput" name="file">
+            </div>
+            
+            <div class="form-group">
+                <label for="temperature">Temperature:</label>
+                <input type="text" id="temperature" name="temperature" placeholder="Enter Temperature">
+            </div>
+            
+            <div class="form-group">
+                <label for="waterLevel">Water Level:</label>
+                <input type="text" id="waterLevel" name="waterLevel" placeholder="Enter Water Level">
+            </div>
+            
+            <div class="form-group">
+                <label for="airQuality">Air Quality:</label>
+                <input type="text" id="airQuality" name="airQuality" placeholder="Enter Air Quality">
+            </div>
+            
+            <div class="button-group">
                 <button type="submit">Upload</button>
-            </form>
-        </div>
+                <button type="button" onclick="closeModal('uploadModal')" class="cancel-button">Cancel</button>
+            </div>
+        </form>
     </div>
+</div>
 
 <!-- Rename Modal -->
 <div id="renameModal" class="custom-modal">

@@ -283,6 +283,29 @@ body,html {
     display: block;
 }
 
+/* Position Back Button to the right */
+.table-container {
+    display: flex;
+    flex-direction: column;
+}
+
+.back-button {
+    background: #003366;
+    color: white;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.3s;
+    display: inline-block;
+    margin-left: auto; /* Moves the Back button to the right */
+    margin-bottom: 15px;
+}
+
+.back-button:hover {
+    background: #002244;
+}
 
 /* Adjust for smaller screens */
 @media (max-height: 600px) {
@@ -297,8 +320,6 @@ body,html {
     }
 }
 
-
-
 /* Align top controls */
 .top-controls {
     display: flex;
@@ -306,7 +327,6 @@ body,html {
     align-items: center;
     margin-bottom: 15px;
 }
-
 
 /* Group search & filter */
 .search-container {
@@ -334,7 +354,6 @@ input[type="text"], select {
     margin-top: 5px; /* Moves the elements slightly downward */
 }
 
-
 /* Table */
 table {
     width: 100%;
@@ -342,14 +361,7 @@ table {
     background: white;
     border-radius: 10px;
     overflow: hidden;
-    table-layout: auto; /* Ensure columns adjust dynamically */
-}
-
-
-/* Normal thead (No sticky) */
-thead {
-    background: #003366;
-    color: white;
+    table-layout: fixed; /* Ensures columns maintain consistent width */
 }
 
 /* Table Header */
@@ -359,48 +371,28 @@ thead {
     position: sticky;
     top: 0;
     z-index: 10;
-    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1); /* Add shadow for better visibility */
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1); /* Add shadow for visibility */
 }
 
 /* Table Headers and Data Cells */
 th, td {
-    padding: 10px;  /* Consistent padding */
+    padding: 10px; /* Ensures consistent spacing */
     text-align: left;
     border-bottom: 1px solid #ddd;
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
 }
-td {
-    padding: 5px;
-    white-space: nowrap;
-}
 
-.select-checkbox {
-    margin: 0;
-    padding: 0;
-}
-
-
-    th:nth-child(1), td:nth-child(1) {
-        max-width: 200px; /* Adjust folder name column width */
-    }
-
-    th:nth-child(2), td:nth-child(2) {
-        max-width: 150px; /* Adjust date modified column width */
-    }
-
-    th:nth-child(3), td:nth-child(3) {
-        max-width: 100px; /* Adjust type column width */
-    }
-
-    th:nth-child(4), td:nth-child(4) {
-        max-width: 120px; /* Adjust number of contents column width */
-    }
-
-    th:nth-child(5), td:nth-child(5) {
-        max-width: 180px; /* Adjust actions column width */
-    }
+/* Adjust column widths for readability */
+th:nth-child(1), td:nth-child(1) { width: 5%; }   /* Select */
+th:nth-child(2), td:nth-child(2) { width: 18%; }  /* Name */
+th:nth-child(3), td:nth-child(3) { width: 15%; }  /* Date Modified */
+th:nth-child(4), td:nth-child(4) { width: 12%; }  /* Type */
+th:nth-child(5), td:nth-child(5) { width: 12%; }  /* Temperature */
+th:nth-child(6), td:nth-child(6) { width: 12%; }  /* Water Level */
+th:nth-child(7), td:nth-child(7) { width: 12%; }  /* Air Quality */
+th:nth-child(8), td:nth-child(8) { width: 20%; }  /* Actions */
 
 /* Hover Effect */
 tbody tr:hover {
@@ -753,4 +745,21 @@ button[type="submit"] {
 }
 button[type="submit"]:hover {
     background: red;
+}
+
+.cancel-button {
+    background: #dc3545;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-size: 16px;
+    transition: 0.3s;
+    width: 100%;
+    margin-top: 10px;
+}
+
+.cancel-button:hover {
+    background: #c82333;
 }

@@ -298,6 +298,26 @@ document.addEventListener("DOMContentLoaded", function () {
     ModalManager.attachEventListeners();
 });
 
+//handling file upload
+document.getElementById("uploadForm").addEventListener("submit", function(event) {
+    event.preventDefault(); // Prevents page refresh
+
+    // Handle the form data using FormData
+    let formData = new FormData(this);
+
+    // Perform an AJAX request to upload the file without refreshing
+    fetch("uploadFile.php", {
+        method: "POST",
+        body: formData
+    })
+    .then(response => response.text())
+    .then(data => {
+        closeModal("uploadModal");
+        location.reload(); // Refresh page to reflect changes (if needed)
+    })
+    .catch(error => console.error("Error:", error));
+});
+
 document.getElementById("uploadBtn").addEventListener("click", function() {
     document.getElementById("uploadModal").style.display = "flex";
 });
