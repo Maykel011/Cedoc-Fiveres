@@ -1,8 +1,9 @@
 <?php
 include '../connection/Connection.php'; 
-include '../AdminBackEnd/ViewFolderBE.php';
+//include '../AdminBackEnd/ViewFolderBE.php';
 
 // Get folder name from the URL
+$folderName = isset($_GET['folder']) ? $_GET['folder'] : 'Unknown Folder';
 ?>
 
 <!DOCTYPE html>
