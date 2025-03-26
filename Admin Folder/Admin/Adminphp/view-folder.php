@@ -104,7 +104,7 @@ include '../AdminBackEnd/ViewFolderBE.php';
         </tbody>
     </table>
     
-    <div id="uploadModal" class="custom-modal" style="display:none;">
+    <div id="uploadModal" class="customs-modal" style="display:none;">
     <div class="upload-modal-content">
         <span class="close" onclick="closeModal('uploadModal')"></span>
         <h2>Upload File</h2>

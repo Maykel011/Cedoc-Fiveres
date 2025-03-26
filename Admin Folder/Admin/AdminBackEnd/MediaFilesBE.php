@@ -27,11 +27,28 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
         $stmt->close();
     }
 
-    // Handle folder renaming
-// Handle folder renaming
-elseif ($action === "rename") {
+  // Handle folder renaming
+  elseif ($action === "rename") {
     $folderId = $_POST['folder_id'];
-    $newName = $_POST['new_name'];
+    $newName = trim($_POST['new_name']);
+
+    if (empty($newName)) {
+        echo json_encode(["status" => "error", "message" => "New folder name cannot be empty"]);
+        exit;
+    }
+
+    // Check if the new name already exists
+    $stmt = $conn->prepare("SELECT id FROM media_folders WHERE folder_name = ?");
+    $stmt->bind_param("s", $newName);
+    $stmt->execute();
+    $stmt->store_result();
+
+    if ($stmt->num_rows > 0) {
+        echo json_encode(["status" => "error", "message" => "Folder name already exists"]);
+        $stmt->close();
+        exit;
+    }
+    $stmt->close();
 
     // Get the current folder name
     $stmt = $conn->prepare("SELECT folder_name FROM media_folders WHERE id = ?");
@@ -45,31 +62,38 @@ elseif ($action === "rename") {
         $oldPath = "uploads/" . $oldName;
         $newPath = "uploads/" . $newName;
 
-        // Rename folder in filesystem
-        if (is_dir($oldPath)) {
-            rename($oldPath, $newPath);
-        }
+        // ✅ Disable Foreign Key Checks
+        $conn->query("SET FOREIGN_KEY_CHECKS=0");
 
-        // Update database
+        // ✅ Update `files` table first
+        $updateStmt = $conn->prepare("UPDATE files SET folder_name = ? WHERE folder_name = ?");
+        $updateStmt->bind_param("ss", $newName, $oldName);
+        $updateStmt->execute();
+        $updateStmt->close();
+
+        // ✅ Update `media_folders` table
         $stmt = $conn->prepare("UPDATE media_folders SET folder_name = ? WHERE id = ?");
         $stmt->bind_param("si", $newName, $folderId);
-
-        if ($stmt->execute()) {
-            // Also update file references in the `files` table
-            $updateStmt = $conn->prepare("UPDATE files SET folder_name = ? WHERE folder_name = ?");
-            $updateStmt->bind_param("ss", $newName, $oldName);
-            $updateStmt->execute();
-            $updateStmt->close();
-
-            echo json_encode(["status" => "success", "message" => "Folder renamed successfully"]);
-        } else {
-            echo json_encode(["status" => "error", "message" => "Error renaming folder"]);
-        }
+        $stmt->execute();
         $stmt->close();
+
+        // ✅ Enable Foreign Key Checks
+        $conn->query("SET FOREIGN_KEY_CHECKS=1");
+
+        // ✅ Rename the folder in the filesystem
+        if (is_dir($oldPath) && !file_exists($newPath)) {
+            if (!rename($oldPath, $newPath)) {
+                echo json_encode(["status" => "error", "message" => "Error renaming folder in filesystem"]);
+                exit;
+            }
+        }
+
+        echo json_encode(["status" => "success", "message" => "Folder renamed successfully"]);
     } else {
         echo json_encode(["status" => "error", "message" => "Folder not found"]);
     }
 }
+
 
 
     // Handle folder deletion

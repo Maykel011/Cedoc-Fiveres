@@ -706,20 +706,33 @@ button:hover {
     align-items: center;
 }
 
+.customs-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: block; /* Change to flex or block when showing */
+    z-index: 1000;
+}
+
+/* Center the modal content using absolute positioning */
 .upload-modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
     background: white;
     padding: 25px;
     border-radius: 10px;
     width: 400px;
     text-align: left;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-    animation: fadeIn 0.3s ease-in-out;
 }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: scale(0.9); }
-    to { opacity: 1; transform: scale(1); }
-}
+
+
 
 .close {
     position: absolute;
