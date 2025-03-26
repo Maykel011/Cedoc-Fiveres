@@ -11,7 +11,7 @@ include '../AdminBackEnd/ViewFolderBE.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES - View Folder</title>
-    <link rel="stylesheet" href="../../Css/ViewFolders.css">
+    <link rel="stylesheet" href="../../Css/ViewFold.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -105,30 +105,33 @@ include '../AdminBackEnd/ViewFolderBE.php';
     </table>
     
     <div id="uploadModal" class="custom-modal" style="display:none;">
-        <div class="upload-modal-content">
-            <span class="close" onclick="closeModal('uploadModal')">&times;</span>
-            <h2>Upload File</h2>
-            <form id="uploadForm" enctype="multipart/form-data">
-                <div class="form-group">
-                    <label for="fileInput">Choose File:</label>
-                    <input type="file" id="fileInput" name="file" required>
-                </div>
-                <div class="form-group">
-                    <label for="temperature">Temperature:</label>
-                    <input type="text" id="temperature" name="temperature" placeholder="Enter Temperature">
-                </div>
-                <div class="form-group">
-                    <label for="waterLevel">Water Level:</label>
-                    <input type="text" id="waterLevel" name="waterLevel" placeholder="Enter Water Level">
-                </div>
-                <div class="form-group">
-                    <label for="airQuality">Air Quality:</label>
-                    <input type="text" id="airQuality" name="airQuality" placeholder="Enter Air Quality">
-                </div>
-                <button type="submit">Upload</button>
-            </form>
-        </div>
+    <div class="upload-modal-content">
+        <span class="close" onclick="closeModal('uploadModal')"></span>
+        <h2>Upload File</h2>
+        <form id="uploadForm" enctype="multipart/form-data">
+            <div class="form-group">
+                <label for="fileInput">Choose File:</label>
+                <input type="file" id="fileInput" name="file" required>
+            </div>
+            <div class="form-group">
+                <label for="temperature">Temperature:</label>
+                <input type="text" id="temperature" name="temperature" placeholder="Enter Temperature">
+            </div>
+            <div class="form-group">
+                <label for="waterLevel">Water Level:</label>
+                <input type="text" id="waterLevel" name="waterLevel" placeholder="Enter Water Level">
+            </div>
+            <div class="form-group">
+                <label for="airQuality">Air Quality:</label>
+                <input type="text" id="airQuality" name="airQuality" placeholder="Enter Air Quality">
+            </div>
+            <div class="button-group">
+                <button type="submit" class="upload-btn">Upload</button>
+                <button type="button" class="cancel-btn" onclick="closeModal('uploadModal')">Cancel</button>
+            </div>
+        </form>
     </div>
+</div>
     
 
     <div id="uploadModal" class="custom-modal" style="display:none;">

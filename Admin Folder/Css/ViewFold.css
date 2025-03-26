@@ -657,6 +657,13 @@ button:hover {
     color: #d9534f;
 }
 
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px; /* Adds a small gap between buttons */
+    margin-top: 10px;
+}
+
 .upload-button {
     background: #007bff;
     color: white;
@@ -667,8 +674,24 @@ button:hover {
     font-size: 16px;
     transition: 0.3s;
 }
+
 .upload-button:hover {
     background: #0056b3;
+}
+
+.cancel-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 100%;
+    flex-grow: 1; /* Ensures both buttons have equal width */
+}
+
+.cancel-btn:hover {
+    background-color: #c82333;
 }
 
 .custom-modal {
