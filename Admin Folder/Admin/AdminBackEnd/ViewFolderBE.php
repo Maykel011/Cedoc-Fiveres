@@ -3,6 +3,8 @@ include '../connection/Connection.php'; // Database connection
 
 // Get folder name safely from POST or GET
 $folderName = isset($_POST['folder_name']) ? trim($_POST['folder_name']) : (isset($_GET['folder']) ? trim($_GET['folder']) : '');
+$folderName = $folderName !== null ? $folderName : ''; // Ensure it's a string
+
 if (empty($folderName)) {
     die(json_encode(["status" => "error", "message" => "No folder selected."]));
 }
@@ -11,9 +13,9 @@ $uploadDir = "uploads/" . $folderName . "/"; // Define upload path
 
 // Handle file upload
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES['file'])) {
-    $temperature = $_POST['temperature'] ?? null;
-    $waterLevel = $_POST['waterLevel'] ?? null;
-    $airQuality = $_POST['airQuality'] ?? null;
+    $temperature = isset($_POST['temperature']) && $_POST['temperature'] !== "" ? $_POST['temperature'] : null;
+    $waterLevel = isset($_POST['waterLevel']) && $_POST['waterLevel'] !== "" ? floatval($_POST['waterLevel']) : null;
+    $airQuality = isset($_POST['airQuality']) && $_POST['airQuality'] !== "" ? floatval($_POST['airQuality']) : null;
 
     $fileName = $_FILES['file']['name'];
     $fileTmp = $_FILES['file']['tmp_name'];
@@ -28,10 +30,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES['file'])) {
     if (move_uploaded_file($fileTmp, $filePath)) {
         // Insert file details into database
         $stmt = $conn->prepare("INSERT INTO files (file_name, file_type, folder_name, temperature, water_level, air_quality) VALUES (?, ?, ?, ?, ?, ?)");
-        $stmt->bind_param("ssssss", $fileName, $fileType, $folderName, $temperature, $waterLevel, $airQuality);
+        $stmt->bind_param("ssssdd", $fileName, $fileType, $folderName, $temperature, $waterLevel, $airQuality);
 
         if ($stmt->execute()) {
-            // Update num_contents count
+            // Update num_contents count in `media_folders`
             $updateStmt = $conn->prepare("UPDATE media_folders SET num_contents = (SELECT COUNT(*) FROM files WHERE folder_name = ?) WHERE folder_name = ?");
             $updateStmt->bind_param("ss", $folderName, $folderName);
             $updateStmt->execute();

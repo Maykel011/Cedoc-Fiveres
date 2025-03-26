@@ -92,9 +92,10 @@ include '../AdminBackEnd/ViewFolderBE.php';
                 <td><?= htmlspecialchars($file['file_name']) ?></td>
                 <td><?= htmlspecialchars($file['date_modified']) ?></td>
                 <td><?= htmlspecialchars($file['file_type']) ?></td>
-                <td><?= htmlspecialchars($file['temperature']) ?></td>
-                <td><?= htmlspecialchars($file['water_level']) ?></td>
-                <td><?= htmlspecialchars($file['air_quality']) ?></td>
+                <td><?= htmlspecialchars($file['temperature'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+<td><?= htmlspecialchars($file['water_level'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+<td><?= htmlspecialchars($file['air_quality'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+
                 <td>
                     <button onclick="editFile(<?= $file['id'] ?>, '<?= htmlspecialchars($file['file_name']) ?>')">Edit</button>
                     <button onclick="deleteFile(<?= $file['id'] ?>)">Delete</button>
