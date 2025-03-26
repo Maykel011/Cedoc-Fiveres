@@ -28,20 +28,49 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
     }
 
     // Handle folder renaming
-    elseif ($action === "rename") {
-        $folderId = $_POST['folder_id'];
-        $newName = $_POST['new_name'];
+// Handle folder renaming
+elseif ($action === "rename") {
+    $folderId = $_POST['folder_id'];
+    $newName = $_POST['new_name'];
 
+    // Get the current folder name
+    $stmt = $conn->prepare("SELECT folder_name FROM media_folders WHERE id = ?");
+    $stmt->bind_param("i", $folderId);
+    $stmt->execute();
+    $stmt->bind_result($oldName);
+    $stmt->fetch();
+    $stmt->close();
+
+    if (!empty($oldName)) {
+        $oldPath = "uploads/" . $oldName;
+        $newPath = "uploads/" . $newName;
+
+        // Rename folder in filesystem
+        if (is_dir($oldPath)) {
+            rename($oldPath, $newPath);
+        }
+
+        // Update database
         $stmt = $conn->prepare("UPDATE media_folders SET folder_name = ? WHERE id = ?");
         $stmt->bind_param("si", $newName, $folderId);
 
         if ($stmt->execute()) {
+            // Also update file references in the `files` table
+            $updateStmt = $conn->prepare("UPDATE files SET folder_name = ? WHERE folder_name = ?");
+            $updateStmt->bind_param("ss", $newName, $oldName);
+            $updateStmt->execute();
+            $updateStmt->close();
+
             echo json_encode(["status" => "success", "message" => "Folder renamed successfully"]);
         } else {
             echo json_encode(["status" => "error", "message" => "Error renaming folder"]);
         }
         $stmt->close();
+    } else {
+        echo json_encode(["status" => "error", "message" => "Folder not found"]);
     }
+}
+
 
     // Handle folder deletion
     elseif ($action === "delete") {
