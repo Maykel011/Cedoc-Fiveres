@@ -1,9 +1,8 @@
 <?php
 include '../connection/Connection.php'; 
-//include '../AdminBackEnd/ViewFolderBE.php';
+include '../AdminBackEnd/ViewFolderBE.php';
 
-// Get folder name from the URL
-$folderName = isset($_GET['folder']) ? $_GET['folder'] : 'Unknown Folder';
+
 ?>
 
 <!DOCTYPE html>
@@ -12,7 +11,7 @@ $folderName = isset($_GET['folder']) ? $_GET['folder'] : 'Unknown Folder';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES - View Folder</title>
-    <link rel="stylesheet" href="../../Css/ViewFolder.css">
+    <link rel="stylesheet" href="../../Css/ViewFolders.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -74,68 +73,91 @@ $folderName = isset($_GET['folder']) ? $_GET['folder'] : 'Unknown Folder';
     <button id="uploadBtn" class="upload-button">Upload File</button>
         </div>
         <table>
-    <thead>
-        <tr>
-            <th>Select</th>
-            <th>Name</th>
-            <th>Date Modified</th>
-            <th>Type</th>
-            <th>Temperature (°C)</th>
-            <th>Water Level (M)</th>
-            <th>Air Quality (PM2.5)</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td><input type="checkbox" class="select-checkbox"></td>
-            <td>Sample File</td>
-            <td>2025-03-25</td>
-            <td>File</td>
-            <td>25°C</td>
-            <td>Normal</td>
-            <td>Good</td>
-            <td>
-                <button class='rename-btn'>Rename</button>
-                <button class='delete-btn'>Delete</button>
-            </td>
-        </tr>
-    </tbody>
-</table>
-
-<!-- Upload Modal -->
-<div id="uploadModal" class="custom-modal">
-    <div class="upload-modal-content">
-        <span class="close" onclick="closeModal('uploadModal')"></span>
-        <h2>Upload File</h2>
-        <form id="uploadForm">
-            <div class="form-group">
-                <label for="fileInput">Choose File:</label>
-                <input type="file" id="fileInput" name="file">
-            </div>
-            
-            <div class="form-group">
-                <label for="temperature">Temperature:</label>
-                <input type="text" id="temperature" name="temperature" placeholder="Enter Temperature">
-            </div>
-            
-            <div class="form-group">
-                <label for="waterLevel">Water Level:</label>
-                <input type="text" id="waterLevel" name="waterLevel" placeholder="Enter Water Level">
-            </div>
-            
-            <div class="form-group">
-                <label for="airQuality">Air Quality:</label>
-                <input type="text" id="airQuality" name="airQuality" placeholder="Enter Air Quality">
-            </div>
-            
-            <div class="button-group">
+        <thead>
+            <tr>
+                <th>Select</th>
+                <th>Name</th>
+                <th>Date Modified</th>
+                <th>Type</th>
+                <th>Temperature (°C)</th>
+                <th>Water Level (M)</th>
+                <th>Air Quality (PM2.5)</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            <?php foreach ($files as $file): ?>
+            <tr>
+                <td><input type="checkbox" name="selected_files[]" value="<?= $file['id'] ?>"></td>
+                <td><?= htmlspecialchars($file['file_name']) ?></td>
+                <td><?= htmlspecialchars($file['date_modified']) ?></td>
+                <td><?= htmlspecialchars($file['file_type']) ?></td>
+                <td><?= htmlspecialchars($file['temperature']) ?></td>
+                <td><?= htmlspecialchars($file['water_level']) ?></td>
+                <td><?= htmlspecialchars($file['air_quality']) ?></td>
+                <td>
+                    <button onclick="editFile(<?= $file['id'] ?>, '<?= htmlspecialchars($file['file_name']) ?>')">Edit</button>
+                    <button onclick="deleteFile(<?= $file['id'] ?>)">Delete</button>
+                </td>
+            </tr>
+            <?php endforeach; ?>
+        </tbody>
+    </table>
+    
+    <div id="uploadModal" class="custom-modal" style="display:none;">
+        <div class="upload-modal-content">
+            <span class="close" onclick="closeModal('uploadModal')">&times;</span>
+            <h2>Upload File</h2>
+            <form id="uploadForm" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="fileInput">Choose File:</label>
+                    <input type="file" id="fileInput" name="file" required>
+                </div>
+                <div class="form-group">
+                    <label for="temperature">Temperature:</label>
+                    <input type="text" id="temperature" name="temperature" placeholder="Enter Temperature">
+                </div>
+                <div class="form-group">
+                    <label for="waterLevel">Water Level:</label>
+                    <input type="text" id="waterLevel" name="waterLevel" placeholder="Enter Water Level">
+                </div>
+                <div class="form-group">
+                    <label for="airQuality">Air Quality:</label>
+                    <input type="text" id="airQuality" name="airQuality" placeholder="Enter Air Quality">
+                </div>
                 <button type="submit">Upload</button>
-                <button type="button" onclick="closeModal('uploadModal')" class="cancel-button">Cancel</button>
-            </div>
-        </form>
+            </form>
+        </div>
     </div>
-</div>
+    
+
+    <div id="uploadModal" class="custom-modal" style="display:none;">
+        <div class="upload-modal-content">
+            <span class="close" onclick="closeModal('uploadModal')">&times;</span>
+            <h2>Upload File</h2>
+            <form id="uploadForm" enctype="multipart/form-data">
+    <input type="hidden" id="folderName" name="folder_name" value="<?= htmlspecialchars($folderName) ?>">
+    <div class="form-group">
+        <label for="fileInput">Choose File:</label>
+        <input type="file" id="fileInput" name="file" required>
+    </div>
+    <div class="form-group">
+        <label for="temperature">Temperature:</label>
+        <input type="text" id="temperature" name="temperature" placeholder="Enter Temperature">
+    </div>
+    <div class="form-group">
+        <label for="waterLevel">Water Level:</label>
+        <input type="text" id="waterLevel" name="waterLevel" placeholder="Enter Water Level">
+    </div>
+    <div class="form-group">
+        <label for="airQuality">Air Quality:</label>
+        <input type="text" id="airQuality" name="airQuality" placeholder="Enter Air Quality">
+    </div>
+    <button type="submit">Upload</button>
+</form>
+
+        </div>
+    </div>
 
 <!-- Rename Modal -->
 <div id="renameModal" class="custom-modal">

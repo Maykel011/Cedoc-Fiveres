@@ -1,0 +1,64 @@
+ <tbody>
+                <?php if ($result->num_rows > 0): ?>
+                    <?php while ($row = $result->fetch_assoc()): ?>
+                        <tr>
+                            <td><input type="checkbox" class="select-checkbox"></td>
+                            <td><?php echo htmlspecialchars($row['file_name']); ?></td>
+                            <td><?php echo htmlspecialchars($row['date_modified']); ?></td>
+                            <td><?php echo htmlspecialchars($row['file_type']); ?></td>
+                            <td><?php echo !empty($row['temperature']) ? htmlspecialchars($row['temperature']) . ' °C' : ''; ?></td>
+                            <td><?php echo !empty($row['water_level']) ? htmlspecialchars($row['water_level']) . ' M' : ''; ?></td>
+                            <td><?php echo !empty($row['air_quality']) ? htmlspecialchars($row['air_quality']) . ' PM2.5' : ''; ?></td>
+                            <td>
+                                <button class='rename-btn' onclick="openRenameModal('<?php echo htmlspecialchars($row['file_name']); ?>')">Rename</button>
+                                <button class='delete-btn' onclick="openDeleteModal('<?php echo htmlspecialchars($row['file_name']); ?>')">Delete</button>
+                            </td>
+                        </tr>
+                    <?php endwhile; ?>
+                <?php else: ?>
+                    <tr>
+                        <td colspan="8">No files found in this folder.</td>
+                    </tr>
+                <?php endif; ?>
+            </tbody>
+
+// Get folder name from the URL
+$folderName = isset($_GET['folder']) ? $_GET['folder'] : 'Unknown Folder';
+
+// Fetch files from the database
+$sql = "SELECT * FROM files WHERE folder_name = ?"; // ✅ Properly using a placeholder
+$stmt = $conn->prepare($sql); // ✅ Preparing the correct SQL query
+$stmt->bind_param("s", $folderName); // ✅ Binding the parameter safely
+$stmt->execute();
+$result = $stmt->get_result();
+
+
+// Handle File Upload
+if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_FILES['file'])) {
+    $fileName = basename($_FILES['file']['name']);
+    $fileTmpName = $_FILES['file']['tmp_name'];
+    $fileType = pathinfo($fileName, PATHINFO_EXTENSION);
+
+    $temperature = isset($_POST['temperature']) && $_POST['temperature'] !== '' ? floatval($_POST['temperature']) : null;
+    $waterLevel = isset($_POST['waterLevel']) && $_POST['waterLevel'] !== '' ? floatval($_POST['waterLevel']) : null;
+    $airQuality = isset($_POST['airQuality']) && $_POST['airQuality'] !== '' ? floatval($_POST['airQuality']) : null;
+
+    $uploadDir = "../../uploads/"; // Ensure this folder exists and has correct permissions
+    $uploadPath = $uploadDir . $fileName;
+
+    if (move_uploaded_file($fileTmpName, $uploadPath)) {
+        $insertSQL = "INSERT INTO Folder_content (file_name, file_type, folder_name, temperature, water_level, air_quality) 
+                      VALUES (?, ?, ?, ?, ?, ?)";
+        $insertStmt = $conn->prepare($insertSQL);
+        $insertStmt->bind_param("ssssdd", $fileName, $fileType, $folderName, $temperature, $waterLevel, $airQuality);
+
+        if ($insertStmt->execute()) {
+            header("Location: content.php?folder_name=$folderName&upload_success=1");
+            exit();
+        } else {
+            echo "Database Insertion Failed: " . $conn->error;
+        }
+    } else {
+        echo "File upload failed!";
+    }
+}

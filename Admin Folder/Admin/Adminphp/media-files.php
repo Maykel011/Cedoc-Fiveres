@@ -82,30 +82,32 @@ include '../AdminBackEnd/MediaFilesBE.php';
                     </tr>
                 </thead>
                 <tbody id="media-table-body">
-                <?php
-                $query = "SELECT * FROM media_folders ORDER BY date_modified DESC";
-                $result = $conn->query($query);
+    <?php
+    $query = "SELECT * FROM media_folders ORDER BY date_modified DESC";
+    $result = $conn->query($query);
 
-                while ($row = $result->fetch_assoc()) {
-                    echo "<tr>
-                        <td> 📁 <a href='view-folder.php?folder={$row['folder_name']}' class='folder-link'>{$row['folder_name']}</a> </td>
-                        <td>{$row['date_modified']}</td>
-                        <td>Folder</td>
-                        <td>{$row['num_contents']}</td>
-                        <td>
-                            <button class='rename-btn' data-id='{$row['id']}'>Rename</button>
-                            <button class='delete-btn' data-id='{$row['id']}'>Delete</button>
-                        </td>
-                    </tr>";
-                }
-                ?>
-            </tbody>
-        
-        </table>
-
-    </div>
-</div>
-
+    while ($row = $result->fetch_assoc()) :
+    ?>
+        <tr id="folder-<?php echo $row['id']; ?>">
+            <td>
+                <a href="view-folder.php?folder=<?php echo urlencode($row['folder_name']); ?>" style="text-decoration: none; color: black;">
+                    <span class="folder-icon">📁</span>
+                    <span class="folder-name" id="folder-name-<?php echo $row['id']; ?>">
+                        <?php echo htmlspecialchars($row['folder_name']); ?>
+                    </span>
+                </a>
+                <input type="text" id="rename-input-<?php echo $row['id']; ?>" value="<?php echo htmlspecialchars($row['folder_name']); ?>" style="display:none;">
+            </td>
+            <td><?php echo date('Y-m-d h:i:s A', strtotime($row['date_modified'])); ?></td>
+            <td>Folder</td>
+            <td><?php echo htmlspecialchars($row['num_contents']); ?></td>
+            <td>
+                <button class="rename-btn" data-id="<?php echo $row['id']; ?>">Rename</button>
+                <button class="delete-btn" data-id="<?php echo $row['id']; ?>">Delete</button>
+            </td>
+        </tr>
+    <?php endwhile; ?>
+</tbody>
 
 
 
