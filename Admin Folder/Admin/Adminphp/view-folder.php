@@ -11,7 +11,7 @@ include '../AdminBackEnd/ViewFolderBE.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES - View Folder</title>
-    <link rel="stylesheet" href="../../Css/ViewFold.css">
+    <link rel="stylesheet" href="../../Css/ViewFolds.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -97,7 +97,9 @@ include '../AdminBackEnd/ViewFolderBE.php';
 <td><?= htmlspecialchars($file['air_quality'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
 
                 <td>
-                    <button onclick="editFile(<?= $file['id'] ?>, '<?= htmlspecialchars($file['file_name']) ?>')">Edit</button>
+                <button onclick="openEditModal(<?= $file['id'] ?>, '<?= htmlspecialchars($file['file_name']) ?>', <?= $file['temperature'] ?? 'null' ?>, <?= $file['water_level'] ?? 'null' ?>, <?= $file['air_quality'] ?? 'null' ?>)">Edit</button>
+
+
                     <button onclick="deleteFile(<?= $file['id'] ?>)">Delete</button>
                 </td>
             </tr>
@@ -134,74 +136,73 @@ include '../AdminBackEnd/ViewFolderBE.php';
     </div>
 </div>
     
+<!-- Edit Modal -->
+<div id="editModal" class="editcustom-modal"style="display:none;">
+    <div class="edit-modal-content">
+        <span class="close" onclick="closeModal('editModal')"></span>
+        <h2>Edit File</h2>
+        <form method="post">
+            <input type="hidden" id="editFileId" name="file_id">
+            
+            <div class="form-group">
+                <label>File Name:</label>
+                <input type="text" id="editFileName" name="file_name" required>
+            </div>
 
-    <div id="uploadModal" class="custom-modal" style="display:none;">
-        <div class="upload-modal-content">
-            <span class="close" onclick="closeModal('uploadModal')">&times;</span>
-            <h2>Upload File</h2>
-            <form id="uploadForm" enctype="multipart/form-data">
-    <input type="hidden" id="folderName" name="folder_name" value="<?= htmlspecialchars($folderName) ?>">
-    <div class="form-group">
-        <label for="fileInput">Choose File:</label>
-        <input type="file" id="fileInput" name="file" required>
+            <div class="form-group">
+                <label>Temperature (°C):</label>
+                <input type="number" id="editTemperature" name="temperature" step="0.1">
+            </div>
+
+            <div class="form-group">
+                <label>Water Level (M):</label>
+                <input type="number" id="editWaterLevel" name="water_level" step="0.1">
+            </div>
+
+            <div class="form-group">
+                <label>Air Quality (PM2.5):</label>
+                <input type="number" id="editAirQuality" name="air_quality" step="0.1">
+            </div>
+
+<!-- Button container for spacing -->
+<div class="button-group">
+        <button type="submit" name="editFile">Save Changes</button>
+        <button type="button" class="cancel-button" onclick="closeModal('editModal')">Cancel</button>
     </div>
-    <div class="form-group">
-        <label for="temperature">Temperature:</label>
-        <input type="text" id="temperature" name="temperature" placeholder="Enter Temperature">
-    </div>
-    <div class="form-group">
-        <label for="waterLevel">Water Level:</label>
-        <input type="text" id="waterLevel" name="waterLevel" placeholder="Enter Water Level">
-    </div>
-    <div class="form-group">
-        <label for="airQuality">Air Quality:</label>
-        <input type="text" id="airQuality" name="airQuality" placeholder="Enter Air Quality">
-    </div>
-    <button type="submit">Upload</button>
 </form>
-
-        </div>
-    </div>
-    
-<!-- Rename Modal -->
-<div id="renameModal" class="custom-modal">
-    <div class="rename-modal-content">
-        <span class="close" onclick="ModalManager.closeModal('renameModal')"></span>
-        <h2>Rename Folder</h2>
-        <p id="renameFolderName"></p>
-        <input type="text" id="newFolderName" placeholder="Enter new folder name">
-        <p id="renameError" style="color: red; display: none; font-size: 14px;"></p> <!-- Error Message Field -->
-        <button id="renameFolderBtn">Rename</button>
-        <button onclick="ModalManager.closeModal('renameModal')">Cancel</button>
     </div>
 </div>
+
+
 
 
 <!-- Delete Modal -->
-<div id="deleteModal" class="custom-modal">
+<div id="deleteModal" class="custom-modal" style="display: none;">
     <div class="delete-modal-content">
-        <span class="close" onclick="closeModal('deleteModal')"></span>
-        <h2>Delete Folder</h2>
+        <span class="close" onclick="closeModal('deleteModal')">&times;</span>
+        <h2>Delete File</h2>
         <p id="deleteFolderName"></p>
-        <p>Are you sure you want to delete this folder?</p>
-        <button id="deleteFolderBtn">Delete</button>
-        <button onclick="closeModal('deleteModal')">Cancel</button>
+        <p>Are you sure you want to delete this file?</p>
+        <!-- Hidden input to store the file ID -->
+        <input type="hidden" id="deleteFileId">
+        <form id="deleteForm" method="POST">
+            <input type="hidden" name="deleteFile" value="1">
+            <input type="hidden" name="file_id" id="deleteFileInput">
+            <button type="submit">Delete</button>
+            <button type="button" onclick="closeModal('deleteModal')">Cancel</button>
+        </form>
     </div>
 </div>
 
-<!-- Success Rename Modal -->
-<div id="renameSuccessModal" class="success-modal">
-    <div class="success-modal-content">
-        <h3>Folder Renamed Successfully!</h3>
-    </div>
-</div>
 
-<!-- Success Delete Modal -->
+
+<!-- 
+Success Delete Modal 
 <div id="deleteSuccessModal" class="success-modal">
     <div class="success-modal-content">
         <h3>Folder Deleted Successfully!</h3>
     </div>
-</div>
+</div> -->
 
 <script src="../../js/ViewFolder.js"></script>
 </body>

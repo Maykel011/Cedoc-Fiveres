@@ -60,142 +60,70 @@ $files = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 $conn->close();
 
+
 // Handle folder operations (Create, Rename, Delete)
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['action'])) {
-    include '../connection/Connection.php'; // Reopen connection for operations
-    $action = $_POST['action'];
 
-    // Create a new folder
-    if ($action === "create") {
-        $folderName = trim($_POST['folder_name']);
+// Include database connection
+$host = "localhost";
+$user = "root";
+$password = "";
+$dbname = "cedoc_fiveres";
 
-        if (empty($folderName)) {
-            echo json_encode(["status" => "error", "message" => "Folder name is required"]);
-            exit;
-        }
+$conn = new mysqli($host, $user, $password, $dbname);
 
-        $stmt = $conn->prepare("INSERT INTO media_folders (folder_name, num_contents) VALUES (?, 0)");
-        $stmt->bind_param("s", $folderName);
-
-        if ($stmt->execute()) {
-            echo json_encode(["status" => "success", "message" => "Folder created successfully"]);
-        } else {
-            echo json_encode(["status" => "error", "message" => "Error creating folder"]);
-        }
-        $stmt->close();
-    }
-
-    // Rename a folder (database + filesystem)
-    elseif ($action === "rename") {
-        $folderId = $_POST['folder_id'];
-        $newName = trim($_POST['new_name']);
-
-        // Fetch the existing folder name
-        $stmt = $conn->prepare("SELECT folder_name FROM media_folders WHERE id = ?");
-        $stmt->bind_param("i", $folderId);
-        $stmt->execute();
-        $stmt->bind_result($oldName);
-        $stmt->fetch();
-        $stmt->close();
-
-        if (!empty($oldName)) {
-            $oldPath = "uploads/" . $oldName;
-            $newPath = "uploads/" . $newName;
-
-            // Rename folder in filesystem
-            if (is_dir($oldPath) && !file_exists($newPath)) {
-                rename($oldPath, $newPath);
-            }
-
-            // Update folder name in database
-            $stmt = $conn->prepare("UPDATE media_folders SET folder_name = ? WHERE id = ?");
-            $stmt->bind_param("si", $newName, $folderId);
-            $stmt->execute();
-            $stmt->close();
-
-            // Update files table to reflect new folder name
-            $stmt = $conn->prepare("UPDATE files SET folder_name = ? WHERE folder_name = ?");
-            $stmt->bind_param("ss", $newName, $oldName);
-            $stmt->execute();
-            $stmt->close();
-
-            echo json_encode(["status" => "success", "message" => "Folder renamed successfully"]);
-        } else {
-            echo json_encode(["status" => "error", "message" => "Folder not found"]);
-        }
-    }
-
-    // Delete a folder (database + filesystem)
-    elseif ($action === "delete") {
-        $folderId = $_POST['folder_id'];
-
-        // Fetch folder name
-        $stmt = $conn->prepare("SELECT folder_name FROM media_folders WHERE id = ?");
-        $stmt->bind_param("i", $folderId);
-        $stmt->execute();
-        $stmt->bind_result($folderName);
-        $stmt->fetch();
-        $stmt->close();
-
-        if (!empty($folderName)) {
-            // Delete all files in the folder first
-            $stmt = $conn->prepare("DELETE FROM files WHERE folder_name = ?");
-            $stmt->bind_param("s", $folderName);
-            $stmt->execute();
-            $stmt->close();
-
-            // Delete folder record from database
-            $stmt = $conn->prepare("DELETE FROM media_folders WHERE id = ?");
-            $stmt->bind_param("i", $folderId);
-            $stmt->execute();
-            $stmt->close();
-
-            // Delete folder from filesystem
-            $folderPath = "uploads/" . $folderName;
-            if (is_dir($folderPath)) {
-                array_map('unlink', glob("$folderPath/*")); // Remove files first
-                rmdir($folderPath); // Remove empty folder
-            }
-
-            echo json_encode(["status" => "success", "message" => "Folder deleted successfully"]);
-        } else {
-            echo json_encode(["status" => "error", "message" => "Folder not found"]);
-        }
-    }
-
-    $conn->close();
+// Check if the connection is successful
+if ($conn->connect_error) {
+    die("Connection failed: " . $conn->connect_error);
 }
 
-// Handle file deletion
-if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST['delete_file'])) {
-    include '../connection/Connection.php'; // Reopen connection
+// ✅ Edit File Logic
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editFile'])) {
+    $id = intval($_POST['file_id']);
+    $file_name = $_POST['file_name'];
+    $temperature = !empty($_POST['temperature']) ? $_POST['temperature'] : NULL;
+    $water_level = !empty($_POST['water_level']) ? floatval($_POST['water_level']) : NULL;
+    $air_quality = !empty($_POST['air_quality']) ? floatval($_POST['air_quality']) : NULL;
 
-    $fileName = $_POST['delete_file'];
-    $folderName = $_POST['folder_name'];
-    $filePath = "uploads/" . $folderName . "/" . $fileName;
+    // ✅ Prepare SQL Statement
+    $stmt = $conn->prepare("UPDATE files SET file_name = ?, temperature = ?, water_level = ?, air_quality = ?, date_modified = NOW() WHERE id = ?");
+    
+    if ($stmt === false) {
+        die("Prepare failed: " . $conn->error);
+    }
 
-    // Delete from database
-    $stmt = $conn->prepare("DELETE FROM files WHERE file_name = ? AND folder_name = ?");
-    $stmt->bind_param("ss", $fileName, $folderName);
+    $stmt->bind_param("ssddi", $file_name, $temperature, $water_level, $air_quality, $id);
 
     if ($stmt->execute()) {
-        // Delete file from filesystem
-        if (file_exists($filePath)) {
-            unlink($filePath);
-        }
-
-        // Update folder content count
-        $updateStmt = $conn->prepare("UPDATE media_folders SET num_contents = (SELECT COUNT(*) FROM files WHERE folder_name = ?) WHERE folder_name = ?");
-        $updateStmt->bind_param("ss", $folderName, $folderName);
-        $updateStmt->execute();
-        $updateStmt->close();
-
-        echo json_encode(["status" => "success", "message" => "File deleted successfully"]);
-    } else {
-        echo json_encode(["status" => "error", "message" => "Error deleting file"]);
+        // ✅ Stay on the same page by refreshing
+        echo "<meta http-equiv='refresh' content='0'>";
+        exit();
     }
+
     $stmt->close();
-    $conn->close();
-    exit;
 }
+
+// ✅ Delete File Logic
+if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['deleteFile'])) {
+    $id = intval($_POST['file_id']);
+
+    $stmt = $conn->prepare("DELETE FROM files WHERE id = ?");
+    
+    if ($stmt === false) {
+        die("Prepare failed: " . $conn->error);
+    }
+
+    $stmt->bind_param("i", $id);
+
+    if ($stmt->execute()) {
+        // ✅ Refresh page to update the file list
+        header("Location: " . $_SERVER['PHP_SELF']);
+        exit();
+    }
+
+    $stmt->close();
+}
+
+// ✅ Close connection
+$conn->close();
 ?>
+

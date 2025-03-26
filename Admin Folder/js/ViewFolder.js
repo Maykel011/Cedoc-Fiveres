@@ -153,150 +153,6 @@ function closeModal(modalId) {
 }
 
 
-//modal rename & Deleting
-document.addEventListener("DOMContentLoaded", function () {
-    const ModalManager = {
-        currentFolderId: null,
-
-        openModal: function (modalId) {
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.style.display = "flex";
-            }
-        },
-
-        closeModal: function (modalId) {
-            console.log("Closing modal:", modalId);
-            const modal = document.getElementById(modalId);
-            if (modal) {
-                modal.style.display = "none";
-                this.clearErrorMessages(modalId);
-            }
-        },
-
-        openRenameModal: function (folderId, folderName) {
-            this.currentFolderId = folderId;
-            document.getElementById("renameFolderName").textContent = `Folder: ${folderName}`;
-            this.openModal("renameModal");
-        },
-
-        openDeleteModal: function (folderId, folderName) {
-            this.currentFolderId = folderId;
-            document.getElementById("deleteFolderName").textContent = `Folder: ${folderName}`;
-            this.openModal("deleteModal");
-        },
-
-        showSuccessModal: function (modalId) {
-            const modal = document.getElementById(modalId);
-            if (!modal) return;
-
-            modal.style.display = "flex";
-            setTimeout(() => {
-                modal.style.display = "none";
-                location.reload();
-            }, 1000);
-        },
-
-        renameFolder: function () {
-            const newName = document.getElementById("newFolderName").value.trim();
-            const errorMsg = document.getElementById("renameError");
-
-            if (!newName) {
-                errorMsg.textContent = "Please enter a new folder name.";
-                errorMsg.style.display = "block"; // Show the error message
-                return;
-            }
-
-            errorMsg.style.display = "none"; // Hide error if input is valid
-
-            fetch("../AdminBackEnd/MediaFilesBE.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: `action=rename&folder_id=${this.currentFolderId}&new_name=${encodeURIComponent(newName)}`
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === "success") {
-                        this.closeModal("renameModal");
-                        this.showSuccessModal("renameSuccessModal");
-                    } else {
-                        errorMsg.textContent = data.message; // Show server error message
-                        errorMsg.style.display = "block";
-                    }
-                });
-        },
-
-        deleteFolder: function () {
-            fetch("../AdminBackEnd/MediaFilesBE.php", {
-                method: "POST",
-                headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: `action=delete&folder_id=${this.currentFolderId}`
-            })
-                .then(response => response.json())
-                .then(data => {
-                    if (data.status === "success") {
-                        this.closeModal("deleteModal");
-                        this.showSuccessModal("deleteSuccessModal");
-                    } else {
-                        alert(data.message);
-                    }
-                });
-        },
-
-        clearErrorMessages: function (modalId) {
-            if (modalId === "renameModal") {
-                const errorMsg = document.getElementById("renameError");
-                errorMsg.style.display = "none"; // Hide error when modal is closed
-                errorMsg.textContent = "";
-            }
-        },
-
-        attachEventListeners: function () {
-            // Rename Button Event
-            const renameFolderBtn = document.getElementById("renameFolderBtn");
-            if (renameFolderBtn) {
-                renameFolderBtn.addEventListener("click", () => this.renameFolder());
-            }
-
-            // Delete Button Event
-            const deleteFolderBtn = document.getElementById("deleteFolderBtn");
-            if (deleteFolderBtn) {
-                deleteFolderBtn.addEventListener("click", () => this.deleteFolder());
-            }
-
-            // Attach modal openers
-            document.querySelectorAll(".rename-btn").forEach(button => {
-                button.addEventListener("click", () => {
-                    const folderId = button.getAttribute("data-id");
-                    const folderName = button.closest("tr").children[0].textContent.replace("📁", "").trim();
-                    this.openRenameModal(folderId, folderName);
-                });
-            });
-
-            document.querySelectorAll(".delete-btn").forEach(button => {
-                button.addEventListener("click", () => {
-                    const folderId = button.getAttribute("data-id");
-                    const folderName = button.closest("tr").children[0].textContent.replace("📁", "").trim();
-                    this.openDeleteModal(folderId, folderName);
-                });
-            });
-
-            // Global close modal functionality
-            document.querySelectorAll(".close").forEach(button => {
-                button.addEventListener("click", () => this.closeModal(button.parentElement.parentElement.id));
-            });
-
-            // Attach Cancel Button Functionality
-            document.querySelectorAll(".custom-modal button").forEach(button => {
-                if (button.textContent.trim() === "Cancel") {
-                    button.addEventListener("click", () => this.closeModal(button.closest(".custom-modal").id));
-                }
-            });
-        }
-    };
-
-    ModalManager.attachEventListeners();
-});
 
 //handling file upload
 document.getElementById("uploadBtn").addEventListener("click", function() {
@@ -321,3 +177,40 @@ document.getElementById("uploadForm").addEventListener("submit", function(e) {
     });
 });
 
+
+//Handling rename & Deleting
+function openEditModal(id, fileName, temp, water, air) {
+    document.getElementById("editFileId").value = id;
+    document.getElementById("editFileName").value = fileName;
+    document.getElementById("editTemperature").value = temp || '';
+    document.getElementById("editWaterLevel").value = water || '';
+    document.getElementById("editAirQuality").value = air || '';
+    document.getElementById("editModal").style.display = "flex";
+}
+
+function openDeleteModal(id) {
+    document.getElementById("deleteFileId").value = id;
+    document.getElementById("deleteModal").style.display = "flex";
+}
+
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = "none";
+}
+
+// Open Delete Modal and set the file ID
+function openDeleteModal(id, fileName) {
+    document.getElementById("deleteFileId").value = id;
+    document.getElementById("deleteFileInput").value = id; // Ensure ID is sent in form
+    document.getElementById("deleteFolderName").textContent = "Deleting: " + fileName;
+    document.getElementById("deleteModal").style.display = "flex";
+}
+
+// Close Modal
+function closeModal(modalId) {
+    document.getElementById(modalId).style.display = "none";
+}
+
+// Ensure Delete Button Works
+document.getElementById("deleteForm").addEventListener("submit", function() {
+    closeModal('deleteModal'); // Hide modal after submit
+});
