@@ -103,27 +103,43 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editFile'])) {
 }
 
 // ✅ Delete File Logic
-if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['deleteFile'])) {
-    $id = intval($_POST['file_id']);
+if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    $fileId = isset($_POST["file_id"]) ? intval($_POST["file_id"]) : 0;
 
-    $stmt = $conn->prepare("DELETE FROM files WHERE id = ?");
-    
-    if ($stmt === false) {
-        die("Prepare failed: " . $conn->error);
+    if ($fileId === 0) {
+        echo json_encode(["success" => false, "message" => "Invalid file ID"]);
+        exit;
     }
 
-    $stmt->bind_param("i", $id);
-
-    if ($stmt->execute()) {
-        // ✅ Refresh page to update the file list
-        header("Location: " . $_SERVER['PHP_SELF']);
-        exit();
-    }
-
+    // Get file details
+    $stmt = $conn->prepare("SELECT file_name, folder_name FROM files WHERE id = ?");
+    $stmt->bind_param("i", $fileId);
+    $stmt->execute();
+    $result = $stmt->get_result()->fetch_assoc();
     $stmt->close();
+
+    if (!$result) {
+        echo json_encode(["success" => false, "message" => "File not found"]);
+        exit;
+    }
+
+    $filePath = __DIR__ . "/uploads/" . $result["folder_name"] . "/" . $result["file_name"];
+
+    // Delete file from database
+    $stmt = $conn->prepare("DELETE FROM files WHERE id = ?");
+    $stmt->bind_param("i", $fileId);
+    $stmt->execute();
+    $stmt->close();
+
+    // Delete file from server
+    if (file_exists($filePath)) {
+        unlink($filePath);
+    }
+
+    echo json_encode(["success" => true]);
 }
 
-// ✅ Close connection
 $conn->close();
+
 ?>
 

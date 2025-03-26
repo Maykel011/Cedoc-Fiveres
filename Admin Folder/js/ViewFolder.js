@@ -188,29 +188,52 @@ function openEditModal(id, fileName, temp, water, air) {
     document.getElementById("editModal").style.display = "flex";
 }
 
-function openDeleteModal(id) {
-    document.getElementById("deleteFileId").value = id;
-    document.getElementById("deleteModal").style.display = "flex";
-}
-
 function closeModal(modalId) {
     document.getElementById(modalId).style.display = "none";
 }
 
-// Open Delete Modal and set the file ID
-function openDeleteModal(id, fileName) {
-    document.getElementById("deleteFileId").value = id;
-    document.getElementById("deleteFileInput").value = id; // Ensure ID is sent in form
-    document.getElementById("deleteFolderName").textContent = "Deleting: " + fileName;
-    document.getElementById("deleteModal").style.display = "flex";
-}
 
-// Close Modal
-function closeModal(modalId) {
-    document.getElementById(modalId).style.display = "none";
-}
+document.addEventListener("DOMContentLoaded", function () {
+    let deleteFileBtn = document.getElementById("deleteFolderBtn");
+    let deleteModal = document.getElementById("deleteModal");
+    let deleteSuccessModal = document.getElementById("deleteSuccessModal");
+    let deleteFileName = document.getElementById("deleteFileName");
+    let fileToDelete = 0;
 
-// Ensure Delete Button Works
-document.getElementById("deleteForm").addEventListener("submit", function() {
-    closeModal('deleteModal'); // Hide modal after submit
+    // Open Delete Modal
+    window.openDeleteModal = function (fileId, fileName) {
+        fileToDelete = fileId;
+        deleteFileName.innerText = `File: ${fileName}`;
+        deleteModal.style.display = "block";
+    };
+
+    // Close Modal
+    window.closeModal = function (modalId) {
+        document.getElementById(modalId).style.display = "none";
+    };
+
+    // Delete File
+    deleteFileBtn.addEventListener("click", function () {
+        if (fileToDelete === 0) return;
+
+        fetch("delete_file.php", {
+            method: "POST",
+            headers: { "Content-Type": "application/x-www-form-urlencoded" },
+            body: `file_id=${fileToDelete}`
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                closeModal("deleteModal");
+                deleteSuccessModal.style.display = "block";
+                setTimeout(() => {
+                    deleteSuccessModal.style.display = "none";
+                    location.reload(); // Reload page to update file list
+                }, 2000);
+            } else {
+                alert("Error: " + data.message);
+            }
+        })
+        .catch(error => console.error("Error:", error));
+    });
 });

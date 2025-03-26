@@ -98,9 +98,7 @@ include '../AdminBackEnd/ViewFolderBE.php';
 
                 <td>
                 <button onclick="openEditModal(<?= $file['id'] ?>, '<?= htmlspecialchars($file['file_name']) ?>', <?= $file['temperature'] ?? 'null' ?>, <?= $file['water_level'] ?? 'null' ?>, <?= $file['air_quality'] ?? 'null' ?>)">Edit</button>
-
-
-                    <button onclick="deleteFile(<?= $file['id'] ?>)">Delete</button>
+                <button onclick="openDeleteModal(<?= $file['id'] ?>, '<?= $file['file_name'] ?>')">Delete</button>
                 </td>
             </tr>
             <?php endforeach; ?>
@@ -174,35 +172,26 @@ include '../AdminBackEnd/ViewFolderBE.php';
 </div>
 
 
-
-
 <!-- Delete Modal -->
-<div id="deleteModal" class="custom-modal" style="display: none;">
+<div id="deleteModal" class="deletecustom-modal">
     <div class="delete-modal-content">
-        <span class="close" onclick="closeModal('deleteModal')">&times;</span>
+        <span class="close" onclick="closeModal('deleteModal')"></span>
         <h2>Delete File</h2>
-        <p id="deleteFolderName"></p>
+        <p id="deleteFileName"></p>
         <p>Are you sure you want to delete this file?</p>
-        <!-- Hidden input to store the file ID -->
-        <input type="hidden" id="deleteFileId">
-        <form id="deleteForm" method="POST">
-            <input type="hidden" name="deleteFile" value="1">
-            <input type="hidden" name="file_id" id="deleteFileInput">
-            <button type="submit">Delete</button>
-            <button type="button" onclick="closeModal('deleteModal')">Cancel</button>
-        </form>
+        <button id="deleteFileBtn">Delete</button>
+        <button onclick="closeModal('deleteModal')">Cancel</button>
     </div>
 </div>
 
 
-
 <!-- 
-Success Delete Modal 
+Success Delete Modal  -->>
 <div id="deleteSuccessModal" class="success-modal">
     <div class="success-modal-content">
-        <h3>Folder Deleted Successfully!</h3>
+        <h3>File Deleted Successfully!</h3>
     </div>
-</div> -->
+</div>
 
 <script src="../../js/ViewFolder.js"></script>
 </body>
