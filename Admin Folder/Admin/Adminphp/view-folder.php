@@ -158,7 +158,7 @@ include '../AdminBackEnd/ViewFolderBE.php';
 
         </div>
     </div>
-
+    
 <!-- Rename Modal -->
 <div id="renameModal" class="custom-modal">
     <div class="rename-modal-content">

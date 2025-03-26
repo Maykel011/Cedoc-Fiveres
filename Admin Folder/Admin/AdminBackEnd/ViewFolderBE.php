@@ -138,7 +138,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_file'])) {
     } else {
         echo json_encode(["status" => "error", "message" => "Error deleting file"]);
     }
-
     $stmt->close();
     $conn->close();
     exit;
