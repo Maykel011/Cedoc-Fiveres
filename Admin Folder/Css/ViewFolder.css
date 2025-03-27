@@ -272,6 +272,7 @@ body,html {
 
 /* Table container */
 .table-container {
+    
     padding: 20px;
     background: #f9f9f9;
     border-radius: 10px;
@@ -290,6 +291,7 @@ body,html {
 }
 
 .back-button {
+    font-family: 'Akrobat', sans-serif;
     background: #003366;
     color: white;
     padding: 10px 20px;
@@ -344,6 +346,7 @@ body,html {
 
 /* Ensure consistent styling */
 input[type="text"], select {
+    font-family: 'Akrobat', sans-serif;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -356,6 +359,7 @@ input[type="text"], select {
 
 /* Table */
 table {
+    
     width: 100%;
     border-collapse: collapse;
     background: white;
@@ -366,6 +370,7 @@ table {
 
 /* Table Header */
 thead {
+    font-family: 'Akrobat', sans-serif;
     background: #003366;
     color: white;
     position: sticky;
@@ -401,6 +406,7 @@ tbody tr:hover {
 
 /* Style Buttons */
 td button {
+    font-family: 'Akrobat', sans-serif;
     background: #007BFF;
     color: white;
     border: none;
@@ -467,6 +473,7 @@ td button:hover {
 
 /* Buttons */
 button {
+    font-family: 'Akrobat', sans-serif;
     background: linear-gradient(135deg, #ff4b5c, #ff6b81);
     font-size: 14px;
     font-weight: bold;
@@ -487,6 +494,7 @@ button:hover {
 }
 
 .upload-button {
+    font-family: 'Akrobat', sans-serif;
     background: #007bff;
     color: white;
     padding: 10px 20px;
@@ -571,6 +579,7 @@ form {
 }
 
 .form-group input {
+    font-family: 'Akrobat', sans-serif;
     flex: 1;
     padding: 8px;
     border: 1px solid #ccc;
@@ -619,6 +628,7 @@ button[type="submit"]:hover {
     justify-content: center;
     align-items: center;
     z-index: 1000;
+    backdrop-filter: blur(5px);
 }
 
 /* Centered Modal Content */
@@ -645,9 +655,11 @@ button[type="submit"]:hover {
     max-width: 400px; /* Adjust width if needed */
     background: rgba(0, 0, 0, 0.3); /* Optional: Adds a background overlay */
     padding: 1000px;
+    backdrop-filter: blur(5px);
 }
 
 .delete-modal-content {
+    font-family: 'Akrobat', sans-serif;
     background: #fff;
     padding: 20px;
     width: 100%;
@@ -662,6 +674,7 @@ button[type="submit"]:hover {
 }
 
 .delete-modal-content button {
+    font-family: 'Akrobat', sans-serif;
     background-color: #d9534f;
     color: white;
     border: none;
@@ -673,11 +686,12 @@ button[type="submit"]:hover {
 }
 
 .delete-modal-content button:hover {
+    font-family: 'Akrobat', sans-serif;
     background-color: #c9302c;
 }
-
 /* Success Modal */
-.success-modal {
+.deletesuccess-modal {
+    font-family: 'Akrobat', sans-serif;
     display: none;
     position: fixed;
     z-index: 1100;
@@ -694,6 +708,57 @@ button[type="submit"]:hover {
     opacity: 0;
     transition: opacity 0.3s ease, transform 0.3s ease;
     animation: fadeInScale 0.3s ease-out forwards;
+}
+
+/* Add slight pop-up effect */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -55%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Success Modal Content */
+.success-modal-content {
+    padding: 15px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Check Icon */
+.success-modal-content::before {
+    content: "✔"; /* Unicode checkmark */
+    font-size: 24px;
+    font-weight: bold;
+    display: inline-block;
+    background: white;
+    color: #2ecc71;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+}
+
+/* Fade-out effect when hiding */
+.success-modal.hide {
+    opacity: 0;
+    transform: translate(-50%, -45%) scale(0.9);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Close Button */
+.successclose {
+    float: right;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
 }
 
 /* Add slight pop-up effect */

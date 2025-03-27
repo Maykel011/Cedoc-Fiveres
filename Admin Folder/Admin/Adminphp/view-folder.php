@@ -11,7 +11,7 @@ include '../AdminBackEnd/ViewFolderBE.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES - View Folder</title>
-    <link rel="stylesheet" href="../../Css/ViewFolds.css">
+    <link rel="stylesheet" href="../../Css/ViewFolder.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -171,28 +171,26 @@ include '../AdminBackEnd/ViewFolderBE.php';
     </div>
 </div>
 
-
-<!-- Delete Modal -->
+<!-- Delete Confirmation Modal -->
 <div id="deleteModal" class="deletecustom-modal">
     <div class="delete-modal-content">
         <span class="close" onclick="closeModal('deleteModal')"></span>
-        <h2>Delete File</h2>
+        <h2>Delete Confirmation</h2>
         <p id="deleteFileName"></p>
-        <p>Are you sure you want to delete this file?</p>
+        <p>Are you sure you want to delete this?</p>
         <button id="deleteFileBtn">Delete</button>
         <button onclick="closeModal('deleteModal')">Cancel</button>
     </div>
 </div>
 
-
-<!-- 
-Success Delete Modal  -->>
-<div id="deleteSuccessModal" class="success-modal">
+<!-- Success Modal -->
+<div id="deleteSuccessModal" class="deletesuccess-modal" style="display: none;">
     <div class="success-modal-content">
-        <h3>File Deleted Successfully!</h3>
+        <span class="successclose" onclick="closeModal('deleteSuccessModal')"></span>
+        <h2 id="deleteSuccessMessage">Deleted Successfully</h2>
     </div>
 </div>
 
-<script src="../../js/ViewFolder.js"></script>
+<script src="../../js/ViewFolds.js"></script>
 </body>
 </html>

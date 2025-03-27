@@ -5,9 +5,6 @@ include '../connection/Connection.php'; // Database connection
 $folderName = isset($_POST['folder_name']) ? trim($_POST['folder_name']) : (isset($_GET['folder']) ? trim($_GET['folder']) : '');
 $folderName = $folderName !== null ? $folderName : ''; // Ensure it's a string
 
-if (empty($folderName)) {
-    die(json_encode(["status" => "error", "message" => "No folder selected."]));
-}
 
 $uploadDir = "uploads/" . $folderName . "/"; // Define upload path
 
@@ -102,44 +99,100 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editFile'])) {
     $stmt->close();
 }
 
-// ✅ Delete File Logic
-if ($_SERVER["REQUEST_METHOD"] === "POST") {
-    $fileId = isset($_POST["file_id"]) ? intval($_POST["file_id"]) : 0;
+//handling delete
 
-    if ($fileId === 0) {
-        echo json_encode(["success" => false, "message" => "Invalid file ID"]);
+if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"])) {
+    $action = $_POST["action"];
+
+    // Delete a single file
+    if ($action === "deleteFile") {
+        $fileId = $_POST['file_id'];
+
+        // Get file name and folder name
+        $stmt = $conn->prepare("SELECT file_name, folder_name FROM files WHERE id = ?");
+        $stmt->bind_param("i", $fileId);
+        $stmt->execute();
+        $stmt->bind_result($fileName, $folderName);
+        $stmt->fetch();
+        $stmt->close();
+
+        if (!empty($fileName)) {
+            // Delete from database
+            $stmt = $conn->prepare("DELETE FROM files WHERE id = ?");
+            $stmt->bind_param("i", $fileId);
+            $stmt->execute();
+            $stmt->close();
+
+            // Delete file from uploads folder
+            $filePath = "uploads/$folderName/$fileName";
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+
+            echo json_encode(["status" => "success", "message" => "File deleted successfully"]);
+            exit;
+        } else {
+            echo json_encode(["status" => "error", "message" => "File not found"]);
+            exit;
+        }
+    }
+
+    // Delete a folder and its contents
+    elseif ($action === "deleteFolder") {
+        $folderName = $_POST['folder_name'];
+
+        // Get all files inside the folder
+        $stmt = $conn->prepare("SELECT file_name FROM files WHERE folder_name = ?");
+        $stmt->bind_param("s", $folderName);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $files = [];
+        while ($row = $result->fetch_assoc()) {
+            $files[] = $row['file_name'];
+        }
+        $stmt->close();
+
+        // Delete all files from database
+        $stmt = $conn->prepare("DELETE FROM files WHERE folder_name = ?");
+        $stmt->bind_param("s", $folderName);
+        $stmt->execute();
+        $stmt->close();
+
+        // Delete the folder from the database
+        $stmt = $conn->prepare("DELETE FROM media_folders WHERE folder_name = ?");
+        $stmt->bind_param("s", $folderName);
+        $stmt->execute();
+        $stmt->close();
+
+        // Delete files from filesystem
+        foreach ($files as $file) {
+            $filePath = "uploads/$folderName/$file";
+            if (file_exists($filePath)) {
+                unlink($filePath);
+            }
+        }
+
+        // Remove the folder itself
+        $folderPath = "uploads/$folderName";
+        deleteFolder($folderPath);
+
+        echo json_encode(["status" => "success", "message" => "Folder and its contents deleted successfully"]);
         exit;
     }
 
-    // Get file details
-    $stmt = $conn->prepare("SELECT file_name, folder_name FROM files WHERE id = ?");
-    $stmt->bind_param("i", $fileId);
-    $stmt->execute();
-    $result = $stmt->get_result()->fetch_assoc();
-    $stmt->close();
-
-    if (!$result) {
-        echo json_encode(["success" => false, "message" => "File not found"]);
-        exit;
-    }
-
-    $filePath = __DIR__ . "/uploads/" . $result["folder_name"] . "/" . $result["file_name"];
-
-    // Delete file from database
-    $stmt = $conn->prepare("DELETE FROM files WHERE id = ?");
-    $stmt->bind_param("i", $fileId);
-    $stmt->execute();
-    $stmt->close();
-
-    // Delete file from server
-    if (file_exists($filePath)) {
-        unlink($filePath);
-    }
-
-    echo json_encode(["success" => true]);
+    $conn->close();
 }
 
-$conn->close();
-
+// Function to delete folder and its contents
+function deleteFolder($folderPath) {
+    if (!is_dir($folderPath)) return;
+    
+    $files = array_diff(scandir($folderPath), ['.', '..']);
+    foreach ($files as $file) {
+        $filePath = $folderPath . DIRECTORY_SEPARATOR . $file;
+        is_dir($filePath) ? deleteFolder($filePath) : unlink($filePath);
+    }
+    rmdir($folderPath);
+}
 ?>
 

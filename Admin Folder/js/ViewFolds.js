@@ -179,6 +179,7 @@ document.getElementById("uploadForm").addEventListener("submit", function(e) {
 
 
 //Handling rename & Deleting
+// Open edit modal
 function openEditModal(id, fileName, temp, water, air) {
     document.getElementById("editFileId").value = id;
     document.getElementById("editFileName").value = fileName;
@@ -188,52 +189,77 @@ function openEditModal(id, fileName, temp, water, air) {
     document.getElementById("editModal").style.display = "flex";
 }
 
+// Close any modal
 function closeModal(modalId) {
     document.getElementById(modalId).style.display = "none";
 }
 
+// Show success modal, auto-close after 500ms, then refresh
+function showSuccessModal(message) {
+    document.getElementById("deleteSuccessMessage").innerText = message;
+    const successModal = document.getElementById("deleteSuccessModal");
+    successModal.style.display = "block";
 
-document.addEventListener("DOMContentLoaded", function () {
-    let deleteFileBtn = document.getElementById("deleteFolderBtn");
-    let deleteModal = document.getElementById("deleteModal");
-    let deleteSuccessModal = document.getElementById("deleteSuccessModal");
-    let deleteFileName = document.getElementById("deleteFileName");
-    let fileToDelete = 0;
+    // Auto-close after 500ms and refresh the page
+    setTimeout(() => {
+        closeModal("deleteSuccessModal");
+        location.reload(); // Refresh the page
+    }, 1000);
+}
 
-    // Open Delete Modal
-    window.openDeleteModal = function (fileId, fileName) {
-        fileToDelete = fileId;
-        deleteFileName.innerText = `File: ${fileName}`;
-        deleteModal.style.display = "block";
-    };
+// Open delete confirmation modal
+function openDeleteModal(itemId, itemName, isFolder = false, element) {
+    document.getElementById("deleteFileName").innerText = isFolder ? `Folder: ${itemName}` : `File: ${itemName}`;
+    document.getElementById("deleteFileBtn").setAttribute("data-id", itemId);
+    document.getElementById("deleteFileBtn").setAttribute("data-type", isFolder ? "folder" : "file");
+    document.getElementById("deleteFileBtn").setAttribute("data-element", element);
+    document.getElementById("deleteModal").style.display = "block";
+}
 
-    // Close Modal
-    window.closeModal = function (modalId) {
-        document.getElementById(modalId).style.display = "none";
-    };
-
-    // Delete File
-    deleteFileBtn.addEventListener("click", function () {
-        if (fileToDelete === 0) return;
-
-        fetch("delete_file.php", {
-            method: "POST",
-            headers: { "Content-Type": "application/x-www-form-urlencoded" },
-            body: `file_id=${fileToDelete}`
-        })
-        .then(response => response.json())
-        .then(data => {
-            if (data.success) {
-                closeModal("deleteModal");
-                deleteSuccessModal.style.display = "block";
-                setTimeout(() => {
-                    deleteSuccessModal.style.display = "none";
-                    location.reload(); // Reload page to update file list
-                }, 2000);
-            } else {
-                alert("Error: " + data.message);
-            }
-        })
-        .catch(error => console.error("Error:", error));
+// Delete file function
+function deleteFile(fileId, element) {
+    fetch(window.location.href, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `action=deleteFile&file_id=${fileId}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "success") {
+            closeModal("deleteModal");
+            showSuccessModal("File deleted successfully");
+        } else {
+            alert(data.message);
+        }
     });
+}
+
+// Delete folder function
+function deleteFolder(folderName, element) {
+    fetch(window.location.href, {
+        method: "POST",
+        headers: { "Content-Type": "application/x-www-form-urlencoded" },
+        body: `action=deleteFolder&folder_name=${folderName}`
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.status === "success") {
+            closeModal("deleteModal");
+            showSuccessModal("Folder deleted successfully");
+        } else {
+            alert(data.message);
+        }
+    });
+}
+
+// Handle delete button click
+document.getElementById("deleteFileBtn").addEventListener("click", function () {
+    let itemId = this.getAttribute("data-id");
+    let itemType = this.getAttribute("data-type");
+
+    if (itemType === "folder") {
+        deleteFolder(itemId);
+    } else {
+        deleteFile(itemId);
+    }
 });
