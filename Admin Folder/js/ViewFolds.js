@@ -158,24 +158,49 @@ function closeModal(modalId) {
 document.getElementById("uploadBtn").addEventListener("click", function() {
     document.getElementById("uploadModal").style.display = "block";
 });
+
 function closeModal(modalId) {
     document.getElementById(modalId).style.display = "none";
 }
-document.getElementById("uploadForm").addEventListener("submit", function(e) {
+
+function showModal(modalId) {
+    document.getElementById(modalId).style.display = "block";
+}
+
+document.getElementById("uploadForm")?.addEventListener("submit", function(e) {
     e.preventDefault();
     let formData = new FormData(this);
-    fetch("", {
+    
+    fetch(window.location.href, {
         method: "POST",
         body: formData
     })
     .then(response => response.json())
     .then(data => {
-        alert(data.message);
         if (data.status === "success") {
-            location.reload();
+            closeModal('uploadModal');
+            document.getElementById('uploadSuccessMessage').textContent = data.message;
+            showModal('uploadSuccessModal');
+
+            // Auto-close after 1.5 seconds and refresh
+            setTimeout(() => {
+                closeModal('uploadSuccessModal');
+                location.reload();
+            }, 1000);
+        } else {
+            document.getElementById('uploadErrorMessage').textContent = data.message;
+            showModal('uploadErrorModal');
         }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('uploadErrorMessage').textContent = 'An error occurred during upload.';
+        showModal('uploadErrorModal');
     });
 });
+
+
+
 
 
 //Handling rename & Deleting

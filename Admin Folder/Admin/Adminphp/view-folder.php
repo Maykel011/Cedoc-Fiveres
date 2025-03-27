@@ -172,6 +172,20 @@ include '../AdminBackEnd/ViewFolderBE.php';
     </div>
 </div>
 
+<!-- Multiple Delete Confirmation Modal -->
+<div id="multipleDeleteModal" class="deletecustom-modal" style="display: none;">
+    <div class="delete-modal-content">
+        <span class="close" onclick="closeModal('multipleDeleteModal')"></span>
+        <h2>Delete Confirmation</h2>
+        <p id="multipleDeleteCount"></p>
+        <p>Are you sure you want to delete these files?</p>
+        <div class="button-group">
+            <button id="confirmMultipleDeleteBtn" class="delete-btn">Delete</button>
+            <button onclick="closeModal('multipleDeleteModal')" class="cancel-btn">Cancel</button>
+        </div>
+    </div>
+</div>
+
 <!-- Delete Confirmation Modal -->
 <div id="deleteModal" class="deletecustom-modal">
     <div class="delete-modal-content">
@@ -183,6 +197,15 @@ include '../AdminBackEnd/ViewFolderBE.php';
         <button onclick="closeModal('deleteModal')">Cancel</button>
     </div>
 </div>
+
+<!-- Upload Success Modal -->
+<div id="uploadSuccessModal" class="deletesuccess-modal" style="display: none;">
+    <div class="success-modal-content">
+        <span class="successclose" onclick="closeModal('uploadSuccessModal')"></span>
+        <h2 id="uploadSuccessMessage">File Uploaded Successfully</h2>
+    </div>
+</div>
+
 
 <!-- Success Modal -->
 <div id="deleteSuccessModal" class="deletesuccess-modal" style="display: none;">

@@ -19,7 +19,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES['file'])) {
 
     // Ensure directory exists
     if (!file_exists($uploadDir)) {
-        mkdir($uploadDir, 0777, true);
+        if (!mkdir($uploadDir, 0777, true)) {
+            echo json_encode(["status" => "error", "message" => "Failed to create directory"]);
+            exit;
+        }
     }
 
     $filePath = $uploadDir . $fileName;
@@ -37,6 +40,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES['file'])) {
 
             echo json_encode(["status" => "success", "message" => "File uploaded successfully"]);
         } else {
+            // Delete the uploaded file if database insertion fails
+            unlink($filePath);
             echo json_encode(["status" => "error", "message" => "Database insertion failed"]);
         }
         $stmt->close();
