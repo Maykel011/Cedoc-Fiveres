@@ -27,75 +27,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
         $stmt->close();
     }
 
-  // Handle folder renaming
-  elseif ($action === "rename") {
-    $folderId = $_POST['folder_id'];
-    $newName = trim($_POST['new_name']);
-
-    if (empty($newName)) {
-        echo json_encode(["status" => "error", "message" => "New folder name cannot be empty"]);
-        exit;
-    }
-
-    // Check if the new name already exists
-    $stmt = $conn->prepare("SELECT id FROM media_folders WHERE folder_name = ?");
-    $stmt->bind_param("s", $newName);
-    $stmt->execute();
-    $stmt->store_result();
-
-    if ($stmt->num_rows > 0) {
-        echo json_encode(["status" => "error", "message" => "Folder name already exists"]);
-        $stmt->close();
-        exit;
-    }
-    $stmt->close();
-
-    // Get the current folder name
-    $stmt = $conn->prepare("SELECT folder_name FROM media_folders WHERE id = ?");
-    $stmt->bind_param("i", $folderId);
-    $stmt->execute();
-    $stmt->bind_result($oldName);
-    $stmt->fetch();
-    $stmt->close();
-
-    if (!empty($oldName)) {
-        $oldPath = "uploads/" . $oldName;
-        $newPath = "uploads/" . $newName;
-
-        // ✅ Disable Foreign Key Checks
-        $conn->query("SET FOREIGN_KEY_CHECKS=0");
-
-        // ✅ Update `files` table first
-        $updateStmt = $conn->prepare("UPDATE files SET folder_name = ? WHERE folder_name = ?");
-        $updateStmt->bind_param("ss", $newName, $oldName);
-        $updateStmt->execute();
-        $updateStmt->close();
-
-        // ✅ Update `media_folders` table
-        $stmt = $conn->prepare("UPDATE media_folders SET folder_name = ? WHERE id = ?");
-        $stmt->bind_param("si", $newName, $folderId);
-        $stmt->execute();
-        $stmt->close();
-
-        // ✅ Enable Foreign Key Checks
-        $conn->query("SET FOREIGN_KEY_CHECKS=1");
-
-        // ✅ Rename the folder in the filesystem
-        if (is_dir($oldPath) && !file_exists($newPath)) {
-            if (!rename($oldPath, $newPath)) {
-                echo json_encode(["status" => "error", "message" => "Error renaming folder in filesystem"]);
-                exit;
-            }
-        }
-
-        echo json_encode(["status" => "success", "message" => "Folder renamed successfully"]);
-    } else {
-        echo json_encode(["status" => "error", "message" => "Folder not found"]);
-    }
-}
-
-
-
     // Handle folder deletion
     elseif ($action === "delete") {
         $folderId = $_POST['folder_id'];
@@ -109,26 +40,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
         $stmt->close();
 
         if (!empty($folderName)) {
-            // Delete all files from the database
-            $stmt = $conn->prepare("DELETE FROM files WHERE folder_name = ?");
-            $stmt->bind_param("s", $folderName);
-            $stmt->execute();
-            $stmt->close();
+            // Start transaction for consistency
+            $conn->begin_transaction();
 
-            // Delete the folder from the database
-            $stmt = $conn->prepare("DELETE FROM media_folders WHERE id = ?");
-            $stmt->bind_param("i", $folderId);
+            try {
+                // Delete all files from the database
+                $stmt = $conn->prepare("DELETE FROM files WHERE folder_name = ?");
+                $stmt->bind_param("s", $folderName);
+                $stmt->execute();
+                $stmt->close();
 
-            if ($stmt->execute()) {
+                // Delete the folder from the database
+                $stmt = $conn->prepare("DELETE FROM media_folders WHERE id = ?");
+                $stmt->bind_param("i", $folderId);
+                $stmt->execute();
+                $stmt->close();
+
+                // Commit changes
+                $conn->commit();
+
                 // Remove folder from filesystem
                 $folderPath = "uploads/" . $folderName;
                 deleteFolder($folderPath);
 
                 echo json_encode(["status" => "success", "message" => "Folder and its contents deleted successfully"]);
-            } else {
-                echo json_encode(["status" => "error", "message" => "Error deleting folder"]);
+            } catch (Exception $e) {
+                $conn->rollback();
+                echo json_encode(["status" => "error", "message" => "Error deleting folder: " . $e->getMessage()]);
             }
-            $stmt->close();
         } else {
             echo json_encode(["status" => "error", "message" => "Folder not found"]);
         }
@@ -150,7 +89,7 @@ function deleteFolder($folderPath) {
     rmdir($folderPath);
 }
 
-// ✅ Update `num_contents` when a file is uploaded
+// Upload File & Update `num_contents`
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['file'])) {
     $folderName = $_POST['folder_name'];
     $fileName = $_FILES['file']['name'];
@@ -164,21 +103,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['file'])) {
 
     $filePath = $uploadDir . $fileName;
     if (move_uploaded_file($fileTmp, $filePath)) {
-        $stmt = $conn->prepare("INSERT INTO files (file_name, file_type, folder_name) VALUES (?, ?, ?)");
-        $stmt->bind_param("sss", $fileName, $fileType, $folderName);
+        $conn->begin_transaction();
 
-        if ($stmt->execute()) {
-            // ✅ Update `num_contents`
-            $updateStmt = $conn->prepare("UPDATE media_folders SET num_contents = (SELECT COUNT(*) FROM files WHERE folder_name = ?) WHERE folder_name = ?");
-            $updateStmt->bind_param("ss", $folderName, $folderName);
+        try {
+            // Insert into files table
+            $stmt = $conn->prepare("INSERT INTO files (file_name, file_type, folder_name) VALUES (?, ?, ?)");
+            $stmt->bind_param("sss", $fileName, $fileType, $folderName);
+            $stmt->execute();
+            $stmt->close();
+
+            // Update num_contents
+            $updateStmt = $conn->prepare("
+                UPDATE media_folders 
+                SET num_contents = num_contents + 1 
+                WHERE folder_name = ?
+            ");
+            $updateStmt->bind_param("s", $folderName);
             $updateStmt->execute();
             $updateStmt->close();
 
+            $conn->commit();
+
             echo json_encode(["status" => "success", "message" => "File uploaded successfully"]);
-        } else {
-            echo json_encode(["status" => "error", "message" => "Database insertion failed"]);
+        } catch (Exception $e) {
+            $conn->rollback();
+            echo json_encode(["status" => "error", "message" => "Database insertion failed: " . $e->getMessage()]);
         }
-        $stmt->close();
     } else {
         echo json_encode(["status" => "error", "message" => "File upload failed"]);
     }
@@ -186,33 +136,45 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['file'])) {
     exit;
 }
 
-// ✅ Update `num_contents` when a file is deleted
+// Delete File & Update `num_contents`
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_file'])) {
     $fileName = $_POST['delete_file'];
     $folderName = $_POST['folder_name'];
 
-    $stmt = $conn->prepare("DELETE FROM files WHERE file_name = ? AND folder_name = ?");
-    $stmt->bind_param("ss", $fileName, $folderName);
+    $conn->begin_transaction();
 
-    if ($stmt->execute()) {
-        // ✅ Update `num_contents`
-        $updateStmt = $conn->prepare("UPDATE media_folders SET num_contents = (SELECT COUNT(*) FROM files WHERE folder_name = ?) WHERE folder_name = ?");
-        $updateStmt->bind_param("ss", $folderName, $folderName);
+    try {
+        // Delete the file from the database first
+        $stmt = $conn->prepare("DELETE FROM files WHERE file_name = ? AND folder_name = ?");
+        $stmt->bind_param("ss", $fileName, $folderName);
+        $stmt->execute();
+        $stmt->close();
+
+        // Update num_contents in media_folders
+        $updateStmt = $conn->prepare("
+            UPDATE media_folders 
+            SET num_contents = num_contents - 1 
+            WHERE folder_name = ?
+        ");
+        $updateStmt->bind_param("s", $folderName);
         $updateStmt->execute();
         $updateStmt->close();
 
-        // ✅ Delete file from filesystem
+        $conn->commit();
+
+        // Delete file from filesystem
         $filePath = "uploads/" . $folderName . "/" . $fileName;
         if (file_exists($filePath)) {
             unlink($filePath);
         }
 
         echo json_encode(["status" => "success", "message" => "File deleted successfully"]);
-    } else {
-        echo json_encode(["status" => "error", "message" => "Error deleting file"]);
+    } catch (Exception $e) {
+        // Rollback if there's an error
+        $conn->rollback();
+        echo json_encode(["status" => "error", "message" => "Error deleting file: " . $e->getMessage()]);
     }
 
-    $stmt->close();
     $conn->close();
     exit;
 }
