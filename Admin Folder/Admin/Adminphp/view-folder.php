@@ -1,8 +1,6 @@
 <?php
 include '../connection/Connection.php'; 
 include '../AdminBackEnd/ViewFolderBE.php';
-
-
 ?>
 
 <!DOCTYPE html>
@@ -11,7 +9,7 @@ include '../AdminBackEnd/ViewFolderBE.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES - View Folder</title>
-    <link rel="stylesheet" href="../../Css/ViewFolder.css">
+    <link rel="stylesheet" href="../../Css/ViewFolders.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -56,22 +54,24 @@ include '../AdminBackEnd/ViewFolderBE.php';
 
 <div class="main-content">
     
-    <div class="table-container">
+<div class="table-container">
+    <div class="header-controls">
         <h1 class="main-title"><?php echo htmlspecialchars($folderName); ?></h1>
-             <!-- Back Button -->
-    <button onclick="window.location.href='media-files.php'" class="back-button">Back</button>
         <div class="top-controls">
-        <div class="search-container">
-            <input type="text" class="search-input" placeholder="Search Folder">
-            <select class="filter-select">
-                <option value="name">Sort by Name</option>
-                <option value="date">Sort by Date Modified</option>
-            </select>
+            <div class="search-container">
+                <input type="text" class="search-input" placeholder="Search Folder">
+                <select class="filter-select">
+                    <option value="name">Sort by Name</option>
+                    <option value="date">Sort by Date Modified</option>
+                </select>
+            </div>
+            <div class="action-buttons">
+                <button id="uploadBtn" class="upload-button">Upload File</button>
+                <button id="deleteSelectedBtn" class="delete-selected-button" disabled>Delete Selected</button>
+                <button onclick="window.location.href='media-files.php'" class="back-button">Back</button>
+            </div>
         </div>
-
-         <!-- Upload Button -->
-    <button id="uploadBtn" class="upload-button">Upload File</button>
-        </div>
+    </div>
         <table>
         <thead>
             <tr>
@@ -93,8 +93,8 @@ include '../AdminBackEnd/ViewFolderBE.php';
                 <td><?= htmlspecialchars($file['date_modified']) ?></td>
                 <td><?= htmlspecialchars($file['file_type']) ?></td>
                 <td><?= htmlspecialchars($file['temperature'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
-<td><?= htmlspecialchars($file['water_level'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
-<td><?= htmlspecialchars($file['air_quality'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+                <td><?= htmlspecialchars($file['water_level'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+                <td><?= htmlspecialchars($file['air_quality'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
 
                 <td>
                 <button onclick="openEditModal(<?= $file['id'] ?>, '<?= htmlspecialchars($file['file_name']) ?>', <?= $file['temperature'] ?? 'null' ?>, <?= $file['water_level'] ?? 'null' ?>, <?= $file['air_quality'] ?? 'null' ?>)">Edit</button>
@@ -105,6 +105,7 @@ include '../AdminBackEnd/ViewFolderBE.php';
         </tbody>
     </table>
     
+    <!-- upload file-->
     <div id="uploadModal" class="customs-modal" style="display:none;">
     <div class="upload-modal-content">
         <span class="close" onclick="closeModal('uploadModal')"></span>

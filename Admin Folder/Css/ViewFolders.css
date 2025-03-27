@@ -272,6 +272,7 @@ body,html {
 
 /* Table container */
 .table-container {
+    
     padding: 20px;
     background: #f9f9f9;
     border-radius: 10px;
@@ -289,23 +290,7 @@ body,html {
     flex-direction: column;
 }
 
-.back-button {
-    background: #003366;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: 0.3s;
-    display: inline-block;
-    margin-left: auto; /* Moves the Back button to the right */
-    margin-bottom: 15px;
-}
 
-.back-button:hover {
-    background: #002244;
-}
 
 /* Adjust for smaller screens */
 @media (max-height: 600px) {
@@ -344,6 +329,7 @@ body,html {
 
 /* Ensure consistent styling */
 input[type="text"], select {
+    font-family: 'Akrobat', sans-serif;
     padding: 10px;
     border: 1px solid #ccc;
     border-radius: 5px;
@@ -356,6 +342,7 @@ input[type="text"], select {
 
 /* Table */
 table {
+    
     width: 100%;
     border-collapse: collapse;
     background: white;
@@ -366,6 +353,7 @@ table {
 
 /* Table Header */
 thead {
+    font-family: 'Akrobat', sans-serif;
     background: #003366;
     color: white;
     position: sticky;
@@ -401,12 +389,13 @@ tbody tr:hover {
 
 /* Style Buttons */
 td button {
+    font-family: 'Akrobat', sans-serif;
     background: #007BFF;
     color: white;
     border: none;
     border-radius: 5px;
     margin-right: 5px;
-    padding: 5px 10px;
+    padding: 5px 20px;
     font-size: 14px;
     cursor: pointer;
     white-space: nowrap;
@@ -420,32 +409,6 @@ td button:hover {
     opacity: 0.8;
 }
 
-  .profile-container, .update-password-container, .delete-passkey-container {
-        margin-bottom: 20px;
-        padding: 20px;
-        border-radius: 8px;
-        background: #f9f9f9;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
-    }
-    h2 {
-        color: #333;
-    }
-    label {
-        display: block;
-        margin-top: 10px;
-        font-weight: bold;
-    }
-    input {
-        width: 100%;
-        padding: 10px;
-        margin-top: 5px;
-        border: 1px solid #ccc;
-        border-radius: 5px;
-    }
-
-    button:hover {
-        background: #0056b3;
-    }
 
   /* General Modal Styles */
 .custom-modal {
@@ -493,6 +456,7 @@ td button:hover {
 
 /* Buttons */
 button {
+    font-family: 'Akrobat', sans-serif;
     background: linear-gradient(135deg, #ff4b5c, #ff6b81);
     font-size: 14px;
     font-weight: bold;
@@ -502,62 +466,215 @@ button:hover {
     background: linear-gradient(135deg, #ff6b81, #ff4b5c);
 }
 
-/* General Modal Styles */
+
+
+
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px; /* Adds a small gap between buttons */
+    margin-top: 10px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px; /* Added to move buttons down */
+    margin-bottom: 10px; /* Replaces individual button margins */
+}
+
+.delete-selected-button,
+.back-button,
+.upload-button {
+    font-family: 'Akrobat', sans-serif;
+    padding: 8px 16px;
+    border: 0;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: .2s;
+    display: inline-block;
+}
+
+.delete-selected-button {
+    background: #dc3545;
+    color: white;
+}
+.delete-selected-button:hover { background: #c82333; }
+.delete-selected-button:disabled { 
+    background: #6c757d; 
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.back-button {
+    background: #003366;
+    color: white;
+    margin-left: auto;
+}
+.back-button:hover { background: #002244; }
+
+.upload-button {
+    background: #007bff;
+    color: white;
+}
+.upload-button:hover { background: #0056b3; }
+
+.cancel-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 100%;
+    flex-grow: 1; /* Ensures both buttons have equal width */
+}
+
+.cancel-btn:hover {
+    background-color: #c82333;
+}
+
 .custom-modal {
-    display: none; /* Default to hidden */
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.5);
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
     justify-content: center;
     align-items: center;
 }
 
+.customs-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: block; /* Change to flex or block when showing */
+    z-index: 1000;
+}
 
-/* Rename Modal Content */
-.rename-modal-content {
-    background: #ffffff;
-    padding: 20px;
-    width: 350px;
-    border-radius: 8px;
+/* Center the modal content using absolute positioning */
+.upload-modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    width: 400px;
+    text-align: left;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-    text-align: center;
 }
 
-.rename-modal-content h2 {
-    color: #333;
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
 }
 
-.rename-modal-content input {
-    width: 90%;
-    padding: 10px;
-    margin: 10px 0;
+.form-group {
+    display: flex;
+    align-items: center;
+}
+
+.form-group label {
+    width: 120px;
+    font-weight: bold;
+}
+
+.form-group input {
+    font-family: 'Akrobat', sans-serif;
+    flex: 1;
+    padding: 8px;
     border: 1px solid #ccc;
     border-radius: 5px;
 }
 
-.rename-modal-content button {
-    background-color: #3498db;
+button[type="submit"] {
+    background: #007bff;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+    width: 100%;
+}
+button[type="submit"]:hover {
+    background: red;
+}
+
+.cancel-button {
+    background-color: #dc3545;
     color: white;
     border: none;
     padding: 10px 15px;
-    margin-top: 10px;
     cursor: pointer;
     border-radius: 5px;
-    transition: 0.3s ease-in-out;
+    width: 100%;
+    flex-grow: 1; /* Ensures both buttons have equal width */
 }
 
-.rename-modal-content button:hover {
-    background-color: #2980b9;
+.cancel-button:hover {
+    background: #c82333;
+}
+
+
+/* Modal Overlay */
+.editcustom-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex; /* Use flex to properly center */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+/* Centered Modal Content */
+.edit-modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    width: 400px;
+    text-align: left;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    position: relative;
 }
 
 /* Delete Modal Content */
+
+.deletecustom-modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000; /* Ensure it's above other elements */
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-width: 400px; /* Adjust width if needed */
+    background: rgba(0, 0, 0, 0.3); /* Optional: Adds a background overlay */
+    padding: 1000px;
+    backdrop-filter: blur(5px);
+}
+
 .delete-modal-content {
+    font-family: 'Akrobat', sans-serif;
     background: #fff;
     padding: 20px;
-    width: 350px;
+    width: 100%;
+    max-width: 350px; /* Keeps the modal size */
     border-radius: 8px;
     box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
     text-align: center;
@@ -568,6 +685,7 @@ button:hover {
 }
 
 .delete-modal-content button {
+    font-family: 'Akrobat', sans-serif;
     background-color: #d9534f;
     color: white;
     border: none;
@@ -579,11 +697,12 @@ button:hover {
 }
 
 .delete-modal-content button:hover {
+    font-family: 'Akrobat', sans-serif;
     background-color: #c9302c;
 }
-
 /* Success Modal */
-.success-modal {
+.deletesuccess-modal {
+    font-family: 'Akrobat', sans-serif;
     display: none;
     position: fixed;
     z-index: 1100;
@@ -646,156 +765,22 @@ button:hover {
 }
 
 /* Close Button */
-.close {
+.successclose {
     float: right;
     font-size: 22px;
     font-weight: bold;
     cursor: pointer;
 }
 
-.close:hover {
-    color: #d9534f;
+/* Add slight pop-up effect */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -55%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
 }
 
-.button-group {
-    display: flex;
-    justify-content: space-between;
-    gap: 10px; /* Adds a small gap between buttons */
-    margin-top: 10px;
-}
-
-.upload-button {
-    background: #007bff;
-    color: white;
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: 0.3s;
-}
-
-.upload-button:hover {
-    background: #0056b3;
-}
-
-.cancel-btn {
-    background-color: #dc3545;
-    color: white;
-    border: none;
-    padding: 10px 15px;
-    cursor: pointer;
-    border-radius: 5px;
-    width: 100%;
-    flex-grow: 1; /* Ensures both buttons have equal width */
-}
-
-.cancel-btn:hover {
-    background-color: #c82333;
-}
-
-.custom-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    display: none;
-    justify-content: center;
-    align-items: center;
-}
-
-.customs-modal {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.6);
-    display: block; /* Change to flex or block when showing */
-    z-index: 1000;
-}
-
-/* Center the modal content using absolute positioning */
-.upload-modal-content {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    background: white;
-    padding: 25px;
-    border-radius: 10px;
-    width: 400px;
-    text-align: left;
-    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
-}
-
-
-
-
-.close {
-    position: absolute;
-    top: 10px;
-    right: 15px;
-    font-size: 24px;
-    cursor: pointer;
-    color: #333;
-}
-.close:hover {
-    color: red;
-}
-
-form {
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-.form-group {
-    display: flex;
-    align-items: center;
-}
-
-.form-group label {
-    width: 120px;
-    font-weight: bold;
-}
-
-.form-group input {
-    flex: 1;
-    padding: 8px;
-    border: 1px solid #ccc;
-    border-radius: 5px;
-}
-
-button[type="submit"] {
-    background: #007bff;
-    color: white;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    transition: 0.3s;
-    width: 100%;
-}
-button[type="submit"]:hover {
-    background: red;
-}
-
-.cancel-button {
-    background: #dc3545;
-    color: white;
-    padding: 10px;
-    border: none;
-    border-radius: 5px;
-    cursor: pointer;
-    font-size: 16px;
-    transition: 0.3s;
-    width: 100%;
-    margin-top: 10px;
-}
-
-.cancel-button:hover {
-    background: #c82333;
-}

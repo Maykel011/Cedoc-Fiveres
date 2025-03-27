@@ -234,23 +234,6 @@ function deleteFile(fileId, element) {
     });
 }
 
-// Delete folder function
-function deleteFolder(folderName, element) {
-    fetch(window.location.href, {
-        method: "POST",
-        headers: { "Content-Type": "application/x-www-form-urlencoded" },
-        body: `action=deleteFolder&folder_name=${folderName}`
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.status === "success") {
-            closeModal("deleteModal");
-            showSuccessModal("Folder deleted successfully");
-        } else {
-            alert(data.message);
-        }
-    });
-}
 
 // Handle delete button click
 document.getElementById("deleteFileBtn").addEventListener("click", function () {
@@ -262,4 +245,57 @@ document.getElementById("deleteFileBtn").addEventListener("click", function () {
     } else {
         deleteFile(itemId);
     }
+});
+
+
+//Handling multiple
+// Handle checkbox selection
+document.addEventListener("DOMContentLoaded", function() {
+    const checkboxes = document.querySelectorAll('input[type="checkbox"][name="selected_files[]"]');
+    const deleteSelectedBtn = document.getElementById('deleteSelectedBtn');
+    
+    checkboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', function() {
+            const checkedCount = document.querySelectorAll('input[type="checkbox"][name="selected_files[]"]:checked').length;
+            deleteSelectedBtn.disabled = checkedCount === 0;
+        });
+    });
+    
+    // Delete selected files
+    deleteSelectedBtn.addEventListener('click', function() {
+        const selectedFiles = [];
+        document.querySelectorAll('input[type="checkbox"][name="selected_files[]"]:checked').forEach(checkbox => {
+            selectedFiles.push(checkbox.value);
+        });
+        
+        if (selectedFiles.length === 0) {
+            alert('Please select at least one file to delete');
+            return;
+        }
+        
+        if (confirm(`Are you sure you want to delete ${selectedFiles.length} selected file(s)?`)) {
+            const folderName = document.querySelector('.main-title').textContent.trim();
+            
+            fetch(window.location.href, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/x-www-form-urlencoded",
+                },
+                body: `action=deleteMultipleFiles&selected_files[]=${selectedFiles.join('&selected_files[]=')}&folder_name=${encodeURIComponent(folderName)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.status === "success") {
+                    showSuccessModal(data.message);
+                    setTimeout(() => location.reload(), 1000);
+                } else {
+                    alert(data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while deleting files');
+            });
+        }
+    });
 });
