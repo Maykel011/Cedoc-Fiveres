@@ -1,0 +1,856 @@
+@font-face {
+    font-family: 'Akrobat';
+    src: url('AkrobatB.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    /* font-family: 'Akrobat', sans-serif; */
+}
+
+
+@font-face {
+    font-family: 'SerpentineBold';
+    src: url('Serpentinebold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+    /* font-family: 'SerpentineBold', sans-serif; */
+}
+
+body,html {
+    margin: 0;
+    font-family: 'Akrobat', sans-serif;
+    height: 100%;
+    overflow: hidden; /* Prevent full page scrolling */
+
+}
+
+
+/* HEADER */
+.header {
+    
+    display: flex;
+    align-items: center; /* Vertically center items */
+    justify-content: center; /* Center content */
+    background-color: #9c0000;
+    color: white;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    width: 100%;
+}
+
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+}
+
+/* MAIN CONTENT */
+.main-content {
+    margin-left: 250px; /* Adjust for sidebar */
+    padding: 20px;
+    text-align: center; /* Centers content inside the div */
+    position: relative;
+}
+
+/* Centered Title */
+.main-title {
+    font-family: 'SerpentineBold', sans-serif;
+    font-size: 30px;
+    font-weight: bold;
+    color: rgb(0, 0, 0); /* Adjust for visibility */
+    margin: 0;
+    position: relative; /* Keeps it below the header */
+        width: 100%;
+    text-align: center;
+    margin-bottom: 10px;
+}
+
+.left-side {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: 55px;
+    margin-right: 15px;
+    
+}
+
+
+.right-side {
+    margin-right: 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.icon {
+    height: 30px;
+    margin-left: 20px;
+    cursor: pointer;
+}
+
+.icon:hover {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+/* SIDEBAR */
+.sidebar {
+    height: calc(100vh - 100px);
+    background: #2c3e50;
+    position: fixed;
+    top: auto;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    padding-top: 10px;
+    min-width: 250px;
+    max-width: 250px;
+    height: 100vh; /* Fixed full height */
+    overflow-y: auto; /* Allows scrolling inside the sidebar */
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0px;
+    margin: 0;
+}
+
+.sidebar li {
+    margin: 5px 0;
+}
+
+/* Sidebar Links */
+.sidebar a, .dropdown-btn {
+    font-family: 'Akrobat', sans-serif;
+    text-decoration: none;
+    color: rgb(255, 255, 255);
+    font-size: 1.2em;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease, transform 0.2s ease-in-out;
+}
+
+/* Align icons and text */
+.sidebar a .text, .dropdown-btn .text {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.sidebar-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    transition: transform 0.2s ease-in-out;
+}
+
+/* Hover Effect with Zoom */
+.sidebar a:hover, .dropdown-btn:hover {
+    background-color: #ff0000;
+    border-radius: 5px;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Smooth Zoom for Sidebar Icons */
+.sidebar a:hover .sidebar-icon, .dropdown-btn:hover .sidebar-icon {
+    transform: scale(1.2);
+}
+
+/* Fade-in and Fade-out Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+/* USER DROPDOWN */
+.user {
+    font-family: 'Akrobat', sans-serif;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Space between icon and text */
+    padding: 10px;
+}
+
+/* User Icon */
+.user .icon {
+    width: 30px;
+    height: 30px;
+}
+
+/* Admin Text */
+.admin-text {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+/* Dropdown Menu */
+.user-dropdown {
+    position: absolute;
+    top: 45px; /* Adjusted to align under the user icon */
+    right: 0;
+    background: #fff;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    overflow: hidden;
+    width: 180px;
+    display: none;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 100;
+}
+
+/* Dropdown Items */
+.user-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Icons inside dropdown */
+.user-dropdown a img {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.2s ease-in-out;
+}
+
+
+/* Hover Effect */
+.user-dropdown a:hover {
+    background: #e40000;
+    color: white;
+}
+
+/* Zoom-in effect for icons on hover */
+.user-dropdown a:hover img {
+    transform: scale(1.1);
+}
+
+/* Show dropdown */
+.user-dropdown.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Divider between items */
+.user-dropdown a:not(:last-child) {
+    border-bottom: 1px solid #eee;
+}
+
+
+
+/* Table container */
+.table-container {
+    
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow-x: auto; /* Horizontal scroll */
+    overflow-y: auto; /* Vertical scroll */
+    max-width: 100%;
+    max-height: 79vh; /* Responsive height */
+    display: block;
+}
+
+/* Position Back Button to the right */
+.table-container {
+    display: flex;
+    flex-direction: column;
+}
+
+
+
+/* Adjust for smaller screens */
+@media (max-height: 600px) {
+    .table-container {
+        max-height: 50vh; /* Reduce height on smaller screens */
+    }
+}
+
+@media (max-height: 400px) {
+    .table-container {
+        max-height: 40vh; /* Further reduction for very small screens */
+    }
+}
+
+/* Align top controls */
+.top-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+/* Group search & filter */
+.search-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Group folder input & button */
+.folder-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Ensure consistent styling */
+input[type="text"], select {
+    font-family: 'Akrobat', sans-serif;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    width: 200px;  /* Ensure both are the same width */
+    height: 40px;  /* Ensure both are the same height */
+    box-sizing: border-box; /* Prevents padding from increasing size */
+    margin-top: 5px; /* Moves the elements slightly downward */
+}
+
+/* Table */
+table {
+    
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    table-layout: fixed; /* Ensures columns maintain consistent width */
+}
+
+/* Table Header */
+thead {
+    font-family: 'Akrobat', sans-serif;
+    background: #003366;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 3px rgba(0, 0, 0, 0.1); /* Add shadow for visibility */
+}
+
+/* Table Headers and Data Cells */
+th, td {
+    padding: 10px; /* Ensures consistent spacing */
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Adjust column widths for readability */
+th:nth-child(1), td:nth-child(1) { width: 5%; }   /* Select */
+th:nth-child(2), td:nth-child(2) { width: 18%; }  /* Name */
+th:nth-child(3), td:nth-child(3) { width: 15%; }  /* Date Modified */
+th:nth-child(4), td:nth-child(4) { width: 12%; }  /* Type */
+th:nth-child(5), td:nth-child(5) { width: 12%; }  /* Temperature */
+th:nth-child(6), td:nth-child(6) { width: 12%; }  /* Water Level */
+th:nth-child(7), td:nth-child(7) { width: 12%; }  /* Air Quality */
+th:nth-child(8), td:nth-child(8) { width: 20%; }  /* Actions */
+
+/* Hover Effect */
+tbody tr:hover {
+    background: #f1f1f1;
+}
+
+/* Style Buttons */
+td button {
+    font-family: 'Akrobat', sans-serif;
+    background: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-right: 5px;
+    padding: 5px 20px;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+td button:last-child {
+    background: #DC3545;
+}
+
+td button:hover {
+    opacity: 0.8;
+}
+
+
+  /* General Modal Styles */
+.custom-modal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
+    left: 0;
+    top: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.6);
+    backdrop-filter: blur(5px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+/* Modal Content */
+.modal-content {
+    background: linear-gradient(135deg, #1e1e2f, #3a3a5e);
+    color: white;
+    padding: 20px;
+    border-radius: 12px;
+    width: 350px;
+    box-shadow: 0 0 20px rgba(255, 255, 255, 0.2);
+    text-align: center;
+    animation: fadeIn 0.3s ease-in-out;
+    position: relative;
+}
+
+/* Close Button */
+.close {
+    position: absolute;
+    right: 15px;
+    top: 10px;
+    font-size: 20px;
+    cursor: pointer;
+    color: white;
+    transition: 0.3s;
+}
+
+.close:hover {
+    color: #ff4b5c;
+}
+
+/* Buttons */
+button {
+    font-family: 'Akrobat', sans-serif;
+    background: linear-gradient(135deg, #ff4b5c, #ff6b81);
+    font-size: 14px;
+    font-weight: bold;
+}
+
+button:hover {
+    background: linear-gradient(135deg, #ff6b81, #ff4b5c);
+}
+
+
+
+
+.button-group {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px; /* Adds a small gap between buttons */
+    margin-top: 10px;
+}
+
+.action-buttons {
+    display: flex;
+    gap: 8px;
+    margin-top: 10px; /* Added to move buttons down */
+    margin-bottom: 10px; /* Replaces individual button margins */
+}
+
+.delete-selected-button,
+.back-button,
+.upload-button {
+    font-family: 'Akrobat', sans-serif;
+    padding: 8px 16px;
+    border: 0;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    transition: .2s;
+    display: inline-block;
+}
+
+.delete-selected-button {
+    background: #dc3545;
+    color: white;
+}
+.delete-selected-button:hover { background: #c82333; }
+.delete-selected-button:disabled { 
+    background: #6c757d; 
+    cursor: not-allowed;
+    opacity: 0.8;
+}
+
+.back-button {
+    background: #003366;
+    color: white;
+    margin-left: auto;
+}
+.back-button:hover { background: #002244; }
+
+.upload-button {
+    background: #007bff;
+    color: white;
+}
+.upload-button:hover { background: #0056b3; }
+
+.cancel-btn {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 100%;
+    flex-grow: 1; /* Ensures both buttons have equal width */
+}
+
+.cancel-btn:hover {
+    background-color: #c82333;
+}
+
+
+.custom-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: none;
+    justify-content: center;
+    align-items: center;
+}
+
+.customs-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: block; /* Change to flex or block when showing */
+    z-index: 1000;
+}
+
+/* Center the modal content using absolute positioning */
+.upload-modal-content {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    width: 400px;
+    text-align: left;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+}
+
+
+form {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+.form-group {
+    display: flex;
+    align-items: center;
+}
+
+.form-group label {
+    width: 120px;
+    font-weight: bold;
+}
+
+.form-group input {
+    font-family: 'Akrobat', sans-serif;
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+}
+
+button[type="submit"] {
+    background: #007bff;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: 0.3s;
+    width: 100%;
+}
+button[type="submit"]:hover {
+    background: red;
+}
+
+.cancel-button {
+    background-color: #dc3545;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    cursor: pointer;
+    border-radius: 5px;
+    width: 100%;
+    flex-grow: 1; /* Ensures both buttons have equal width */
+}
+
+.cancel-button:hover {
+    background: #c82333;
+}
+
+
+/* Modal Overlay */
+.editcustom-modal {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background: rgba(0, 0, 0, 0.6);
+    display: flex; /* Use flex to properly center */
+    justify-content: center;
+    align-items: center;
+    z-index: 1000;
+    backdrop-filter: blur(5px);
+}
+
+/* Centered Modal Content */
+.edit-modal-content {
+    background: white;
+    padding: 25px;
+    border-radius: 10px;
+    width: 400px;
+    text-align: left;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    position: relative;
+}
+
+/* Delete Modal Content */
+
+.deletecustom-modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000; /* Ensure it's above other elements */
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-width: 400px; /* Adjust width if needed */
+    background: rgba(0, 0, 0, 0.3); /* Optional: Adds a background overlay */
+    padding: 1000px;
+    backdrop-filter: blur(5px);
+}
+
+.delete-modal-content {
+    font-family: 'Akrobat', sans-serif;
+    background: #fff;
+    padding: 20px;
+    width: 100%;
+    max-width: 350px; /* Keeps the modal size */
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.delete-modal-content h2 {
+    color: #d9534f;
+}
+#deleteFileName {
+    word-wrap: break-word;  /* Ensures long words wrap */
+    overflow-wrap: break-word;
+    white-space: normal;  /* Allows text to wrap */
+    max-width: 100%;  /* Prevents text from overflowing */
+    display: block;
+}
+
+
+.delete-modal-content button {
+    font-family: 'Akrobat', sans-serif;
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: 0.3s ease-in-out;
+}
+
+.delete-modal-content button:hover {
+    font-family: 'Akrobat', sans-serif;
+    background-color: #c9302c;
+}
+/* Success Modal */
+.deletesuccess-modal {
+    font-family: 'Akrobat', sans-serif;
+    display: none;
+    position: fixed;
+    z-index: 1100;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: #2ecc71;
+    color: white;
+    padding: 20px 40px;
+    border-radius: 10px;
+    font-size: 18px;
+    text-align: center;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    animation: fadeInScale 0.3s ease-out forwards;
+}
+
+/* Add slight pop-up effect */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -55%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Success Modal Content */
+.success-modal-content {
+    padding: 15px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Check Icon */
+.success-modal-content::before {
+    content: "✔"; /* Unicode checkmark */
+    font-size: 24px;
+    font-weight: bold;
+    display: inline-block;
+    background: white;
+    color: #2ecc71;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+}
+
+/* Fade-out effect when hiding */
+.success-modal.hide {
+    opacity: 0;
+    transform: translate(-50%, -45%) scale(0.9);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Close Button */
+.successclose {
+    float: right;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Add slight pop-up effect */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -55%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+.file-link[data-type^="image/"]::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url('../../assets/icon/image-icon.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.file-link[data-type="application/pdf"]::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url('../assets/icon/pdf.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.file-link[data-type^="video/"]::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url('../../assets/icon/video-icon.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.file-link[data-type="application/msword"]::before,
+.file-link[data-type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"]::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url('../assets/icon/doc.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    margin-right: 5px;
+    vertical-align: middle;
+}
+
+.file-link[data-type="application/vnd.ms-excel"]::before,
+.file-link[data-type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-image: url('../assets/icon/xls.png');
+    background-size: contain;
+    background-repeat: no-repeat;
+    margin-right: 5px;
+    vertical-align: middle;
+}

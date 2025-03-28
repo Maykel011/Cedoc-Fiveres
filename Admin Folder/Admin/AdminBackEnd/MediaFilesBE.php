@@ -27,6 +27,62 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
         $stmt->close();
     }
 
+    // Handle folder renaming
+elseif ($action === "rename") {
+    $folderId = $_POST['folder_id'];
+    $newName = trim($_POST['new_name']);
+
+    if (empty($newName)) {
+        echo json_encode(["status" => "error", "message" => "New folder name is required"]);
+        exit;
+    }
+
+    // Get current folder name
+    $stmt = $conn->prepare("SELECT folder_name FROM media_folders WHERE id = ?");
+    $stmt->bind_param("i", $folderId);
+    $stmt->execute();
+    $stmt->bind_result($oldName);
+    $stmt->fetch();
+    $stmt->close();
+
+    if (empty($oldName)) {
+        echo json_encode(["status" => "error", "message" => "Folder not found"]);
+        exit;
+    }
+
+    $conn->begin_transaction();
+
+    try {
+        // Rename folder in media_folders table
+        $stmt = $conn->prepare("UPDATE media_folders SET folder_name = ? WHERE id = ?");
+        $stmt->bind_param("si", $newName, $folderId);
+        $stmt->execute();
+        $stmt->close();
+
+        // Update all files in this folder to reference the new folder name
+        $stmt = $conn->prepare("UPDATE files SET folder_name = ? WHERE folder_name = ?");
+        $stmt->bind_param("ss", $newName, $oldName);
+        $stmt->execute();
+        $stmt->close();
+
+        // Rename the physical folder
+        $oldPath = "../../uploads/" . $oldName;
+        $newPath = "../../uploads/" . $newName;
+
+        if (file_exists($oldPath)) {
+            if (!rename($oldPath, $newPath)) {
+                throw new Exception("Failed to rename folder on filesystem");
+            }
+        }
+
+        $conn->commit();
+        echo json_encode(["status" => "success", "message" => "Folder renamed successfully"]);
+    } catch (Exception $e) {
+        $conn->rollback();
+        echo json_encode(["status" => "error", "message" => "Error renaming folder: " . $e->getMessage()]);
+    }
+}
+
     // Handle folder deletion
     elseif ($action === "delete") {
         $folderId = $_POST['folder_id'];
@@ -60,7 +116,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['action'])) {
                 $conn->commit();
 
                 // Remove folder from filesystem
-                $folderPath = "uploads/" . $folderName;
+                $folderPath = "../../uploads/" . $folderName;
                 deleteFolder($folderPath);
 
                 echo json_encode(["status" => "success", "message" => "Folder and its contents deleted successfully"]);
@@ -89,13 +145,15 @@ function deleteFolder($folderPath) {
     rmdir($folderPath);
 }
 
+
+
 // Upload File & Update `num_contents`
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['file'])) {
     $folderName = $_POST['folder_name'];
     $fileName = $_FILES['file']['name'];
     $fileTmp = $_FILES['file']['tmp_name'];
     $fileType = $_FILES['file']['type'];
-    $uploadDir = "uploads/" . $folderName . "/";
+    $uploadDir = "../../uploads/" . $folderName . "/";
 
     if (!file_exists($uploadDir)) {
         mkdir($uploadDir, 0777, true);
@@ -178,4 +236,5 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_file'])) {
     $conn->close();
     exit;
 }
+
 ?>

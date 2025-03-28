@@ -9,8 +9,9 @@ include '../AdminBackEnd/ViewFolderBE.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES - View Folder</title>
-    <link rel="stylesheet" href="../../Css/ViewFolders.css">
+    <link rel="stylesheet" href="../../Css/ViewFolders1.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
 </head>
 
 <body>
@@ -72,38 +73,90 @@ include '../AdminBackEnd/ViewFolderBE.php';
             </div>
         </div>
     </div>
-        <table>
-        <thead>
-            <tr>
-                <th>Select</th>
-                <th>Name</th>
-                <th>Date Modified</th>
-                <th>Type</th>
-                <th>Temperature (°C)</th>
-                <th>Water Level (M)</th>
-                <th>Air Quality (PM2.5)</th>
-                <th>Actions</th>
-            </tr>
-        </thead>
-        <tbody>
-            <?php foreach ($files as $file): ?>
-            <tr>
-                <td><input type="checkbox" name="selected_files[]" value="<?= $file['id'] ?>"></td>
-                <td><?= htmlspecialchars($file['file_name']) ?></td>
-                <td><?= htmlspecialchars($file['date_modified']) ?></td>
-                <td><?= htmlspecialchars($file['file_type']) ?></td>
-                <td><?= htmlspecialchars($file['temperature'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
-                <td><?= htmlspecialchars($file['water_level'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
-                <td><?= htmlspecialchars($file['air_quality'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
-
-                <td>
+    <table>
+    <thead>
+        <tr>
+            <th>Select</th>
+            <th>Name</th>
+            <th>Date Modified</th>
+            <th>Type</th>
+            <th>Temperature (°C)</th>
+            <th>Water Level (M)</th>
+            <th>Air Quality (PM2.5)</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php foreach ($files as $file): 
+            $filePath = "uploads/" . htmlspecialchars($folderName) . "/" . htmlspecialchars($file['file_name']);
+            $fileType = strtolower($file['file_type']);
+        ?>
+        <tr>
+            <td><input type="checkbox" name="selected_files[]" value="<?= $file['id'] ?>"></td>
+            <td>
+                <a href="<?= $filePath ?>" 
+                   target="_blank" 
+                   class="file-link" 
+                   data-type="<?= htmlspecialchars($fileType) ?>"
+                   title="Click to view/download">
+                   <?php 
+                   
+            // Display icon based on file type
+            if (strpos($fileType, 'image/') === 0) {
+                echo '';
+            } elseif ($fileType === 'application/pdf') {
+                echo '';
+            } elseif (strpos($fileType, 'video/') === 0) {
+                echo '';
+            } elseif (strpos($fileType, 'msword') !== false || 
+                      strpos($fileType, 'wordprocessingml') !== false) {
+                echo '';
+            } elseif (strpos($fileType, 'ms-excel') !== false || 
+                      strpos($fileType, 'spreadsheetml') !== false) {
+                echo '';
+            } elseif (strpos($fileType, 'audio/') === 0) {
+                echo '';
+            } else {
+                echo '';
+            }
+            echo htmlspecialchars($file['file_name']); 
+        ?>
+                </a>
+            </td>
+            <td><?= htmlspecialchars($file['date_modified']) ?></td>
+            <td>
+                <?php 
+                    // Display simplified file type
+                    if (strpos($fileType, 'image/') === 0) {
+                        echo 'Image';
+                    } elseif ($fileType === 'application/pdf') {
+                        echo 'PDF';
+                    } elseif (strpos($fileType, 'video/') === 0) {
+                        echo 'Video/MP4';
+                    } elseif (strpos($fileType, 'msword') !== false || 
+                              strpos($fileType, 'wordprocessingml') !== false) {
+                        echo 'Word';
+                    } elseif (strpos($fileType, 'ms-excel') !== false || 
+                              strpos($fileType, 'spreadsheetml') !== false) {
+                        echo 'Excel';
+                    } elseif (strpos($fileType, 'audio/') === 0) {
+                        echo 'Audio';
+                    } else {
+                        echo htmlspecialchars($file['file_type']); 
+                    }
+                ?>
+            </td>
+            <td><?= htmlspecialchars($file['temperature'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+            <td><?= htmlspecialchars($file['water_level'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+            <td><?= htmlspecialchars($file['air_quality'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+            <td>
                 <button onclick="openEditModal(<?= $file['id'] ?>, '<?= htmlspecialchars($file['file_name']) ?>', <?= $file['temperature'] ?? 'null' ?>, <?= $file['water_level'] ?? 'null' ?>, <?= $file['air_quality'] ?? 'null' ?>)">Edit</button>
                 <button onclick="openDeleteModal(<?= $file['id'] ?>, '<?= $file['file_name'] ?>')">Delete</button>
-                </td>
-            </tr>
-            <?php endforeach; ?>
-        </tbody>
-    </table>
+            </td>
+        </tr>
+        <?php endforeach; ?>
+    </tbody>
+</table>
     
     <!-- upload file-->
     <div id="uploadModal" class="customs-modal" style="display:none;">
@@ -172,16 +225,16 @@ include '../AdminBackEnd/ViewFolderBE.php';
     </div>
 </div>
 
+
+
 <!-- Multiple Delete Confirmation Modal -->
-<div id="multipleDeleteModal" class="deletecustom-modal" style="display: none;">
+<div id="multipleDeleteModal" class="deletecustom-modal" style="display:none;">
     <div class="delete-modal-content">
-        <span class="close" onclick="closeModal('multipleDeleteModal')"></span>
+        <span class="close" onclick="closeModal('deleteModal')"></span>
         <h2>Delete Confirmation</h2>
-        <p id="multipleDeleteCount"></p>
-        <p>Are you sure you want to delete these files?</p>
-        <div class="button-group">
-            <button id="confirmMultipleDeleteBtn" class="delete-btn">Delete</button>
-            <button onclick="closeModal('multipleDeleteModal')" class="cancel-btn">Cancel</button>
+        <p id="multipleDeleteMessage"></p>
+            <button id="confirmMultipleDelete" class="btn-danger">Delete</button>
+            <button onclick="closeModal('multipleDeleteModal')" class="btn-cancel">Cancel</button>
         </div>
     </div>
 </div>
@@ -215,6 +268,6 @@ include '../AdminBackEnd/ViewFolderBE.php';
     </div>
 </div>
 
-<script src="../../js/ViewFolds.js"></script>
+<script src="../../js/View.js"></script>
 </body>
 </html>

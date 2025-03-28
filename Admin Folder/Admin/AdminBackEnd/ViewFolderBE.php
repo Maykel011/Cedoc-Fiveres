@@ -5,7 +5,7 @@ include '../connection/Connection.php'; // Database connection
 $folderName = isset($_POST['folder_name']) ? trim($_POST['folder_name']) : (isset($_GET['folder']) ? trim($_GET['folder']) : '');
 $folderName = $folderName !== null ? $folderName : ''; // Ensure it's a string
 
-$uploadDir = "uploads/" . $folderName . "/"; // Define upload path
+$uploadDir = "../../uploads/" . $folderName . "/"; // Define upload path
 
 // Handle file upload
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES['file'])) {
@@ -62,30 +62,78 @@ $stmt->close();
 
 // Handle folder operations (Create, Rename, Delete)
 
-// ✅ Edit File Logic
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editFile'])) {
     $id = intval($_POST['file_id']);
-    $file_name = $_POST['file_name'];
+    $new_file_name = trim($_POST['file_name']);
     $temperature = !empty($_POST['temperature']) ? $_POST['temperature'] : NULL;
     $water_level = !empty($_POST['water_level']) ? floatval($_POST['water_level']) : NULL;
     $air_quality = !empty($_POST['air_quality']) ? floatval($_POST['air_quality']) : NULL;
 
-    // ✅ Prepare SQL Statement
-    $stmt = $conn->prepare("UPDATE files SET file_name = ?, temperature = ?, water_level = ?, air_quality = ?, date_modified = NOW() WHERE id = ?");
-    
-    if ($stmt === false) {
-        die("Prepare failed: " . $conn->error);
+    // 1. Get current file details
+    $stmt = $conn->prepare("SELECT file_name, folder_name, file_type FROM files WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $stmt->bind_result($current_file_name, $folder_name, $file_type);
+    $stmt->fetch();
+    $stmt->close();
+
+    if (empty($current_file_name)) {
+        die("File not found in database");
     }
 
-    $stmt->bind_param("ssddi", $file_name, $temperature, $water_level, $air_quality, $id);
+    // 2. Preserve file extension
+    $current_ext = pathinfo($current_file_name, PATHINFO_EXTENSION);
+    $new_ext = pathinfo($new_file_name, PATHINFO_EXTENSION);
+    
+    // If new name doesn't have extension, keep the old one
+    if (empty($new_ext) && !empty($current_ext)) {
+        $new_file_name .= '.' . $current_ext;
+    }
 
-    if ($stmt->execute()) {
-        // ✅ Stay on the same page by refreshing
+    // 3. Set paths
+    $current_path = "../../uploads/$folder_name/$current_file_name";
+    $new_path = "../../uploads/$folder_name/$new_file_name";
+
+    // 4. Verify original file exists
+    if (!file_exists($current_path)) {
+        die("Original file not found on server");
+    }
+
+    // 5. Check if new filename already exists
+    if ($new_file_name !== $current_file_name && file_exists($new_path)) {
+        die("A file with that name already exists");
+    }
+
+    // 6. Begin transaction
+    $conn->begin_transaction();
+
+    try {
+        // 7. Rename physical file
+        if (!rename($current_path, $new_path)) {
+            throw new Exception("Failed to rename file on server");
+        }
+
+        // 8. Update database
+        $stmt = $conn->prepare("UPDATE files SET file_name = ?, file_type = ?, temperature = ?, water_level = ?, air_quality = ?, date_modified = NOW() WHERE id = ?");
+        $stmt->bind_param("sssddi", $new_file_name, $file_type, $temperature, $water_level, $air_quality, $id);
+
+        if (!$stmt->execute()) {
+            throw new Exception("Database update failed");
+        }
+
+        $conn->commit();
         echo "<meta http-equiv='refresh' content='0'>";
         exit();
+    } catch (Exception $e) {
+        $conn->rollback();
+        
+        // Try to revert file rename if it succeeded but DB failed
+        if (file_exists($new_path) && !file_exists($current_path)) {
+            rename($new_path, $current_path);
+        }
+        
+        die("Error: " . $e->getMessage());
     }
-
-    $stmt->close();
 }
 
 // Handling Single delete

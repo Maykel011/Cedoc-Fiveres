@@ -165,6 +165,6 @@ include '../AdminBackEnd/MediaFilesBE.php';
 
 
 
-<script src="../../js/mediafiles1.js"></script>
+<script src="../../js/media.js"></script>
 </body>
 </html>
