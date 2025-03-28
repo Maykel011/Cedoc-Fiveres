@@ -11,7 +11,6 @@ include '../AdminBackEnd/ViewFolderBE.php';
     <title>CEDOC FIVERES - View Folder</title>
     <link rel="stylesheet" href="../../Css/ViewFolders1.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/2.10.377/pdf.min.js"></script>
 </head>
 
 <body>
@@ -280,6 +279,6 @@ include '../AdminBackEnd/ViewFolderBE.php';
     </div>
 </div>
 
-<script src="../../js/View.js"></script>
+<script src="../../js/Views.js"></script>
 </body>
 </html>
