@@ -318,9 +318,12 @@ function openFilePreview(fileUrl, fileType, fileName) {
 }
 
 function openOfficePreview(fileUrl, fileName, fileType) {
-    // Use Microsoft Office Online Viewer for both Word and Excel
-    const officeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
+    // Check if we're on localhost or 127.0.0.1
+    const isLocal = window.location.hostname === "localhost" || 
+                   window.location.hostname === "127.0.0.1" ||
+                   fileUrl.startsWith("file://");
     
+    // Create modal
     const modal = document.createElement('div');
     modal.className = 'file-preview-modal';
     modal.style.cssText = `
@@ -335,6 +338,7 @@ function openOfficePreview(fileUrl, fileName, fileType) {
         flex-direction: column;
     `;
 
+    // Create modal header
     const header = document.createElement('div');
     header.style.cssText = `
         display: grid;
@@ -388,6 +392,7 @@ function openOfficePreview(fileUrl, fileName, fileType) {
         justify-self: center;
     `;
 
+    // Create modal content area
     const content = document.createElement('div');
     content.style.cssText = `
         flex: 1;
@@ -398,47 +403,71 @@ function openOfficePreview(fileUrl, fileName, fileType) {
         overflow: auto;
     `;
 
-    const iframe = document.createElement('iframe');
-    iframe.src = officeViewerUrl;
-    iframe.style.cssText = `
-        width: 100%;
-        height: 100%;
-        min-height: 500px;
-        border: none;
-    `;
+    // Create different content based on environment
+    if (isLocal) {
+        // Local development message
+        const localMessage = document.createElement('div');
+        localMessage.style.cssText = `
+            text-align: center;
+            color: white;
+            padding: 20px;
+            max-width: 600px;
+        `;
+        localMessage.innerHTML = `
+            <h3>Office File Preview Not Available Locally</h3>
+            <p>For security reasons, Office files cannot be previewed directly when running on localhost.</p>
+            <p>Please download the file to view it, or deploy the application to your hosting server for full preview functionality.</p>
+            <p>When deployed, this system will use Microsoft Office Online Viewer for seamless previews.</p>
+        `;
+        content.appendChild(localMessage);
+    } else {
+        // Hosted solution - use Office Online Viewer
+        const officeViewerUrl = `https://view.officeapps.live.com/op/embed.aspx?src=${encodeURIComponent(fileUrl)}`;
+        
+        const iframe = document.createElement('iframe');
+        iframe.src = officeViewerUrl;
+        iframe.style.cssText = `
+            width: 100%;
+            height: 100%;
+            min-height: 500px;
+            border: none;
+        `;
 
-    const fallback = document.createElement('div');
-    fallback.style.cssText = `
-        display: none;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        width: 100%;
-        height: 100%;
-        background: white;
-        color: #333;
-    `;
-    fallback.innerHTML = `
-        <p>Could not load document preview</p>
-        <button style="padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; margin-top: 10px; cursor: pointer;">
-            Try Again
-        </button>
-    `;
+        const fallback = document.createElement('div');
+        fallback.style.cssText = `
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            width: 100%;
+            height: 100%;
+            background: white;
+            color: #333;
+        `;
+        fallback.innerHTML = `
+            <p>Could not load document preview</p>
+            <button style="padding: 8px 16px; background: #4CAF50; color: white; border: none; border-radius: 4px; margin-top: 10px; cursor: pointer;">
+                Try Again
+            </button>
+            <p style="margin-top: 20px; font-size: 14px;">If the preview continues to fail, please download the file to view it.</p>
+        `;
 
-    iframe.onerror = function() {
-        iframe.style.display = 'none';
-        fallback.style.display = 'flex';
-    };
+        iframe.onerror = function() {
+            iframe.style.display = 'none';
+            fallback.style.display = 'flex';
+        };
 
-    fallback.querySelector('button').addEventListener('click', function() {
-        iframe.src = officeViewerUrl + '&t=' + Date.now();
-        fallback.style.display = 'none';
-        iframe.style.display = 'block';
-    });
+        fallback.querySelector('button').addEventListener('click', function() {
+            iframe.src = officeViewerUrl + '&t=' + Date.now();
+            fallback.style.display = 'none';
+            iframe.style.display = 'block';
+        });
 
-    content.appendChild(iframe);
-    content.appendChild(fallback);
+        content.appendChild(iframe);
+        content.appendChild(fallback);
+    }
 
+    // Assemble modal
     header.appendChild(title);
     header.appendChild(downloadBtn);
     header.appendChild(closeBtn);
@@ -447,10 +476,12 @@ function openOfficePreview(fileUrl, fileName, fileType) {
     document.body.appendChild(modal);
     document.body.style.overflow = 'hidden';
 
+    // Close modal on ESC or click outside
     const keyHandler = (e) => e.key === 'Escape' && document.body.removeChild(modal);
     document.addEventListener('keydown', keyHandler);
     modal.addEventListener('click', (e) => e.target === modal && document.body.removeChild(modal));
 }
+
 
 // ========== INITIALIZATION ==========
 document.addEventListener("DOMContentLoaded", function() {
@@ -505,3 +536,4 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 });
+
