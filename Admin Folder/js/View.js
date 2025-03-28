@@ -344,111 +344,232 @@ function closeModal(modalId) {
     document.getElementById(modalId).style.display = 'none';
 }
 
-// View
+// Handling Modal Viewing
 document.addEventListener("DOMContentLoaded", function() {
-    // Base path to uploads directory (adjust according to your structure)
-    const BASE_UPLOADS_PATH = '../../uploads/'; // Or '/Admin Folder/uploads/' if that's your structure
-    
-    // Handle file link clicks
+    // Configuration - Set your base upload path here
+    const BASE_UPLOADS_PATH = '../../uploads/';
+    const ABSOLUTE_UPLOADS_PATH = '/uploads/'; // Alternative absolute path
+
+    // Handle all file link clicks
     document.querySelectorAll('.file-link').forEach(link => {
         link.addEventListener('click', function(e) {
-            const fileType = this.getAttribute('data-type');
+            const fileType = this.getAttribute('data-type').toLowerCase();
+            const fileName = this.getAttribute('data-filename') || '';
             let fileUrl = this.getAttribute('href');
             
-            // Fix the path if it's using relative notation
-            if (fileUrl.startsWith('../uploads/')) {
-                fileUrl = fileUrl.replace('../uploads/', BASE_UPLOADS_PATH);
+            // Normalize file paths (only if needed)
+            if (!fileUrl.startsWith('http') && !fileUrl.startsWith('/')) {
+                if (fileUrl.startsWith('../uploads/')) {
+                    fileUrl = fileUrl.replace('../uploads/', BASE_UPLOADS_PATH);
+                }
+                else if (fileUrl.startsWith('uploads/')) {
+                    // Choose one of these path options:
+                    fileUrl = BASE_UPLOADS_PATH + fileUrl.substring('uploads/'.length);
+                    // OR for absolute paths:
+                    // fileUrl = ABSOLUTE_UPLOADS_PATH + fileUrl.substring('uploads/'.length);
+                }
             }
-            else if (fileUrl.startsWith('uploads/')) {
-                fileUrl = BASE_UPLOADS_PATH + fileUrl.substring('uploads/'.length);
-            }
-            
-            // Prevent default for certain file types we want to handle specially
+
+            // Handle different file types
             if (fileType.match(/^image\//) || 
                 fileType === 'application/pdf' || 
                 fileType.match(/^video\//)) {
+                // Previewable files - open in modal
                 e.preventDefault();
-                openFilePreview(fileUrl, fileType);
+                openFilePreview(fileUrl, fileType, fileName);
             }
-            // Other files (Word, Excel, etc.) will open normally
+            else if (fileType.includes('msword') || 
+                     fileType.includes('wordprocessingml') ||
+                     fileType.includes('ms-excel') || 
+                     fileType.includes('spreadsheetml')) {
+                // Office files - force download
+                e.preventDefault();
+                forceFileDownload(fileUrl, fileName);
+            }
+            // Other files will follow default behavior
         });
     });
 });
 
-function openFilePreview(fileUrl, fileType) {
-    // Create preview modal
-    const previewModal = document.createElement('div');
-    previewModal.id = 'filePreviewModal';
-    previewModal.style.display = 'block';
-    previewModal.style.position = 'fixed';
-    previewModal.style.zIndex = '1000';
-    previewModal.style.left = '0';
-    previewModal.style.top = '0';
-    previewModal.style.width = '100%';
-    previewModal.style.height = '100%';
-    previewModal.style.backgroundColor = 'rgba(0,0,0,0.8)';
-    previewModal.style.overflow = 'auto';
-    
-    // Create close button
-    const closeBtn = document.createElement('span');
-    closeBtn.innerHTML = '&times;';
-    closeBtn.style.position = 'absolute';
-    closeBtn.style.right = '35px';
-    closeBtn.style.top = '15px';
-    closeBtn.style.color = 'white';
-    closeBtn.style.fontSize = '40px';
-    closeBtn.style.fontWeight = 'bold';
-    closeBtn.style.cursor = 'pointer';
-    closeBtn.addEventListener('click', () => {
-        document.body.removeChild(previewModal);
+/**
+ * Opens a file preview modal
+ * @param {string} fileUrl - File URL
+ * @param {string} fileType - File MIME type
+ * @param {string} fileName - Display name
+ */
+function openFilePreview(fileUrl, fileType, fileName) {
+    // Create modal container
+    const modal = document.createElement('div');
+    modal.id = 'file-preview-modal';
+    Object.assign(modal.style, {
+        position: 'fixed',
+        top: '0',
+        left: '0',
+        width: '100%',
+        height: '100%',
+        backgroundColor: 'rgba(0,0,0,0.95)',
+        zIndex: '10000',
+        display: 'flex',
+        flexDirection: 'column'
     });
-    
-    // Create content container
+
+    // Create modal header
+    const header = document.createElement('div');
+    Object.assign(header.style, {
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: '15px',
+        backgroundColor: '#222',
+        color: 'white'
+    });
+
+    // Create title
+    const title = document.createElement('h3');
+    title.textContent = fileName;
+    Object.assign(title.style, {
+        margin: '0',
+        fontSize: '18px',
+        whiteSpace: 'nowrap',
+        overflow: 'hidden',
+        textOverflow: 'ellipsis',
+        maxWidth: '60%'
+    });
+
+    // Create close button
+    const closeBtn = document.createElement('button');
+    closeBtn.innerHTML = '&times; Close';
+    Object.assign(closeBtn.style, {
+        background: 'none',
+        border: 'none',
+        color: 'white',
+        fontSize: '16px',
+        cursor: 'pointer',
+        padding: '5px 10px'
+    });
+    closeBtn.addEventListener('click', () => closeModal(modal));
+
+    // Create action buttons container
+    const actions = document.createElement('div');
+    actions.style.display = 'flex';
+    actions.style.gap = '10px';
+
+    // Create download button
+    const downloadBtn = document.createElement('a');
+    downloadBtn.href = fileUrl;
+    downloadBtn.download = fileName;
+    downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download';
+    Object.assign(downloadBtn.style, {
+        padding: '5px 10px',
+        backgroundColor: '#4CAF50',
+        color: 'white',
+        borderRadius: '4px',
+        textDecoration: 'none',
+        display: 'inline-flex',
+        alignItems: 'center',
+        gap: '5px'
+    });
+
+    // Create content area
     const content = document.createElement('div');
-    content.style.display = 'flex';
-    content.style.justifyContent = 'center';
-    content.style.alignItems = 'center';
-    content.style.height = '100%';
-    
+    Object.assign(content.style, {
+        flex: '1',
+        display: 'flex',
+        justifyContent: 'center',
+        alignItems: 'center',
+        padding: '20px',
+        overflow: 'auto'
+    });
+
     // Handle different file types
     if (fileType.match(/^image\//)) {
-        // Image preview
         const img = document.createElement('img');
         img.src = fileUrl;
-        img.style.maxWidth = '90%';
-        img.style.maxHeight = '90%';
-        img.style.objectFit = 'contain';
+        Object.assign(img.style, {
+            maxWidth: '100%',
+            maxHeight: '90vh',
+            objectFit: 'contain'
+        });
         content.appendChild(img);
     } 
     else if (fileType === 'application/pdf') {
-        // PDF preview using PDF.js or embed
         const embed = document.createElement('embed');
-        embed.src = fileUrl;
+        embed.src = fileUrl + '#toolbar=1&navpanes=0';
         embed.type = 'application/pdf';
-        embed.style.width = '90%';
-        embed.style.height = '90%';
+        Object.assign(embed.style, {
+            width: '100%',
+            height: '100%',
+            minHeight: '80vh'
+        });
         content.appendChild(embed);
     }
     else if (fileType.match(/^video\//)) {
-        // Video preview
         const video = document.createElement('video');
         video.src = fileUrl;
         video.controls = true;
         video.autoplay = true;
-        video.style.maxWidth = '90%';
-        video.style.maxHeight = '90%';
+        Object.assign(video.style, {
+            width: '100%',
+            maxHeight: '90vh'
+        });
         content.appendChild(video);
     }
+
+    // Assemble modal
+    actions.appendChild(downloadBtn);
+    header.appendChild(title);
+    header.appendChild(actions);
+    header.appendChild(closeBtn);
+    modal.appendChild(header);
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+
+    // Add keyboard and clickaway listeners
+    const keyHandler = (e) => e.key === 'Escape' && closeModal(modal);
+    document.addEventListener('keydown', keyHandler);
+    modal.addEventListener('click', (e) => e.target === modal && closeModal(modal));
+
+    // Cleanup function
+    function closeModal() {
+        document.body.removeChild(modal);
+        document.body.style.overflow = '';
+        document.removeEventListener('keydown', keyHandler);
+    }
+}
+
+/**
+ * Forces file download
+ * @param {string} url - File URL
+ * @param {string} filename - Suggested filename
+ */
+function forceFileDownload(url, filename) {
+    // Create hidden iframe for download
+    const iframe = document.createElement('iframe');
+    iframe.style.display = 'none';
+    iframe.src = url;
     
-    // Add elements to modal
-    previewModal.appendChild(closeBtn);
-    previewModal.appendChild(content);
-    document.body.appendChild(previewModal);
+    // Fallback for browsers that block iframe downloads
+    iframe.onload = function() {
+        setTimeout(() => {
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            setTimeout(() => document.body.removeChild(a), 100);
+        }, 100);
+    };
     
-    // Close when clicking outside content
-    previewModal.addEventListener('click', (e) => {
-        if (e.target === previewModal) {
-            document.body.removeChild(previewModal);
-        }
-    });
+    document.body.appendChild(iframe);
+    setTimeout(() => document.body.removeChild(iframe), 5000);
+}
+
+// Your existing modal functions
+function openEditModal(fileId, fileName, temperature, waterLevel, airQuality) {
+    // Existing implementation
+}
+
+function openDeleteModal(fileId, fileName) {
+    // Existing implementation
 }

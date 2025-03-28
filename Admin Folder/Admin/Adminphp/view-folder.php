@@ -90,38 +90,46 @@ include '../AdminBackEnd/ViewFolderBE.php';
         <?php foreach ($files as $file): 
             $filePath = "uploads/" . htmlspecialchars($folderName) . "/" . htmlspecialchars($file['file_name']);
             $fileType = strtolower($file['file_type']);
+            $fileExists = file_exists("../../" . $filePath);
         ?>
         <tr>
             <td><input type="checkbox" name="selected_files[]" value="<?= $file['id'] ?>"></td>
             <td>
+                <?php if ($fileExists): ?>
                 <a href="<?= $filePath ?>" 
                    target="_blank" 
                    class="file-link" 
                    data-type="<?= htmlspecialchars($fileType) ?>"
+                   data-filename="<?= htmlspecialchars($file['file_name']) ?>"
                    title="Click to view/download">
                    <?php 
-                   
-            // Display icon based on file type
-            if (strpos($fileType, 'image/') === 0) {
-                echo '';
-            } elseif ($fileType === 'application/pdf') {
-                echo '';
-            } elseif (strpos($fileType, 'video/') === 0) {
-                echo '';
-            } elseif (strpos($fileType, 'msword') !== false || 
-                      strpos($fileType, 'wordprocessingml') !== false) {
-                echo '';
-            } elseif (strpos($fileType, 'ms-excel') !== false || 
-                      strpos($fileType, 'spreadsheetml') !== false) {
-                echo '';
-            } elseif (strpos($fileType, 'audio/') === 0) {
-                echo '';
-            } else {
-                echo '';
-            }
-            echo htmlspecialchars($file['file_name']); 
-        ?>
+                    // Display icon based on file type
+                    if (strpos($fileType, 'image/') === 0) {
+                        echo ' ';
+                    } elseif ($fileType === 'application/pdf') {
+                        echo '';
+                    } elseif (strpos($fileType, 'video/') === 0) {
+                        echo '';
+                    } elseif (strpos($fileType, 'msword') !== false || 
+                              strpos($fileType, 'wordprocessingml') !== false) {
+                        echo ' ';
+                    } elseif (strpos($fileType, 'ms-excel') !== false || 
+                              strpos($fileType, 'spreadsheetml') !== false) {
+                        echo ' ';
+                    } elseif (strpos($fileType, 'audio/') === 0) {
+                        echo '';
+                    } else {
+                        echo '';
+                    }
+                    echo htmlspecialchars($file['file_name']); 
+                   ?>
                 </a>
+                <?php else: ?>
+                    <span class="missing-file">
+                        <i class="fas fa-exclamation-triangle"></i> 
+                        <?= htmlspecialchars($file['file_name']) ?> (Missing)
+                    </span>
+                <?php endif; ?>
             </td>
             <td><?= htmlspecialchars($file['date_modified']) ?></td>
             <td>
@@ -132,7 +140,7 @@ include '../AdminBackEnd/ViewFolderBE.php';
                     } elseif ($fileType === 'application/pdf') {
                         echo 'PDF';
                     } elseif (strpos($fileType, 'video/') === 0) {
-                        echo 'Video/MP4';
+                        echo 'Video';
                     } elseif (strpos($fileType, 'msword') !== false || 
                               strpos($fileType, 'wordprocessingml') !== false) {
                         echo 'Word';
@@ -146,12 +154,16 @@ include '../AdminBackEnd/ViewFolderBE.php';
                     }
                 ?>
             </td>
-            <td><?= htmlspecialchars($file['temperature'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
-            <td><?= htmlspecialchars($file['water_level'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
-            <td><?= htmlspecialchars($file['air_quality'] ?? '', ENT_QUOTES, 'UTF-8') ?></td>
+            <td><?= htmlspecialchars($file['temperature'] ?? '') ?></td>
+            <td><?= htmlspecialchars($file['water_level'] ?? '') ?></td>
+            <td><?= htmlspecialchars($file['air_quality'] ?? '') ?></td>
             <td>
-                <button onclick="openEditModal(<?= $file['id'] ?>, '<?= htmlspecialchars($file['file_name']) ?>', <?= $file['temperature'] ?? 'null' ?>, <?= $file['water_level'] ?? 'null' ?>, <?= $file['air_quality'] ?? 'null' ?>)">Edit</button>
-                <button onclick="openDeleteModal(<?= $file['id'] ?>, '<?= $file['file_name'] ?>')">Delete</button>
+                <button onclick="openEditModal(<?= $file['id'] ?>, '<?= htmlspecialchars($file['file_name']) ?>', <?= $file['temperature'] ?? 'null' ?>, <?= $file['water_level'] ?? 'null' ?>, <?= $file['air_quality'] ?? 'null' ?>)">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button onclick="openDeleteModal(<?= $file['id'] ?>, '<?= $file['file_name'] ?>')">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
             </td>
         </tr>
         <?php endforeach; ?>

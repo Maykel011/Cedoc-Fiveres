@@ -793,64 +793,112 @@ button[type="submit"]:hover {
     }
 }
 
+/* File Link Base Styles */
+.file-link {
+    text-decoration: none;
+    color: inherit;
+    display: inline-flex;
+    align-items: center;
+    max-width: 100%;
+    overflow: hidden;
+    white-space: nowrap;
+    padding: 2px 0;
+}
+
+/* Hover State */
+.file-link:hover {
+    text-decoration: none;
+    color: #0066cc;
+}
+
+/* Container for text with ellipsis */
+.file-link-text {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    display: inline-block;
+    vertical-align: middle;
+    max-width: calc(100% - 25px); /* Adjust based on icon width */
+}
+
+/* File Type Icons */
+.file-link::before {
+    content: "";
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    background-size: contain;
+    background-repeat: no-repeat;
+    background-position: center;
+    margin-right: 6px;
+    flex-shrink: 0;
+}
+
+/* Default File Icon */
+.file-link:not([data-type^="image/"]):not([data-type="application/pdf"]):not([data-type^="video/"]):not([data-type*="word"]):not([data-type*="excel"]):not([data-type*="sheet"])::before {
+    background-image: url('../assets/icon/file.png');
+}
+
+/* Image Files */
 .file-link[data-type^="image/"]::before {
-    content: "";
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    background-image: url('../../assets/icon/image-icon.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    margin-right: 5px;
-    vertical-align: middle;
+    background-image: url('../assets/icon/images.png');
 }
 
+/* PDF Files */
 .file-link[data-type="application/pdf"]::before {
-    content: "";
-    display: inline-block;
-    width: 20px;
-    height: 20px;
     background-image: url('../assets/icon/pdf.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    margin-right: 5px;
-    vertical-align: middle;
 }
 
+/* Video Files */
 .file-link[data-type^="video/"]::before {
-    content: "";
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    background-image: url('../../assets/icon/video-icon.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    margin-right: 5px;
-    vertical-align: middle;
+    background-image: url('../assets/icon/videos.png');
 }
 
+/* Word Documents */
 .file-link[data-type="application/msword"]::before,
-.file-link[data-type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"]::before {
-    content: "";
-    display: inline-block;
-    width: 20px;
-    height: 20px;
+.file-link[data-type="application/vnd.openxmlformats-officedocument.wordprocessingml.document"]::before,
+.file-link[data-type*="word"]::before {
     background-image: url('../assets/icon/doc.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    margin-right: 5px;
-    vertical-align: middle;
 }
 
+/* Excel Files */
 .file-link[data-type="application/vnd.ms-excel"]::before,
-.file-link[data-type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]::before {
-    content: "";
-    display: inline-block;
-    width: 20px;
-    height: 20px;
+.file-link[data-type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"]::before,
+.file-link[data-type*="excel"]::before,
+.file-link[data-type*="sheet"]::before {
     background-image: url('../assets/icon/xls.png');
-    background-size: contain;
-    background-repeat: no-repeat;
-    margin-right: 5px;
-    vertical-align: middle;
+}
+
+/* Audio Files */
+.file-link[data-type^="audio/"]::before {
+    background-image: url('../assets/icon/audio.png');
+}
+
+/* Archive Files */
+.file-link[data-type="application/zip"]::before,
+.file-link[data-type="application/x-rar-compressed"]::before,
+.file-link[data-type="application/x-7z-compressed"]::before {
+    background-image: url('../assets/icon/archive.png');
+}
+
+/* Text Files */
+.file-link[data-type="text/plain"]::before {
+    background-image: url('../assets/icon/txt.png');
+}
+
+/* HTML Files */
+.file-link[data-type="text/html"]::before {
+    background-image: url('../assets/icon/html.png');
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .file-link-text {
+        max-width: calc(100% - 20px);
+    }
+    .file-link::before {
+        width: 16px;
+        height: 16px;
+        margin-right: 4px;
+    }
 }
