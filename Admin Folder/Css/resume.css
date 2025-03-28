@@ -15,6 +15,7 @@
     /* font-family: 'SerpentineBold', sans-serif; */
 }
 
+
 body,html {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -72,7 +73,6 @@ body,html {
 .logo {
     height: 55px;
     margin-right: 15px;
-    
 }
 
 
