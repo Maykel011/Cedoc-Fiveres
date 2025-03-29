@@ -1,11 +1,25 @@
+<?php
+session_start(); // Start session, but don't destroy it immediately
+
+// OPTIONAL: Only destroy session when logout is clicked
+if (isset($_GET['logout'])) {
+    session_unset();
+    session_destroy();
+    header("Location: ../../../login/login.php");
+    exit();
+}
+?>
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES</title>
-    <link rel="stylesheet" href="../../Css/manage-users.css">
+    <link rel="stylesheet" href="../../Css/admind.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <!-- Add CSRF meta tag if you're using CSRF protection -->
+    <meta name="csrf-token" content="<?php echo isset($_SESSION['csrf_token']) ? $_SESSION['csrf_token'] : ''; ?>">
 </head>
 
 <body>
@@ -20,7 +34,7 @@
                 <span class="admin-text">Admin</span>
                 <div class="user-dropdown" id="userDropdown">
                     <a href="profile.php"><img src="../../assets/icon/updateuser.png" alt="Profile Icon" class="dropdown-icon"> Profile</a>
-                    <a href="#"><img src="../../assets/icon/logout.png" alt="Logout Icon" class="dropdown-icon"> Logout</a>
+                    <a href="#" id="logoutLink"><img src="../../assets/icon/logout.png" alt="Logout Icon" class="dropdown-icon"> Logout</a>
                 </div>
             </div>
         </div>

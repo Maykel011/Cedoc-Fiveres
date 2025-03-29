@@ -1,25 +1,11 @@
-<?php
-session_start(); // Start session, but don't destroy it immediately
-
-// OPTIONAL: Only destroy session when logout is clicked
-if (isset($_GET['logout'])) {
-    session_unset();
-    session_destroy();
-    header("Location: ../../../login/login.php");
-    exit();
-}
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES</title>
-    <link rel="stylesheet" href="../../Css/admind.css">
+    <link rel="stylesheet" href="../../Css/admindb.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Add CSRF meta tag if you're using CSRF protection -->
-    <meta name="csrf-token" content="<?php echo isset($_SESSION['csrf_token']) ? $_SESSION['csrf_token'] : ''; ?>">
 </head>
 
 <body>
@@ -40,6 +26,21 @@ if (isset($_GET['logout'])) {
         </div>
     </div>
 </header>
+
+<!-- Logout Modal -->
+<div id="logoutModal" class="logout-modal">
+    <div class="logout-modal-content">
+        <div class="logout-icon">
+            <i class="fas fa-sign-out-alt"></i>
+        </div>
+        <h3>Confirm Logout</h3>
+        <p>Are you sure you want to logout from your admin account?</p>
+        <div class="logout-modal-buttons">
+            <button id="logoutCancel" class="logout-modal-btn logout-modal-cancel">Cancel</button>
+            <button id="logoutConfirm" class="logout-modal-btn logout-modal-confirm">Logout</button>
+        </div>
+    </div>
+</div>
 
 <aside class="sidebar">
     <ul>
@@ -64,7 +65,6 @@ if (isset($_GET['logout'])) {
 <div class="main-content">
     <h1 class="main-title">Admin Dashboard</h1>
 </div>
-
-<script src="../../js/admins.js"></script>
+<script src="../../js/admindb.js"></script>
 </body>
 </html>
