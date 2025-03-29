@@ -263,3 +263,225 @@ body,html {
 .user-dropdown a:not(:last-child) {
     border-bottom: 1px solid #eee;
 }
+
+
+/* Table container */
+.table-container {
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow-x: auto; /* Horizontal scroll */
+    overflow-y: auto; /* Vertical scroll */
+    max-width: 100%;
+    max-height: 79vh; /* Responsive height */
+    display: block;
+}
+
+
+/* Adjust for smaller screens */
+@media (max-height: 600px) {
+    .table-container {
+        max-height: 50vh; /* Reduce height on smaller screens */
+    }
+}
+
+@media (max-height: 400px) {
+    .table-container {
+        max-height: 40vh; /* Further reduction for very small screens */
+    }
+}
+
+
+
+/* Align top controls */
+.top-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 15px;
+}
+
+/* Group folder input & button */
+.folder-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+
+
+.create-folder-btn {
+    background: linear-gradient(135deg, #ff4b5c, #ff6b81);
+    color: white;
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    font-weight: bold;
+    margin-top: 5px; /* Moves the button slightly downward */
+}
+
+
+button:hover {
+    background: #002244;
+}
+
+/* Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    table-layout: fixed;
+}
+
+/* Normal thead (No sticky) */
+thead {
+    background: #003366;
+    color: white;
+}
+
+/* Sticky thead */
+thead {
+    background: #003366;
+    color: white;
+    position: sticky;
+    top: 0; /* Keeps it at the top inside .table-container */
+    z-index: 10;
+}
+
+th, td {
+    padding: 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    white-space: nowrap; /* Prevents text wrapping */
+    overflow: hidden; /* Hides overflowing text */
+    text-overflow: ellipsis; /* Adds '...' for long text */
+}
+
+th:nth-child(1), td:nth-child(1) {
+    max-width: 200px; /* Adjust folder name column width */
+}
+
+th:nth-child(2), td:nth-child(2) {
+    max-width: 150px; /* Adjust date modified column width */
+}
+
+th:nth-child(3), td:nth-child(3) {
+    max-width: 100px; /* Adjust type column width */
+}
+
+th:nth-child(4), td:nth-child(4) {
+    max-width: 120px; /* Adjust number of contents column width */
+}
+
+th:nth-child(5), td:nth-child(5) {
+    max-width: 180px; /* Adjust actions column width */
+}
+
+tbody tr:hover {
+    background: #f1f1f1;
+}
+
+/* Style buttons */
+td button {
+    background: #007BFF;
+    color: white;
+    border: none;
+    border-radius: 5px;
+    margin-right: 5px;
+    padding: 5px 10px;
+    font-size: 14px;
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+td button:last-child {
+    background: #DC3545;
+}
+
+td button:hover {
+    opacity: 0.8;
+}
+
+      /* Custom Logout Modal Styles */
+      .logout-modal {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.7);
+        z-index: 10000;
+        justify-content: center;
+        align-items: center;
+    }
+    
+    .logout-modal-content {
+        background-color: #fff;
+        padding: 30px;
+        border-radius: 8px;
+        width: 400px;
+        max-width: 90%;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        text-align: center;
+        animation: modalFadeIn 0.3s ease-out;
+    }
+    
+    @keyframes modalFadeIn {
+        from { opacity: 0; transform: translateY(-20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+    
+    .logout-modal h3 {
+        margin-top: 0;
+        color: #333;
+        font-size: 1.5rem;
+    }
+    
+    .logout-modal p {
+        color: #666;
+        margin-bottom: 25px;
+    }
+    
+    .logout-modal-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+    }
+    
+    .logout-modal-btn {
+        padding: 10px 20px;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.2s;
+        border: none;
+    }
+    
+    .logout-modal-cancel {
+        background-color: #e0e0e0;
+        color: #333;
+    }
+    
+    .logout-modal-cancel:hover {
+        background-color: #d0d0d0;
+    }
+    
+    .logout-modal-confirm {
+        background-color: #e74c3c;
+        color: white;
+    }
+    
+    .logout-modal-confirm:hover {
+        background-color: #c0392b;
+    }
+    
+    .logout-icon {
+        font-size: 3rem;
+        color: #e74c3c;
+        margin-bottom: 15px;
+    }

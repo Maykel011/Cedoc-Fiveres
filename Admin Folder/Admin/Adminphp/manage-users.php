@@ -1,25 +1,11 @@
-<?php
-session_start(); // Start session, but don't destroy it immediately
-
-// OPTIONAL: Only destroy session when logout is clicked
-if (isset($_GET['logout'])) {
-    session_unset();
-    session_destroy();
-    header("Location: ../../../login/login.php");
-    exit();
-}
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES</title>
-    <link rel="stylesheet" href="../../Css/admind.css">
+    <link rel="stylesheet" href="../../Css/usermanage.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <!-- Add CSRF meta tag if you're using CSRF protection -->
-    <meta name="csrf-token" content="<?php echo isset($_SESSION['csrf_token']) ? $_SESSION['csrf_token'] : ''; ?>">
 </head>
 
 <body>
@@ -40,9 +26,23 @@ if (isset($_GET['logout'])) {
         </div>
     </div>
 </header>
-<!--<li><span class="admin-name">Admin Name</span></li> -->
 
-    <aside class="sidebar">
+<!-- Logout Modal -->
+<div id="logoutModal" class="logout-modal">
+    <div class="logout-modal-content">
+        <div class="logout-icon">
+            <i class="fas fa-sign-out-alt"></i>
+        </div>
+        <h3>Confirm Logout</h3>
+        <p>Are you sure you want to logout from your admin account?</p>
+        <div class="logout-modal-buttons">
+            <button id="logoutCancel" class="logout-modal-btn logout-modal-cancel">Cancel</button>
+            <button id="logoutConfirm" class="logout-modal-btn logout-modal-confirm">Logout</button>
+        </div>
+    </div>
+</div>
+
+<aside class="sidebar">
     <ul>
         <li class="dashboard">
             <a href="adminDashboard.php"><img src="../../Assets/Icon/Analysis.png" alt="Dashboard Icon" class="sidebar-icon"> Admin Dashboard</a>
@@ -59,17 +59,42 @@ if (isset($_GET['logout'])) {
         <li class="manage-users">
             <a href="manage-users.php"><img src="../../Assets/Icon/user-management.png" alt="Manage Users Icon" class="sidebar-icon"> Manage Users</a>
         </li>
-     
     </ul>
 </aside>
 
-
-
 <div class="main-content">
+<div class="table-container">
     <h1 class="main-title">Manage Users</h1>
+
+    <div class="top-controls">
+        <div class="search-container"> 
+        </div>
+
+        <div class="folder-container">
+            <button class="create-folder-btn">Create Users</button>
+        </div>
+    </div>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Employee No.</th>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Role</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+                <tbody id="media-table-body">
+
+</tbody>
+
 </div>
 
 
-    <script src="../../js/manageuser.js"></script>
+    <script src="../../js/usermanage.js"></script>
 </body>
 </html>
+
+
+
+
