@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", function() {
-    // First declare all variables at the top
+
     const userContainer = document.getElementById("userContainer");
     const userDropdown = document.getElementById("userDropdown");
     const logoutLink = document.getElementById('logoutLink');

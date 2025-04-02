@@ -1,4 +1,3 @@
-// Handle Profile Dropdown
 document.addEventListener("DOMContentLoaded", function() {
     // First declare all variables at the top
     const userContainer = document.getElementById("userContainer");

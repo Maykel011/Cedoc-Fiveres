@@ -15,7 +15,6 @@
     /* font-family: 'SerpentineBold', sans-serif; */
 }
 
-
 body,html {
     margin: 0;
     font-family: Arial, sans-serif;
@@ -73,6 +72,7 @@ body,html {
 .logo {
     height: 55px;
     margin-right: 15px;
+    
 }
 
 
@@ -263,3 +263,84 @@ body,html {
 .user-dropdown a:not(:last-child) {
     border-bottom: 1px solid #eee;
 }
+
+
+        /* Custom Logout Modal Styles */
+        .logout-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .logout-modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .logout-modal h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.5rem;
+        }
+        
+        .logout-modal p {
+            color: #666;
+            margin-bottom: 25px;
+        }
+        
+        .logout-modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .logout-modal-btn {
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: none;
+        }
+        
+        .logout-modal-cancel {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+        
+        .logout-modal-cancel:hover {
+            background-color: #d0d0d0;
+        }
+        
+        .logout-modal-confirm {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .logout-modal-confirm:hover {
+            background-color: #c0392b;
+        }
+        
+        .logout-icon {
+            font-size: 3rem;
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }

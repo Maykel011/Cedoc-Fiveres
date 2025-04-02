@@ -485,7 +485,7 @@ function openOfficePreview(fileUrl, fileName, fileType) {
 
 // ========== PROFILE DROPDOWN & LOGOUT FUNCTIONALITY ==========
 document.addEventListener("DOMContentLoaded", function() {
-    // First declare all variables at the top
+
     const userContainer = document.getElementById("userContainer");
     const userDropdown = document.getElementById("userDropdown");
     const logoutLink = document.getElementById('logoutLink');
@@ -515,7 +515,7 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     }
 
-    // Initialize dropdown
+    // Initialize dropdown - moved before other event listeners
     if (userContainer && userDropdown) {
         userContainer.addEventListener("click", function(event) {
             event.stopPropagation();
@@ -584,6 +584,7 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
     });
+
 
     // ========== INITIALIZATION ==========
     // Setup all functionality

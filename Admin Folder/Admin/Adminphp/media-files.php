@@ -10,7 +10,7 @@ include '../AdminBackEnd/MediaFilesBE.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES</title>
-    <link rel="stylesheet" href="../../Css/mediafile.css">
+    <link rel="stylesheet" href="../../Css/mediafiles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -25,13 +25,28 @@ include '../AdminBackEnd/MediaFilesBE.php';
                 <img src="../../assets/icon/users.png" alt="User" class="icon" id="userIcon">
                 <span class="admin-text">Admin</span>
                 <div class="user-dropdown" id="userDropdown">
-                <a href="profile.php"><img src="../../assets/icon/updateuser.png" alt="Profile Icon" class="dropdown-icon"> Profile</a>
-                    <a href="#"><img src="../../assets/icon/logout.png" alt="Logout Icon" class="dropdown-icon"> Logout</a>
+                    <a href="profile.php"><img src="../../assets/icon/updateuser.png" alt="Profile Icon" class="dropdown-icon"> Profile</a>
+                    <a href="#" id="logoutLink"><img src="../../assets/icon/logout.png" alt="Logout Icon" class="dropdown-icon"> Logout</a>
                 </div>
             </div>
         </div>
     </div>
 </header>
+
+<!-- Logout Modal -->
+<div id="logoutModal" class="logout-modal">
+    <div class="logout-modal-content">
+        <div class="logout-icon">
+            <i class="fas fa-sign-out-alt"></i>
+        </div>
+        <h3>Confirm Logout</h3>
+        <p>Are you sure you want to logout from your admin account?</p>
+        <div class="logout-modal-buttons">
+            <button id="logoutCancel" class="logout-modal-btn logout-modal-cancel">Cancel</button>
+            <button id="logoutConfirm" class="logout-modal-btn logout-modal-confirm">Logout</button>
+        </div>
+    </div>
+</div>
 
 <aside class="sidebar">
     <ul>
@@ -165,6 +180,6 @@ include '../AdminBackEnd/MediaFilesBE.php';
 
 
 
-<script src="../../js/media.js"></script>
+<script src="../../js/medias.js"></script>
 </body>
 </html>
