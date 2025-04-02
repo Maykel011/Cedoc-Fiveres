@@ -6,7 +6,7 @@ table {
     background: white;
     border-radius: 10px;
     overflow: hidden;
-    table-layout: fixed;
+    table-layout: auto; /* Changed from fixed to auto for better content fitting */
     box-shadow: 0 0 0 1px #ddd; /* This creates the border */
 }
 
@@ -338,29 +338,16 @@ th, td {
     padding: 15px;
     text-align: left;
     border-bottom: 1px solid #ddd;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    white-space: normal; /* Changed from nowrap to normal */
+    overflow: visible; /* Changed from hidden to visible */
+    text-overflow: clip; /* Changed from ellipsis to clip */
+    word-wrap: break-word; /* Added to handle long content */
 }
 
-th:nth-child(1), td:nth-child(1) {
-    max-width: 200px;
-}
-
-th:nth-child(2), td:nth-child(2) {
-    max-width: 150px;
-}
-
-th:nth-child(3), td:nth-child(3) {
-    max-width: 100px;
-}
-
-th:nth-child(4), td:nth-child(4) {
-    max-width: 120px;
-}
-
-th:nth-child(5), td:nth-child(5) {
-    max-width: 180px;
+/* Removed fixed column widths to allow content to determine width */
+th, td {
+    max-width: none !important;
+    width: auto !important;
 }
 
 tbody tr:hover {
@@ -378,8 +365,6 @@ td button {
     cursor: pointer;
     white-space: nowrap;
 }
-
-
 
 td button:hover {
     opacity: 0.8;
@@ -887,4 +872,33 @@ table {
 }
 .btn-saving .fa-spinner {
     margin-right: 8px;
+}
+
+/* New styles for better table readability */
+td {
+    word-break: break-word; /* Ensure long words break */
+    min-width: 100px; /* Minimum width for cells */
+}
+
+th {
+    white-space: nowrap; /* Keep headers on one line */
+}
+
+.table-container::-webkit-scrollbar {
+    height: 8px;
+    width: 8px;
+}
+
+.table-container::-webkit-scrollbar-track {
+    background: #f1f1f1;
+    border-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar-thumb {
+    background: #888;
+    border-radius: 10px;
+}
+
+.table-container::-webkit-scrollbar-thumb:hover {
+    background: #555;
 }

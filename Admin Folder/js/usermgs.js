@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", function() {
     // First declare all variables at the top
     const userContainer = document.getElementById("userContainer");
@@ -99,23 +98,8 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
     });
-});
 
-
-
-// Manage Users
-document.getElementById('editUserForm').addEventListener('submit', function(e) {
-    const position = document.getElementById('edit_position').value;
-    const role = document.getElementById('edit_role').value;
-    
-    if (!position || !role) {
-        e.preventDefault();
-        alert('Please select both position and role');
-    }
-});
-
-document.addEventListener("DOMContentLoaded", function() {
-    // DOM Elements
+    // Manage Users Section
     const createUserBtn = document.getElementById('createUserBtn');
     const createUserModal = document.getElementById('createUserModal');
     const editUserModal = document.getElementById('editUserModal');
@@ -130,37 +114,222 @@ document.addEventListener("DOMContentLoaded", function() {
     let currentUserId = null;
 
     // Initialize
-    loadUsers();
-    setupEventListeners();
+    if (createUserBtn || editUserForm) {
+        loadUsers();
+        setupEventListeners();
+    }
 
     function setupEventListeners() {
         // Create User Modal
-        createUserBtn.addEventListener('click', openCreateUserModal);
-        createUserForm.addEventListener('submit', handleCreateUser);
-        document.querySelector('#createUserModal .close').addEventListener('click', () => createUserModal.style.display = 'none');
-        document.getElementById('createCancelBtn').addEventListener('click', () => createUserModal.style.display = 'none');
+        if (createUserBtn) {
+            createUserBtn.addEventListener('click', openCreateUserModal);
+        }
+        if (createUserForm) {
+            createUserForm.addEventListener('submit', handleCreateUser);
+            document.querySelector('#createUserModal .close')?.addEventListener('click', () => createUserModal.style.display = 'none');
+            document.getElementById('createCancelBtn')?.addEventListener('click', () => createUserModal.style.display = 'none');
+        }
         
         // Edit User Modal
-        editUserForm.addEventListener('submit', handleEditUser);
-        document.querySelector('#editUserModal .close').addEventListener('click', () => editUserModal.style.display = 'none');
-        document.getElementById('editCancelBtn').addEventListener('click', () => editUserModal.style.display = 'none');
+        if (editUserForm) {
+            editUserForm.addEventListener('submit', handleEditUser);
+            document.querySelector('#editUserModal .close')?.addEventListener('click', () => editUserModal.style.display = 'none');
+            document.getElementById('editCancelBtn')?.addEventListener('click', () => editUserModal.style.display = 'none');
+            
+            // Add save container event listeners
+            document.querySelectorAll('.save-container').forEach(button => {
+                button.addEventListener('click', async function () {
+                    const containerType = this.dataset.container;
+                    const form = document.getElementById('editUserForm');
+                    const formData = new FormData(form);
+                    const userId = formData.get('id');
+                    const button = this;
+
+                    // Only include relevant fields for this container
+                    const containerData = new FormData();
+                    containerData.append('action', 'update_user_partial');
+                    containerData.append('id', userId);
+                    containerData.append('container_type', containerType);
+
+                    // Validate fields based on container type
+                    let isValid = true;
+                    switch (containerType) {
+                        case 'profile':
+                            containerData.append('employee_no', formData.get('employee_no'));
+                            containerData.append('first_name', formData.get('first_name'));
+                            containerData.append('last_name', formData.get('last_name'));
+                            containerData.append('email', formData.get('email'));
+                            
+                            if (!formData.get('employee_no') || !formData.get('first_name') || 
+                                !formData.get('last_name') || !formData.get('email')) {
+                                alert('All profile fields are required');
+                                isValid = false;
+                            }
+                            break;
+
+                        case 'designation':
+                            containerData.append('position', formData.get('position'));
+                            containerData.append('role', formData.get('role'));
+                            
+                            if (!formData.get('position') || !formData.get('role')) {
+                                alert('Both position and role are required');
+                                isValid = false;
+                            }
+                            break;
+
+                        case 'password':
+                            const currentPassword = formData.get('current_password');
+                            const newPassword = formData.get('new_password');
+                            const confirmPassword = formData.get('confirm_password');
+                            
+                            if (newPassword || confirmPassword) {
+                                if (!currentPassword) {
+                                    alert('Current password is required to change password');
+                                    isValid = false;
+                                } else if (!newPassword) {
+                                    alert('New password is required');
+                                    isValid = false;
+                                } else if (!confirmPassword) {
+                                    alert('Please confirm your new password');
+                                    isValid = false;
+                                } else if (newPassword !== confirmPassword) {
+                                    alert('New password and confirmation do not match');
+                                    isValid = false;
+                                } else {
+                                    containerData.append('current_password', currentPassword);
+                                    containerData.append('new_password', newPassword);
+                                    containerData.append('confirm_password', confirmPassword);
+                                }
+                            } else {
+                                isValid = true;
+                            }
+                            break;
+
+                        case 'pincode':
+                            const currentPin = formData.get('current_pin');
+                            const newPin = formData.get('new_pin');
+                            const confirmPin = formData.get('confirm_pin');
+                            
+                            if (newPin || confirmPin) {
+                                if (!currentPin) {
+                                    alert('Current PIN is required to change PIN');
+                                    isValid = false;
+                                } else if (!newPin) {
+                                    alert('New PIN is required');
+                                    isValid = false;
+                                } else if (!confirmPin) {
+                                    alert('Please confirm your new PIN');
+                                    isValid = false;
+                                } else if (newPin !== confirmPin) {
+                                    alert('New PIN and confirmation do not match');
+                                    isValid = false;
+                                } else if (newPin.length !== 6 || !/^\d+$/.test(newPin)) {
+                                    alert('PIN code must be exactly 6 digits');
+                                    isValid = false;
+                                } else {
+                                    containerData.append('current_pin', currentPin);
+                                    containerData.append('new_pin', newPin);
+                                    containerData.append('confirm_pin', confirmPin);
+                                }
+                            } else {
+                                isValid = true;
+                            }
+                            break;
+                    }
+
+                    if (!isValid) return;
+
+                    // Show loading state
+                    const originalText = button.textContent;
+                    button.disabled = true;
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                    button.classList.add('btn-saving');
+
+                    try {
+                        const [response] = await Promise.all([
+                            fetch('../AdminBackEnd/ManageUserBE.php', {
+                                method: 'POST',
+                                body: containerData
+                            }),
+                            new Promise(resolve => setTimeout(resolve, 800)) // Minimum loading time
+                        ]);
+
+                        const responseText = await response.text();
+                        console.log("Raw Response:", responseText);
+
+                        let data;
+                        try {
+                            data = JSON.parse(responseText);
+                        } catch (jsonError) {
+                            if (responseText.toLowerCase().includes('success')) {
+                                data = { status: 'success', message: 'Operation completed successfully' };
+                            } else {
+                                throw new Error("Invalid server response");
+                            }
+                        }
+
+                        // Restore button state
+                        button.disabled = false;
+                        button.textContent = originalText;
+                        button.classList.remove('btn-saving');
+
+                        if (data.status === 'success') {
+                            showSuccessModal(
+                                'editSuccessModal', 
+                                'uploadSuccessMessage', 
+                                `${containerType.charAt(0).toUpperCase() + containerType.slice(1)} updated successfully`
+                            );
+
+                            if (containerType === 'designation') {
+                                loadUsers();
+                            }
+                        } else {
+                            if (containerType === 'designation' && data.message.includes('Maximum of 5 admin users')) {
+                                const adminLimitMessage = document.getElementById('editAdminLimitMessage');
+                                if (adminLimitMessage) {
+                                    adminLimitMessage.style.display = 'block';
+                                    adminLimitMessage.textContent = data.message;
+                                    
+                                    setTimeout(() => {
+                                        adminLimitMessage.style.display = 'none';
+                                    }, 5000);
+                                }
+                            }
+                            showErrorModal(data.message || 'An error occurred');
+                        }
+                    } catch (error) {
+                        // Restore button state
+                        button.disabled = false;
+                        button.textContent = originalText;
+                        button.classList.remove('btn-saving');
+                        
+                        showErrorModal(error.message || 'An error occurred while saving. Please try again.');
+                        console.error('Error:', error);
+                    }
+                });
+            });
+        }
         
         // Delete Modal
-        document.querySelector('#deleteModal .close').addEventListener('click', () => deleteModal.style.display = 'none');
-        document.getElementById('cancelDeleteBtn').addEventListener('click', () => deleteModal.style.display = 'none');
-        document.getElementById('confirmDeleteBtn').addEventListener('click', confirmDelete);
+        if (deleteModal) {
+            document.querySelector('#deleteModal .close')?.addEventListener('click', () => deleteModal.style.display = 'none');
+            document.getElementById('cancelDeleteBtn')?.addEventListener('click', () => deleteModal.style.display = 'none');
+            document.getElementById('confirmDeleteBtn')?.addEventListener('click', confirmDelete);
+        }
         
         // Search functionality
-        searchBtn.addEventListener('click', searchUsers);
-        searchInput.addEventListener('keyup', function(e) {
-            if (e.key === 'Enter') searchUsers();
-        });
+        if (searchBtn && searchInput) {
+            searchBtn.addEventListener('click', searchUsers);
+            searchInput.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') searchUsers();
+            });
+        }
         
         // Close modals when clicking outside
         window.addEventListener('click', function(event) {
-            if (event.target === createUserModal) createUserModal.style.display = 'none';
-            if (event.target === editUserModal) editUserModal.style.display = 'none';
-            if (event.target === deleteModal) deleteModal.style.display = 'none';
+            if (createUserModal && event.target === createUserModal) createUserModal.style.display = 'none';
+            if (editUserModal && event.target === editUserModal) editUserModal.style.display = 'none';
+            if (deleteModal && event.target === deleteModal) deleteModal.style.display = 'none';
         });
     }
 
@@ -176,6 +345,8 @@ document.addEventListener("DOMContentLoaded", function() {
 
     function renderUsers(users) {
         const tbody = document.getElementById('manage-user');
+        if (!tbody) return;
+        
         tbody.innerHTML = '';
         
         if (users.length === 0) {
@@ -279,18 +450,36 @@ document.addEventListener("DOMContentLoaded", function() {
     function openCreateUserModal() {
         // Check admin limit before opening
         checkAdminLimit('create');
-        createUserForm.reset();
-        createUserModal.style.display = 'block';
+        if (createUserForm) createUserForm.reset();
+        if (createUserModal) createUserModal.style.display = 'block';
     }
 
     function editUser(userId) {
         const user = allUsers.find(u => u.id == userId);
         if (!user) return;
         
-        // Split name into first and last
-        const names = user.name.split(' ');
-        const firstName = names[0];
-        const lastName = names.slice(1).join(' ');
+        // Split name into first and last name properly
+        let firstName = '';
+        let lastName = '';
+        
+        // Check if the name contains a comma (last, first format)
+        if (user.name.includes(',')) {
+            const nameParts = user.name.split(',').map(part => part.trim());
+            lastName = nameParts[0];
+            firstName = nameParts[1] || '';
+        } 
+        // Otherwise split by spaces
+        else {
+            const nameParts = user.name.split(' ');
+            // Assume last part is last name, everything else is first name
+            if (nameParts.length > 1) {
+                lastName = nameParts.pop(); // Remove last element and assign to lastName
+                firstName = nameParts.join(' '); // Join remaining parts as firstName
+            } else {
+                firstName = nameParts[0] || '';
+                lastName = '';
+            }
+        }
         
         // Fill the form
         document.getElementById('edit_user_id').value = user.id;
@@ -312,19 +501,24 @@ document.addEventListener("DOMContentLoaded", function() {
         // Check admin limit
         checkAdminLimit('edit', user.role);
         
-        editUserModal.style.display = 'block';
+        if (editUserModal) editUserModal.style.display = 'block';
     }
 
     function confirmDeleteUser(userId) {
         currentUserId = userId;
-        deleteModal.style.display = 'block';
+        if (deleteModal) deleteModal.style.display = 'block';
     }
 
     function handleCreateUser(e) {
         e.preventDefault();
         
         const formData = new FormData(createUserForm);
+        const firstName = formData.get('first_name');
+        const lastName = formData.get('last_name');
         const role = formData.get('role');
+        
+        // Combine first and last name with a space
+        formData.set('name', `${firstName} ${lastName}`.trim());
         
         // Client-side validation
         if (role === 'Admin') {
@@ -350,7 +544,7 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(data => {
             if (data.status === 'success') {
                 alert(data.message);
-                createUserModal.style.display = 'none';
+                if (createUserModal) createUserModal.style.display = 'none';
                 loadUsers();
             } else {
                 alert(data.message);
@@ -366,12 +560,17 @@ document.addEventListener("DOMContentLoaded", function() {
         e.preventDefault();
         
         const formData = new FormData(editUserForm);
+        const firstName = formData.get('first_name');
+        const lastName = formData.get('last_name');
         const userId = formData.get('id');
         const role = formData.get('role');
         const newPassword = formData.get('new_password');
         const confirmPassword = formData.get('confirm_password');
         const newPin = formData.get('new_pin');
         const confirmPin = formData.get('confirm_pin');
+        
+        // Combine first and last name with a space
+        formData.set('name', `${firstName} ${lastName}`.trim());
         
         // Get the user being edited
         const user = allUsers.find(u => u.id == userId);
@@ -427,7 +626,7 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(data => {
             if (data.status === 'success') {
                 alert(data.message);
-                editUserModal.style.display = 'none';
+                if (editUserModal) editUserModal.style.display = 'none';
                 loadUsers();
             } else {
                 alert(data.message);
@@ -458,12 +657,12 @@ document.addEventListener("DOMContentLoaded", function() {
             } else {
                 alert(data.message);
             }
-            deleteModal.style.display = 'none';
+            if (deleteModal) deleteModal.style.display = 'none';
         })
         .catch(error => {
             console.error('Error deleting user:', error);
             alert('Error deleting user');
-            deleteModal.style.display = 'none';
+            if (deleteModal) deleteModal.style.display = 'none';
         });
     }
 
@@ -491,212 +690,77 @@ document.addEventListener("DOMContentLoaded", function() {
         
         if (context === 'create') {
             const adminLimitMessage = document.getElementById('createAdminLimitMessage');
-            const saveBtn = createUserForm.querySelector('.btn.save');
+            const saveBtn = createUserForm?.querySelector('.btn.save');
             
-            if (limitReached) {
+            if (limitReached && adminLimitMessage && saveBtn) {
                 document.getElementById('create_role').value = 'User';
                 adminLimitMessage.style.display = 'block';
                 saveBtn.disabled = true;
-            } else {
+            } else if (adminLimitMessage && saveBtn) {
                 adminLimitMessage.style.display = 'none';
                 saveBtn.disabled = false;
             }
         } else if (context === 'edit') {
             const adminLimitMessage = document.getElementById('editAdminLimitMessage');
-            const saveBtn = editUserForm.querySelector('.btn.save');
+            const saveBtn = editUserForm?.querySelector('.btn.save');
             const roleSelect = document.getElementById('edit_role');
             
-            if (limitReached && currentRole !== 'Admin') {
+            if (limitReached && currentRole !== 'Admin' && adminLimitMessage && saveBtn && roleSelect) {
                 roleSelect.value = currentRole;
                 adminLimitMessage.style.display = 'block';
                 saveBtn.disabled = true;
-            } else {
+            } else if (adminLimitMessage && saveBtn) {
                 adminLimitMessage.style.display = 'none';
                 saveBtn.disabled = false;
             }
         }
     }
-});
 
+    // Function to show success modal
+    function showSuccessModal(modalId, messageId, message) {
+        const modal = document.getElementById(modalId);
+        const messageElement = document.getElementById(messageId);
+        if (!modal || !messageElement) return;
+        
+        messageElement.textContent = message;
+        
+        // Show modal with animation
+        modal.style.display = 'block';
+        setTimeout(() => {
+            modal.style.opacity = '1';
+            modal.style.transform = 'translate(-50%, -50%) scale(1)';
+        }, 10);
 
+        // Auto-hide after 3 seconds
+        setTimeout(() => {
+            modal.style.opacity = '0';
+            modal.style.transform = 'translate(-50%, -45%) scale(0.9)';
+            setTimeout(() => modal.style.display = 'none', 300);
+        }, 3000);
+    }
 
+    // Function to show error modal
+    function showErrorModal(message) {
+        const modal = document.getElementById('errorModal');
+        const messageElement = document.getElementById('errorMessage');
+        if (!modal || !messageElement) return;
+        
+        messageElement.textContent = message;
+        
+        // Show modal
+        modal.style.display = 'block';
+        setTimeout(() => {
+            modal.style.opacity = '1';
+            modal.style.transform = 'translate(-50%, -50%) scale(1)';
+        }, 10);
 
-
-//Save
-document.querySelectorAll('.save-container').forEach(button => {
-    button.addEventListener('click', async function () {
-        const containerType = this.dataset.container;
-        const form = document.getElementById('editUserForm');
-        const formData = new FormData(form);
-        const userId = formData.get('id');
-        const button = this;
-
-        // Only include relevant fields for this container
-        const containerData = new FormData();
-        containerData.append('action', 'update_user_partial');
-        containerData.append('id', userId);
-        containerData.append('container_type', containerType);
-
-        // Validate fields based on container type
-        let isValid = true;
-        switch (containerType) {
-            case 'profile':
-                containerData.append('employee_no', formData.get('employee_no'));
-                containerData.append('first_name', formData.get('first_name'));
-                containerData.append('last_name', formData.get('last_name'));
-                containerData.append('email', formData.get('email'));
-                
-                // For profile, all fields are required but should already be populated in edit mode
-                if (!formData.get('employee_no') || !formData.get('first_name') || 
-                    !formData.get('last_name') || !formData.get('email')) {
-                    alert('All profile fields are required');
-                    isValid = false;
-                }
-                break;
-
-            case 'designation':
-                containerData.append('position', formData.get('position'));
-                containerData.append('role', formData.get('role'));
-                
-                // For designation, both fields are required but should be pre-populated
-                if (!formData.get('position') || !formData.get('role')) {
-                    alert('Both position and role are required');
-                    isValid = false;
-                }
-                break;
-
-            case 'password':
-                // For password, only validate if new password fields are filled
-                const currentPassword = formData.get('current_password');
-                const newPassword = formData.get('new_password');
-                const confirmPassword = formData.get('confirm_password');
-                
-                if (newPassword || confirmPassword) {
-                    if (!currentPassword) {
-                        alert('Current password is required to change password');
-                        isValid = false;
-                    } else if (!newPassword) {
-                        alert('New password is required');
-                        isValid = false;
-                    } else if (!confirmPassword) {
-                        alert('Please confirm your new password');
-                        isValid = false;
-                    } else if (newPassword !== confirmPassword) {
-                        alert('New password and confirmation do not match');
-                        isValid = false;
-                    } else {
-                        containerData.append('current_password', currentPassword);
-                        containerData.append('new_password', newPassword);
-                        containerData.append('confirm_password', confirmPassword);
-                    }
-                } else {
-                    // No password change requested
-                    isValid = true;
-                }
-                break;
-
-            case 'pincode':
-                // For pincode, only validate if new pin fields are filled
-                const currentPin = formData.get('current_pin');
-                const newPin = formData.get('new_pin');
-                const confirmPin = formData.get('confirm_pin');
-                
-                if (newPin || confirmPin) {
-                    if (!currentPin) {
-                        alert('Current PIN is required to change PIN');
-                        isValid = false;
-                    } else if (!newPin) {
-                        alert('New PIN is required');
-                        isValid = false;
-                    } else if (!confirmPin) {
-                        alert('Please confirm your new PIN');
-                        isValid = false;
-                    } else if (newPin !== confirmPin) {
-                        alert('New PIN and confirmation do not match');
-                        isValid = false;
-                    } else if (newPin.length !== 6 || !/^\d+$/.test(newPin)) {
-                        alert('PIN code must be exactly 6 digits');
-                        isValid = false;
-                    } else {
-                        containerData.append('current_pin', currentPin);
-                        containerData.append('new_pin', newPin);
-                        containerData.append('confirm_pin', confirmPin);
-                    }
-                } else {
-                    // No PIN change requested
-                    isValid = true;
-                }
-                break;
-        }
-
-        if (!isValid) return;
-
-        // Show loading state
-        const originalText = button.textContent;
-        button.disabled = true;
-        button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
-        button.classList.add('btn-saving');
-
-        try {
-            const [response] = await Promise.all([
-                fetch('../AdminBackEnd/ManageUserBE.php', {
-                    method: 'POST',
-                    body: containerData
-                }),
-                new Promise(resolve => setTimeout(resolve, 800)) // Minimum loading time
-            ]);
-
-            const responseText = await response.text();
-            console.log("Raw Response:", responseText);
-
-            let data;
-            try {
-                data = JSON.parse(responseText);
-            } catch (jsonError) {
-                if (responseText.toLowerCase().includes('success')) {
-                    data = { status: 'success', message: 'Operation completed successfully' };
-                } else {
-                    throw new Error("Invalid server response");
-                }
-            }
-
-            // Restore button state
-            button.disabled = false;
-            button.textContent = originalText;
-            button.classList.remove('btn-saving');
-
-            if (data.status === 'success') {
-                showSuccessModal(
-                    'editSuccessModal', 
-                    'uploadSuccessMessage', 
-                    `${containerType.charAt(0).toUpperCase() + containerType.slice(1)} updated successfully`
-                );
-
-                if (containerType === 'designation') {
-                    loadUsers();
-                }
-            } else {
-                if (containerType === 'designation' && data.message.includes('Maximum of 5 admin users')) {
-                    const adminLimitMessage = document.getElementById('editAdminLimitMessage');
-                    adminLimitMessage.style.display = 'block';
-                    adminLimitMessage.textContent = data.message;
-                    
-                    setTimeout(() => {
-                        adminLimitMessage.style.display = 'none';
-                    }, 5000);
-                }
-                showErrorModal(data.message || 'An error occurred');
-            }
-        } catch (error) {
-            // Restore button state
-            button.disabled = false;
-            button.textContent = originalText;
-            button.classList.remove('btn-saving');
-            
-            showErrorModal(error.message || 'An error occurred while saving. Please try again.');
-            console.error('Error:', error);
-        }
-    });
+        // Auto-hide after 5 seconds
+        setTimeout(() => {
+            modal.style.opacity = '0';
+            modal.style.transform = 'translate(-50%, -45%) scale(0.9)';
+            setTimeout(() => modal.style.display = 'none', 300);
+        }, 5000);
+    }
 });
 
 // Password validation function
@@ -766,53 +830,12 @@ function validatePinFields() {
     return true;
 }
 
-// Function to show success modal
-function showSuccessModal(modalId, messageId, message) {
-    const modal = document.getElementById(modalId);
-    const messageElement = document.getElementById(messageId);
-    messageElement.textContent = message;
-    
-    // Show modal with animation
-    modal.style.display = 'block';
-    setTimeout(() => {
-        modal.style.opacity = '1';
-        modal.style.transform = 'translate(-50%, -50%) scale(1)';
-    }, 10);
-
-    // Auto-hide after 3 seconds
-    setTimeout(() => {
-        modal.style.opacity = '0';
-        modal.style.transform = 'translate(-50%, -45%) scale(0.9)';
-        setTimeout(() => modal.style.display = 'none', 300);
-    }, 3000);
-}
-
-// Function to show error modal
-function showErrorModal(message) {
-    const modal = document.getElementById('errorModal');
-    const messageElement = document.getElementById('errorMessage');
-    messageElement.textContent = message;
-    
-    // Show modal
-    modal.style.display = 'block';
-    setTimeout(() => {
-        modal.style.opacity = '1';
-        modal.style.transform = 'translate(-50%, -50%) scale(1)';
-    }, 10);
-
-    // Auto-hide after 5 seconds
-    setTimeout(() => {
-        modal.style.opacity = '0';
-        modal.style.transform = 'translate(-50%, -45%) scale(0.9)';
-        setTimeout(() => modal.style.display = 'none', 300);
-    }, 5000);
-}
-
 // Function to close modals
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);
+    if (!modal) return;
+    
     modal.style.opacity = '0';
     modal.style.transform = 'translate(-50%, -45%) scale(0.9)';
     setTimeout(() => modal.style.display = 'none', 300);
 }
-
