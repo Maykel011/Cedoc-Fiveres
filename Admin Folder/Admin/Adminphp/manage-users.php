@@ -81,10 +81,12 @@
                         <th>Name</th>
                         <th>Position</th>
                         <th>Role</th>
-                        <th>Status</th>
+                        <th>Password</th>
+                        <th>Pin-code</th>
+                        <th>Action</th>
                     </tr>
                 </thead>
-                <tbody id="media-table-body">
+                <tbody id="manage-user">
 
 </tbody>
 

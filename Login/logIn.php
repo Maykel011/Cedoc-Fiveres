@@ -17,7 +17,7 @@
             <p>CEDOC FIVERES</p>
             <div class="input-container">
                 <i class="fa fa-user"></i>
-                <input type="text" name="username" placeholder="Username" required>
+                <input type="text" name="Employee No." placeholder="Employee No." required>
             </div>
             <div class="input-container">
                 <i class="fa fa-lock"></i>
