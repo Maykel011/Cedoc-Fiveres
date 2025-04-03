@@ -1,0 +1,145 @@
+@font-face {
+    font-family: 'Akrobat';
+    src: url('AkrobatB.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    /* font-family: 'Akrobat', sans-serif; */
+}
+
+
+@font-face {
+    font-family: 'SerpentineBold';
+    src: url('Serpentinebold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+    /* font-family: 'SerpentineBold', sans-serif; */
+}
+input {
+    font-family: 'Akrobat', sans-serif;
+}
+body {
+    margin: 0;
+    font-family: 'SerpentineBold', sans-serif;
+    background: url('../assets/bg2.gif') no-repeat center center fixed; 
+    background-size: cover;
+    overflow: hidden;
+    background-position: top;
+}
+
+.login-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+    padding: 20px;
+}
+
+.login-form {
+    background-color: rgba(255, 255, 255, 0.9);
+    padding: 40px 30px;
+    border-radius: 15px;
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 350px;
+    position: relative;
+}
+
+.login-form::before {
+    content: "";
+    background: url('../assets/img4.png') no-repeat center top;
+    background-size: 100px;
+    width: 100px;
+    height: 100px;
+    position: absolute;
+    top: -50px;
+    border-radius: 50%;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+.login-form h2 {
+    font-family: 'SerpentineBold', sans-serif;
+    font-weight: 800;
+    color: #1b2560;
+    margin-bottom: 5px;
+    font-size: 25px;
+}
+
+.login-form p {
+    font-family: 'Akrobat', sans-serif;
+    font-weight: 600;
+    margin-top: 15px;
+    font-size: 14px;
+    letter-spacing: 2px;
+    color: #1b2560;
+}
+
+.input-container {
+    font-family: 'SerpentineBold', sans-serif;
+    position: relative;
+    width: 100%;
+}
+
+.input-container input {
+    font-family: 'Akrobat', sans-serif;
+    margin-bottom: 15px;
+    padding: 10px 15px;
+    border: 1px solid #1b2560;
+    border-radius: 5px;
+    font-size: 16px;
+    width: 84%;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    padding-left: 40px;
+}
+
+.input-container .fa {
+    position: absolute;
+    left: 15px;
+    top: 37%;
+    transform: translateY(-50%);
+    font-size: 17px;
+    color: #1b2560;
+}
+
+.button-container {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+}
+
+.login-button {
+    background-color: #1b2560;
+    margin-left: 90px;
+    color: white;
+    border: none;
+    padding: 12px 25px;
+    cursor: pointer;
+    font-size: 16px;
+    width: 48%;
+    border-radius: 5px;
+}
+
+.login-button:hover {
+    background-color: #142042;
+}
+
+.login-button:disabled {
+    background-color: #aaa;
+    cursor: not-allowed;
+}
+
+.forgot-password {
+    text-align: center;
+    margin-top: 10px;
+}
+
+.forgot-password a {
+    color: #007bff;
+    text-decoration: none;
+    font-size: 14px;
+}
+
+.forgot-password a:hover {
+    text-decoration: underline;
+}
