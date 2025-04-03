@@ -155,16 +155,16 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
                     <div class="designation-container">
                         <h3>Designation</h3>
                         <div class="form-group">
-    <label for="create_position">Position</label>
-    <select id="create_position" name="position" required>
-        <option value="" selected disabled>Choose position...</option>
-        <option value="Head">Head</option>
-        <option value="Supervisor">Supervisor</option>
-        <option value="Employee">Employee</option>
-        <option value="Other">Other</option>
-    </select>
-    <input type="text" id="create_other_position" name="other_position" style="display: none; margin-top: 5px; width: 73%;" placeholder="Please specify position">
-</div>
+                            <label for="create_position">Position</label>
+                            <select id="create_position" name="position" required>
+                                <option value="" selected disabled>Choose position...</option>
+                                <option value="Head">Head</option>
+                                <option value="Supervisor">Supervisor</option>
+                                <option value="Employee">Employee</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <input type="text" id="create_other_position" name="other_position" style="display: none; margin-top: 5px; width: 73%;" placeholder="Please specify position">
+                        </div>
                         <div class="form-group">
                             <label for="create_role">Role</label>
                             <select id="create_role" name="role" required>
