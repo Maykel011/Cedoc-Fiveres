@@ -86,6 +86,19 @@ elseif ($action === "rename") {
     // Handle folder deletion
     elseif ($action === "delete") {
         $folderId = $_POST['folder_id'];
+        $pinCode = $_POST['pin_code'] ?? null;
+
+        // Verify admin PIN code
+        $stmt = $conn->prepare("SELECT id FROM users WHERE role = 'Admin' AND pin_code = ?");
+        $stmt->bind_param("s", $pinCode);
+        $stmt->execute();
+        $stmt->store_result();
+        
+        if ($stmt->num_rows === 0) {
+            echo json_encode(["status" => "error", "message" => "Invalid admin PIN code"]);
+            exit;
+        }
+        $stmt->close();
 
         // Get folder name before deleting
         $stmt = $conn->prepare("SELECT folder_name FROM media_folders WHERE id = ?");
@@ -96,7 +109,6 @@ elseif ($action === "rename") {
         $stmt->close();
 
         if (!empty($folderName)) {
-            // Start transaction for consistency
             $conn->begin_transaction();
 
             try {
@@ -112,7 +124,6 @@ elseif ($action === "rename") {
                 $stmt->execute();
                 $stmt->close();
 
-                // Commit changes
                 $conn->commit();
 
                 // Remove folder from filesystem
@@ -131,7 +142,6 @@ elseif ($action === "rename") {
 
     $conn->close();
 }
-
 // Function to delete folder and all its contents
 function deleteFolder($folderPath) {
     if (!is_dir($folderPath)) {
@@ -236,5 +246,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['delete_file'])) {
     $conn->close();
     exit;
 }
+
+
+
 
 ?>

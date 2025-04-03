@@ -20,7 +20,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES - View Folder</title>
-    <link rel="stylesheet" href="../../Css/ViewF.css">
+    <link rel="stylesheet" href="../../Css/ViewFi.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -273,27 +273,36 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
 
 
 
-<!-- Multiple Delete Confirmation Modal -->
-<div id="multipleDeleteModal" class="deletecustom-modal" style="display:none;">
-    <div class="delete-modal-content">
-        <span class="close" onclick="closeModal('deleteModal')"></span>
-        <h2>Delete Confirmation</h2>
-        <p id="multipleDeleteMessage"></p>
-            <button id="confirmMultipleDelete" class="btn-danger">Delete</button>
-            <button onclick="closeModal('multipleDeleteModal')" class="btn-cancel">Cancel</button>
-        </div>
-    </div>
-</div>
-
-<!-- Delete Confirmation Modal -->
+<!-- Delete Modal -->
 <div id="deleteModal" class="deletecustom-modal">
     <div class="delete-modal-content">
         <span class="close" onclick="closeModal('deleteModal')"></span>
         <h2>Delete Confirmation</h2>
         <p id="deleteFileName"></p>
         <p>Are you sure you want to delete this?</p>
+        <div id="pinCodeSection" style="margin: 15px 0;">
+            <label for="deletePinCode">Enter PIN Code:</label>
+            <input type="password" id="deletePinCode" placeholder="6-digit PIN" maxlength="6" style="width: 90%;padding: 8px;margin-top: 5px; border-radius: 5px;">
+            <p id="deletePinError" style="color: red; display: none;"></p>
+        </div>
         <button id="deleteFileBtn">Delete</button>
         <button onclick="closeModal('deleteModal')">Cancel</button>
+    </div>
+</div>
+
+<!-- Multiple Delete Confirmation Modal -->
+<div id="multipleDeleteModal" class="deletecustom-modal" style="display:none;">
+    <div class="delete-modal-content">
+        <span class="close" onclick="closeModal('multipleDeleteModal')"></span>
+        <h2>Delete Confirmation</h2>
+        <p id="multipleDeleteMessage"></p>
+        <div id="multipleDeletePinSection" style="margin: 15px 0;">
+            <label for="multipleDeletePinCode">Enter PIN Code:</label>
+            <input type="password" id="multipleDeletePinCode" placeholder="6-digit PIN" maxlength="6" style="width: 90%;padding: 8px;margin-top: 5px; border-radius: 5px;">
+            <p id="multipleDeletePinError" style="color: red; display: none;"></p>
+        </div>
+        <button id="confirmMultipleDelete" class="btn-danger">Delete</button>
+        <button onclick="closeModal('multipleDeleteModal')" class="btn-cancel">Cancel</button>
     </div>
 </div>
 
@@ -314,6 +323,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
     </div>
 </div>
 
-<script src="../../js/View.js"></script>
+<script src="../../js/Views.js"></script>
 </body>
 </html>

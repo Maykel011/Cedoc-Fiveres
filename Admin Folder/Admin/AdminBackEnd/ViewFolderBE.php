@@ -1,11 +1,22 @@
 <?php
-include '../connection/Connection.php'; // Database connection
+include '../connection/Connection.php';
+
+// Verify admin PIN code function
+function verifyAdminPin($conn, $pinCode) {
+    $stmt = $conn->prepare("SELECT id FROM users WHERE role = 'Admin' AND pin_code = ?");
+    $stmt->bind_param("s", $pinCode);
+    $stmt->execute();
+    $stmt->store_result();
+    $isValid = $stmt->num_rows > 0;
+    $stmt->close();
+    return $isValid;
+}
 
 // Get folder name safely from POST or GET
 $folderName = isset($_POST['folder_name']) ? trim($_POST['folder_name']) : (isset($_GET['folder']) ? trim($_GET['folder']) : '');
-$folderName = $folderName !== null ? $folderName : ''; // Ensure it's a string
+$folderName = $folderName !== null ? $folderName : '';
 
-$uploadDir = "../../uploads/" . $folderName . "/"; // Define upload path
+$uploadDir = "../../uploads/" . $folderName . "/";
 
 // Handle file upload
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES['file'])) {
@@ -60,8 +71,7 @@ $result = $stmt->get_result();
 $files = $result->fetch_all(MYSQLI_ASSOC);
 $stmt->close();
 
-// Handle folder operations (Create, Rename, Delete)
-
+// Handle file editing
 if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editFile'])) {
     $id = intval($_POST['file_id']);
     $new_file_name = trim($_POST['file_name']);
@@ -69,7 +79,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editFile'])) {
     $water_level = !empty($_POST['water_level']) ? floatval($_POST['water_level']) : NULL;
     $air_quality = !empty($_POST['air_quality']) ? floatval($_POST['air_quality']) : NULL;
 
-    // 1. Get current file details
+    // Get current file details
     $stmt = $conn->prepare("SELECT file_name, folder_name, file_type FROM files WHERE id = ?");
     $stmt->bind_param("i", $id);
     $stmt->execute();
@@ -81,39 +91,36 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editFile'])) {
         die("File not found in database");
     }
 
-    // 2. Preserve file extension
+    // Preserve file extension
     $current_ext = pathinfo($current_file_name, PATHINFO_EXTENSION);
     $new_ext = pathinfo($new_file_name, PATHINFO_EXTENSION);
     
-    // If new name doesn't have extension, keep the old one
     if (empty($new_ext) && !empty($current_ext)) {
         $new_file_name .= '.' . $current_ext;
     }
 
-    // 3. Set paths
+    // Set paths
     $current_path = "../../uploads/$folder_name/$current_file_name";
     $new_path = "../../uploads/$folder_name/$new_file_name";
 
-    // 4. Verify original file exists
     if (!file_exists($current_path)) {
         die("Original file not found on server");
     }
 
-    // 5. Check if new filename already exists
     if ($new_file_name !== $current_file_name && file_exists($new_path)) {
         die("A file with that name already exists");
     }
 
-    // 6. Begin transaction
+    // Begin transaction
     $conn->begin_transaction();
 
     try {
-        // 7. Rename physical file
+        // Rename physical file
         if (!rename($current_path, $new_path)) {
             throw new Exception("Failed to rename file on server");
         }
 
-        // 8. Update database
+        // Update database
         $stmt = $conn->prepare("UPDATE files SET file_name = ?, file_type = ?, temperature = ?, water_level = ?, air_quality = ?, date_modified = NOW() WHERE id = ?");
         $stmt->bind_param("sssddi", $new_file_name, $file_type, $temperature, $water_level, $air_quality, $id);
 
@@ -136,15 +143,22 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editFile'])) {
     }
 }
 
-// Handling Single delete
+// Handle delete actions
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"])) {
     $action = $_POST["action"];
 
-    // Delete a single file
+    // Common for all delete actions - verify PIN
+    $pinCode = $_POST['pin_code'] ?? null;
+    if (!verifyAdminPin($conn, $pinCode)) {
+        echo json_encode(["status" => "error", "message" => "Invalid PIN code"]);
+        exit;
+    } 
+
+    // Single file delete
     if ($action === "deleteFile") {
         $fileId = $_POST['file_id'];
 
-        // Get file name and folder name
+        // Get file details
         $stmt = $conn->prepare("SELECT file_name, folder_name FROM files WHERE id = ?");
         $stmt->bind_param("i", $fileId);
         $stmt->execute();
@@ -169,96 +183,85 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"])) {
 
                 $conn->commit();
 
-                // Delete file from uploads folder
-                $filePath = "uploads/$folderName/$fileName";
+                // Delete file from filesystem
+                $filePath = "../../uploads/$folderName/$fileName";
                 if (file_exists($filePath)) {
                     unlink($filePath);
                 }
 
                 echo json_encode(["status" => "success", "message" => "File deleted successfully"]);
-                exit;
             } catch (Exception $e) {
                 $conn->rollback();
                 echo json_encode(["status" => "error", "message" => "Error deleting file: " . $e->getMessage()]);
-                exit;
             }
         } else {
             echo json_encode(["status" => "error", "message" => "File not found"]);
-            exit;
         }
-    }
-
-    // Handling multiple delete
-if ($action === "deleteMultipleFiles") {
-    if (!isset($_POST['selected_files']) || empty($_POST['selected_files'])) {
-        echo json_encode(["status" => "error", "message" => "No files selected"]);
         exit;
     }
 
-    $selectedFiles = $_POST['selected_files'];
-    $folderName = $_POST['folder_name'];
-    $deletedCount = 0;
-
-    $conn->begin_transaction();
-    try {
-        // First get all file names and folder name for filesystem deletion
-        $placeholders = implode(',', array_fill(0, count($selectedFiles), '?'));
-        $types = str_repeat('i', count($selectedFiles));
-        
-        $stmt = $conn->prepare("SELECT file_name, folder_name FROM files WHERE id IN ($placeholders)");
-        $stmt->bind_param($types, ...$selectedFiles);
-        $stmt->execute();
-        $result = $stmt->get_result();
-        $filesToDelete = $result->fetch_all(MYSQLI_ASSOC);
-        $stmt->close();
-
-        // Delete from database
-        $stmt = $conn->prepare("DELETE FROM files WHERE id IN ($placeholders)");
-        $stmt->bind_param($types, ...$selectedFiles);
-        $stmt->execute();
-        $deletedCount = $stmt->affected_rows;
-        $stmt->close();
-
-        // Update folder count
-        $updateStmt = $conn->prepare("UPDATE media_folders SET num_contents = num_contents - ? WHERE folder_name = ?");
-        $updateStmt->bind_param("is", $deletedCount, $folderName);
-        $updateStmt->execute();
-        $updateStmt->close();
-
-        $conn->commit();
-
-        // Delete from filesystem
-        foreach ($filesToDelete as $file) {
-            $filePath = "uploads/" . $file['folder_name'] . "/" . $file['file_name'];
-            if (file_exists($filePath)) {
-                unlink($filePath);
-            }
+    // Multiple files delete
+    if ($action === "deleteMultipleFiles") {
+        if (!isset($_POST['selected_files']) || empty($_POST['selected_files'])) {
+            echo json_encode(["status" => "error", "message" => "No files selected"]);
+            exit;
         }
 
-        echo json_encode(["status" => "success", "message" => "$deletedCount files deleted successfully"]);
-    } catch (Exception $e) {
-        $conn->rollback();
-        echo json_encode(["status" => "error", "message" => "Error deleting files: " . $e->getMessage()]);
-    }
-    exit;
-}
-
-    // Delete a folder and its contents
-    elseif ($action === "deleteFolder") {
+        $selectedFiles = $_POST['selected_files'];
         $folderName = $_POST['folder_name'];
+        $deletedCount = 0;
 
-        // Start transaction
         $conn->begin_transaction();
         try {
-            // Get count of files to be deleted
-            $countStmt = $conn->prepare("SELECT COUNT(*) FROM files WHERE folder_name = ?");
-            $countStmt->bind_param("s", $folderName);
-            $countStmt->execute();
-            $countStmt->bind_result($fileCount);
-            $countStmt->fetch();
-            $countStmt->close();
+            // Get files to delete
+            $placeholders = implode(',', array_fill(0, count($selectedFiles), '?'));
+            $types = str_repeat('i', count($selectedFiles));
+            
+            $stmt = $conn->prepare("SELECT file_name, folder_name FROM files WHERE id IN ($placeholders)");
+            $stmt->bind_param($types, ...$selectedFiles);
+            $stmt->execute();
+            $result = $stmt->get_result();
+            $filesToDelete = $result->fetch_all(MYSQLI_ASSOC);
+            $stmt->close();
 
-            // Get all files inside the folder
+            // Delete from database
+            $stmt = $conn->prepare("DELETE FROM files WHERE id IN ($placeholders)");
+            $stmt->bind_param($types, ...$selectedFiles);
+            $stmt->execute();
+            $deletedCount = $stmt->affected_rows;
+            $stmt->close();
+
+            // Update folder count
+            $updateStmt = $conn->prepare("UPDATE media_folders SET num_contents = num_contents - ? WHERE folder_name = ?");
+            $updateStmt->bind_param("is", $deletedCount, $folderName);
+            $updateStmt->execute();
+            $updateStmt->close();
+
+            $conn->commit();
+
+            // Delete from filesystem
+            foreach ($filesToDelete as $file) {
+                $filePath = "../../uploads/" . $file['folder_name'] . "/" . $file['file_name'];
+                if (file_exists($filePath)) {
+                    unlink($filePath);
+                }
+            }
+
+            echo json_encode(["status" => "success", "message" => "$deletedCount files deleted successfully"]);
+        } catch (Exception $e) {
+            $conn->rollback();
+            echo json_encode(["status" => "error", "message" => "Error deleting files: " . $e->getMessage()]);
+        }
+        exit;
+    }
+
+    // Folder delete
+    if ($action === "deleteFolder") {
+        $folderName = $_POST['folder_name'];
+
+        $conn->begin_transaction();
+        try {
+            // Get all files in folder
             $stmt = $conn->prepare("SELECT file_name FROM files WHERE folder_name = ?");
             $stmt->bind_param("s", $folderName);
             $stmt->execute();
@@ -275,7 +278,7 @@ if ($action === "deleteMultipleFiles") {
             $stmt->execute();
             $stmt->close();
 
-            // Delete the folder from the database
+            // Delete folder from database
             $stmt = $conn->prepare("DELETE FROM media_folders WHERE folder_name = ?");
             $stmt->bind_param("s", $folderName);
             $stmt->execute();
@@ -285,25 +288,26 @@ if ($action === "deleteMultipleFiles") {
 
             // Delete files from filesystem
             foreach ($files as $file) {
-                $filePath = "uploads/$folderName/$file";
+                $filePath = "../../uploads/$folderName/$file";
                 if (file_exists($filePath)) {
                     unlink($filePath);
                 }
             }
 
-            // Remove the folder itself
-            $folderPath = "uploads/$folderName";
-            deleteFolder($folderPath);
+            // Delete folder itself
+            $folderPath = "../../uploads/$folderName";
+            if (is_dir($folderPath)) {
+                array_map('unlink', glob("$folderPath/*.*"));
+                rmdir($folderPath);
+            }
 
             echo json_encode(["status" => "success", "message" => "Folder and its contents deleted successfully"]);
-            exit;
         } catch (Exception $e) {
             $conn->rollback();
             echo json_encode(["status" => "error", "message" => "Error deleting folder: " . $e->getMessage()]);
-            exit;
         }
+        exit;
     }
-
 }
 
 // Function to delete folder and its contents
@@ -317,7 +321,6 @@ function deleteFolder($folderPath) {
     }
     rmdir($folderPath);
 }
-
 
 $conn->close();
 ?>

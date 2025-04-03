@@ -15,10 +15,8 @@ document.addEventListener("DOMContentLoaded", function () {
             }
         });
     }
-});
 
-// Handle Search Filter
-document.addEventListener("DOMContentLoaded", function () {
+    // Handle Search Filter
     const searchInput = document.querySelector(".search-input");
     const filterSelect = document.querySelector(".filter-select");
     const tableBody = document.querySelector("tbody");
@@ -28,7 +26,7 @@ document.addEventListener("DOMContentLoaded", function () {
         return;
     }
 
-    // 🔍 Handle Search Functionality
+    // Search Functionality
     if (searchInput) {
         searchInput.addEventListener("input", function () {
             const searchValue = this.value.toLowerCase();
@@ -39,44 +37,37 @@ document.addEventListener("DOMContentLoaded", function () {
         });
     }
 
-    // 📂 Handle Sorting Functionality
+    // Sorting Functionality
     if (filterSelect) {
         filterSelect.addEventListener("change", function () {
-            const selectedFilter = this.value; // "name" or "date"
+            const selectedFilter = this.value;
             let rows = Array.from(tableBody.querySelectorAll("tr"));
 
             if (selectedFilter === "name") {
-                // Sort alphabetically by folder name
                 rows.sort((a, b) => {
                     const nameA = a.children[0].textContent.trim().toLowerCase();
                     const nameB = b.children[0].textContent.trim().toLowerCase();
                     return nameA.localeCompare(nameB);
                 });
             } else if (selectedFilter === "date") {
-                // Sort by Date Modified (newest to oldest)
                 rows.sort((a, b) => {
                     const dateA = parseDate(a.children[1].textContent);
                     const dateB = parseDate(b.children[1].textContent);
-                    return dateB - dateA; // Descending order
+                    return dateB - dateA;
                 });
             }
 
-            // Clear and re-append sorted rows
             tableBody.innerHTML = "";
             rows.forEach(row => tableBody.appendChild(row));
         });
     }
 
-    // 🗓️ Function to Parse Date
     function parseDate(dateString) {
         const date = new Date(dateString);
-        return isNaN(date) ? new Date(0) : date; // Default to old date if invalid
+        return isNaN(date) ? new Date(0) : date;
     }
-});
 
-
-// Handle Create Folder
-document.addEventListener("DOMContentLoaded", function () {
+    // Handle Create Folder
     const createFolderBtn = document.querySelector(".create-folder-btn");
 
     if (createFolderBtn) {
@@ -97,64 +88,15 @@ document.addEventListener("DOMContentLoaded", function () {
             .then(response => response.json())
             .then(data => {
                 if (data.status === "success") {
-                    setTimeout(() => location.reload(), 300); // Quick reload after success
+                    setTimeout(() => location.reload(), 300);
                 } else {
                     showModal("errorModal", data.message);
                 }
             });
         });
     }
-});
 
-// Function to show error modal with dynamic message
-function showModal(modalId, message) {
-    const modal = document.getElementById(modalId);
-    const modalMessage = modal.querySelector(".modal-message");
-
-    if (modalMessage) {
-        modalMessage.textContent = message;
-    }
-
-    modal.style.display = "flex";
-}
-
-// Function to close modal
-function closeModal(modalId) {
-    document.getElementById(modalId).style.display = "none";
-}
-
-
-// Function to show modal with dynamic message
-function showModal(modalId, message) {
-    const modal = document.getElementById(modalId);
-    const modalMessage = modal.querySelector(".modal-message");
-
-    if (modalMessage) {
-        modalMessage.textContent = message;
-    }
-
-    modal.style.display = "flex";
-}
-
-// Function to close modal
-function closeModal(modalId) {
-    document.getElementById(modalId).style.display = "none";
-}
-
-
-// Function to show modal
-function showModal(modalId) {
-    document.getElementById(modalId).style.display = "flex";
-}
-
-// Function to close modal
-function closeModal(modalId) {
-    document.getElementById(modalId).style.display = "none";
-}
-
-
-//modal rename & Deleting
-document.addEventListener("DOMContentLoaded", function () {
+    // Modal Manager with Admin PIN Verification
     const ModalManager = {
         currentFolderId: null,
 
@@ -166,7 +108,6 @@ document.addEventListener("DOMContentLoaded", function () {
         },
 
         closeModal: function (modalId) {
-            console.log("Closing modal:", modalId);
             const modal = document.getElementById(modalId);
             if (modal) {
                 modal.style.display = "none";
@@ -203,11 +144,11 @@ document.addEventListener("DOMContentLoaded", function () {
 
             if (!newName) {
                 errorMsg.textContent = "Please enter a new folder name.";
-                errorMsg.style.display = "block"; // Show the error message
+                errorMsg.style.display = "block";
                 return;
             }
 
-            errorMsg.style.display = "none"; // Hide error if input is valid
+            errorMsg.style.display = "none";
 
             fetch("../AdminBackEnd/MediaFilesBE.php", {
                 method: "POST",
@@ -220,51 +161,70 @@ document.addEventListener("DOMContentLoaded", function () {
                         this.closeModal("renameModal");
                         this.showSuccessModal("renameSuccessModal");
                     } else {
-                        errorMsg.textContent = data.message; // Show server error message
+                        errorMsg.textContent = data.message;
                         errorMsg.style.display = "block";
                     }
                 });
         },
 
         deleteFolder: function () {
+            const pinCode = document.getElementById("deletePinCode").value.trim();
+            const errorElement = document.getElementById("deletePinError");
+            
+            if (!pinCode || pinCode.length !== 6) {
+                errorElement.textContent = "Please enter a valid 6-digit PIN code";
+                errorElement.style.display = "block";
+                return;
+            }
+            
+            errorElement.style.display = "none";
+            
             fetch("../AdminBackEnd/MediaFilesBE.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
-                body: `action=delete&folder_id=${this.currentFolderId}`
+                body: `action=delete&folder_id=${this.currentFolderId}&pin_code=${encodeURIComponent(pinCode)}`
             })
                 .then(response => response.json())
                 .then(data => {
                     if (data.status === "success") {
                         this.closeModal("deleteModal");
                         this.showSuccessModal("deleteSuccessModal");
+                        document.getElementById("deletePinCode").value = "";
                     } else {
-                        alert(data.message);
+                        errorElement.textContent = data.message;
+                        errorElement.style.display = "block";
                     }
+                })
+                .catch(error => {
+                    errorElement.textContent = "An error occurred. Please try again.";
+                    errorElement.style.display = "block";
                 });
         },
 
         clearErrorMessages: function (modalId) {
             if (modalId === "renameModal") {
                 const errorMsg = document.getElementById("renameError");
-                errorMsg.style.display = "none"; // Hide error when modal is closed
+                errorMsg.style.display = "none";
                 errorMsg.textContent = "";
+            } else if (modalId === "deleteModal") {
+                const errorMsg = document.getElementById("deletePinError");
+                errorMsg.style.display = "none";
+                errorMsg.textContent = "";
+                document.getElementById("deletePinCode").value = "";
             }
         },
 
         attachEventListeners: function () {
-            // Rename Button Event
             const renameFolderBtn = document.getElementById("renameFolderBtn");
             if (renameFolderBtn) {
                 renameFolderBtn.addEventListener("click", () => this.renameFolder());
             }
 
-            // Delete Button Event
             const deleteFolderBtn = document.getElementById("deleteFolderBtn");
             if (deleteFolderBtn) {
                 deleteFolderBtn.addEventListener("click", () => this.deleteFolder());
             }
 
-            // Attach modal openers
             document.querySelectorAll(".rename-btn").forEach(button => {
                 button.addEventListener("click", () => {
                     const folderId = button.getAttribute("data-id");
@@ -281,12 +241,10 @@ document.addEventListener("DOMContentLoaded", function () {
                 });
             });
 
-            // Global close modal functionality
             document.querySelectorAll(".close").forEach(button => {
                 button.addEventListener("click", () => this.closeModal(button.parentElement.parentElement.id));
             });
 
-            // Attach Cancel Button Functionality
             document.querySelectorAll(".custom-modal button").forEach(button => {
                 if (button.textContent.trim() === "Cancel") {
                     button.addEventListener("click", () => this.closeModal(button.closest(".custom-modal").id));
@@ -298,60 +256,22 @@ document.addEventListener("DOMContentLoaded", function () {
     ModalManager.attachEventListeners();
 });
 
-// Pagination
+function showModal(modalId, message) {
+    const modal = document.getElementById(modalId);
+    const modalMessage = modal?.querySelector(".modal-message");
 
-document.addEventListener("DOMContentLoaded", function () {
-    const rowsPerPage = 10;
-    let currentPage = 1;
-    const tableBody = document.getElementById("media-table-body");
-    const rows = Array.from(tableBody.getElementsByTagName("tr"));
-    let filteredRows = [...rows]; 
-    let totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-
-    function showPage(page) {
-        if (filteredRows.length === 0) {
-            tableBody.innerHTML = "<tr><td colspan='5'>No results found</td></tr>";
-            document.getElementById("page-number").innerText = "No results";
-            document.getElementById("prev-btn").disabled = true;
-            document.getElementById("next-btn").disabled = true;
-            return;
-        }
-
-        rows.forEach(row => (row.style.display = "none"));
-
-        let start = (page - 1) * rowsPerPage;
-        let end = start + rowsPerPage;
-        filteredRows.slice(start, end).forEach(row => (row.style.display = "table-row"));
-
-        document.getElementById("page-number").innerText = `Page ${page} of ${totalPages}`;
-        document.getElementById("prev-btn").disabled = page === 1;
-        document.getElementById("next-btn").disabled = page === totalPages;
+    if (modalMessage) {
+        modalMessage.textContent = message;
     }
 
-    function nextPage() {
-        if (currentPage < totalPages) {
-            currentPage++;
-            showPage(currentPage);
-        }
+    if (modal) {
+        modal.style.display = "flex";
     }
+}
 
-    function prevPage() {
-        if (currentPage > 1) {
-            currentPage--;
-            showPage(currentPage);
-        }
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = "none";
     }
-
-    function searchTable() {
-        const query = document.getElementById("search-input").value.toLowerCase();
-        filteredRows = rows.filter(row => row.textContent.toLowerCase().includes(query));
-        currentPage = 1;
-        totalPages = Math.ceil(filteredRows.length / rowsPerPage);
-        showPage(currentPage);
-    }
-
-    showPage(currentPage);
-    window.nextPage = nextPage;
-    window.prevPage = prevPage;
-    window.searchTable = searchTable;
-});
+}

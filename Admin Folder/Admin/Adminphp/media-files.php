@@ -19,7 +19,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES</title>
-    <link rel="stylesheet" href="../../Css/mediafiles.css">
+    <link rel="stylesheet" href="../../Css/mediafiles1.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -167,10 +167,16 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
         <h2>Delete Folder</h2>
         <p id="deleteFolderName"></p>
         <p>Are you sure you want to delete this folder?</p>
+        <div id="pinCodeSection" style="margin: 15px 0;">
+            <label for="deletePinCode">Enter PIN code:</label>
+            <input type="password" id="deletePinCode" placeholder="6-digit PIN" maxlength="6" style="width: 90%; padding: 8px; margin-top: 5px;">
+            <p id="deletePinError" style="color: red; display: none;"></p>
+        </div>
         <button id="deleteFolderBtn">Delete</button>
         <button onclick="closeModal('deleteModal')">Cancel</button>
     </div>
 </div>
+
 
 <!-- Success Rename Modal -->
 <div id="renameSuccessModal" class="success-modal">
