@@ -95,7 +95,7 @@ elseif ($action === "rename") {
         $stmt->store_result();
         
         if ($stmt->num_rows === 0) {
-            echo json_encode(["status" => "error", "message" => "Invalid admin PIN code"]);
+            echo json_encode(["status" => "error", "message" => "Invalid PIN code"]);
             exit;
         }
         $stmt->close();

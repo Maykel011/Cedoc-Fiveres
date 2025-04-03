@@ -1,23 +1,29 @@
 @font-face {
     font-family: 'Akrobat';
     src: url('AkrobatB.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    /* font-family: 'Akrobat', sans-serif; */
 }
+
 
 @font-face {
     font-family: 'SerpentineBold';
     src: url('Serpentinebold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+    /* font-family: 'SerpentineBold', sans-serif; */
 }
 
 body {
     margin: 0;
-    font-family: 'SerpentineBold', sans-serif;
     background: url('../assets/bg2.gif') no-repeat center center fixed;
     background-size: cover;
     overflow: hidden;
     background-position: top;
 }
 
-.login-container {
+.forgot-container {
     display: flex;
     justify-content: center;
     align-items: center;
@@ -25,7 +31,7 @@ body {
     padding: 20px;
 }
 
-.login-form {
+.forgot-form {
     background-color: rgba(255, 255, 255, 0.95);
     padding: 40px 30px;
     border-radius: 15px;
@@ -37,7 +43,7 @@ body {
     position: relative;
 }
 
-.login-form::before {
+.forgot-form::before {
     content: "";
     background: url('../assets/img4.png') no-repeat center top;
     background-size: 100px;
@@ -49,14 +55,16 @@ body {
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
 
-.login-form h2 {
+.forgot-form h2 {
+    font-family: 'SerpentineBold', sans-serif;
     font-weight: 800;
     color: #1b2560;
     margin-bottom: 5px;
     font-size: 25px;
 }
 
-.login-form p {
+.forgot-form p {
+    font-family: 'Akrobat', sans-serif;
     font-weight: 600;
     margin-top: 15px;
     font-size: 14px;
@@ -97,7 +105,8 @@ body {
     width: 100%;
 }
 
-.login-button {
+.forgot-button {
+    font-family: 'Akrobat', sans-serif;
     background-color: #1b2560;
     color: white;
     border: none;
@@ -108,7 +117,7 @@ body {
     border-radius: 5px;
 }
 
-.login-button:hover {
+.forgot-button:hover {
     background-color: #142042;
 }
 
@@ -118,6 +127,7 @@ body {
 }
 
 .forgot-password a {
+    font-family: 'Akrobat', sans-serif;
     color: #007bff;
     text-decoration: none;
     font-size: 14px;

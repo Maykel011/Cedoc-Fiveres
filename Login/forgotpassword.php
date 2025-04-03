@@ -6,12 +6,12 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="icon" href="assets/icon.ico" type="image/x-icon">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    <link rel="stylesheet" href="./css/forgot.css">
+    <link rel="stylesheet" href="./css/forgotp.css">
     <title>Forgot Password</title>
 </head>
 <body>
-    <div class="login-container">
-        <form action="forgotpassword.php" method="POST" class="login-form">
+    <div class="forgot-container">
+        <form action="forgotpassword.php" method="POST" class="forgot-form">
             <h2>Forgot Password</h2>
             <p>Enter your email to reset your password</p>
             <?php if(isset($error)): ?>
@@ -25,7 +25,7 @@
                 <input type="email" name="email" placeholder="Email" required>
             </div>
             <div class="button-container">
-                <button class="login-button" type="submit">Submit</button>
+                <button class="forgot-button" type="submit">Submit</button>
             </div>
             <div class="forgot-password">
                 <a href="login.php">Back to Login</a>
@@ -33,6 +33,6 @@
         </form>
     </div>
 
-    <script src="./js/login.js"></script>
+    <script src="./js/forgot.js"></script>
 </body>
 </html>
