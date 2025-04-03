@@ -155,14 +155,16 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
                     <div class="designation-container">
                         <h3>Designation</h3>
                         <div class="form-group">
-                            <label for="create_position">Position</label>
-                            <select id="create_position" name="position" required>
-                                <option value="" selected disabled>Choose position...</option>
-                                <option value="Head">Head</option>
-                                <option value="Supervisor">Supervisor</option>
-                                <option value="Employee">Employee</option>
-                            </select>
-                        </div>
+    <label for="create_position">Position</label>
+    <select id="create_position" name="position" required>
+        <option value="" selected disabled>Choose position...</option>
+        <option value="Head">Head</option>
+        <option value="Supervisor">Supervisor</option>
+        <option value="Employee">Employee</option>
+        <option value="Other">Other</option>
+    </select>
+    <input type="text" id="create_other_position" name="other_position" style="display: none; margin-top: 5px; width: 73%;" placeholder="Please specify position">
+</div>
                         <div class="form-group">
                             <label for="create_role">Role</label>
                             <select id="create_role" name="role" required>
@@ -240,13 +242,15 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
 
                         </div>
 
-                        <div class="form-group">
+                         <div class="form-group">
                             <label for="edit_position">Position</label>
                             <select id="edit_position" name="position" required>
                                 <option value="Head">Head</option>
                                 <option value="Supervisor">Supervisor</option>
                                 <option value="Employee">Employee</option>
+                                <option value="Other">Other</option>
                             </select>
+                            <input type="text" id="edit_other_position" name="other_position" style="display: none; margin-top: 5px; width: 73%;" placeholder="Please specify position">
                         </div>
                         <div class="form-group">
                             <label for="edit_role">Role</label>
@@ -345,7 +349,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
         </div>
     </div>
 
-    <script src="../../js/usermgs.js"></script>
+    <script src="../../js/usermngs.js"></script>
 </body>
 
 </html>
