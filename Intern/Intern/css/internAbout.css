@@ -1,0 +1,255 @@
+@import url('https://fonts.googleapis.com/css2?family=Oswald:wght@200..700&family=Poppins:ital,wght@0,800;0,900;1,800;1,900&family=Sigmar&display=swap');
+        @font-face {
+            font-family: 'Akrobat';
+            src: url('DCMS\fontfamily\AkrobatR.ttf') format('truetype');
+        }
+        @font-face {
+            font-family: 'Serpentine';
+            src: url('DCMS\fontfamily\SerpentineBold.ttf') format('truetype');
+        }
+        body {
+            margin: 0;
+            font-family: 'Montserrat';
+            display: flex;
+            flex-direction: column;
+            height: 100vh;
+            background: #edecfe;
+        }
+        .datetime {
+            background-color: rgba(33, 37, 41, 1);
+            color: #EDEADE;
+            padding: 10px;
+            text-align: right;
+            font-family: 'Montserrat', sans-serif;
+        }
+        header {
+            background-color: #1b2560;
+            display: flex;
+            color: white;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0px;
+            height: 100px;
+            width: 100%;
+            position: fixed;
+            top: 30px;
+            z-index: 1;
+        }
+        nav img {
+            height: 70px;
+            margin-top: 7px;
+            padding: 0 20px;
+        }
+        ul {
+            padding: 0;
+            margin: 0;
+            list-style: none;
+            box-sizing: border-box;
+        }
+        nav {
+            background: #1b2560;
+            height: 90px;
+        }
+        nav ul {
+            float: right;
+            margin-right: 20px;
+        }
+        nav ul li {
+            display: inline-block;
+            line-height: 87px;
+            margin: 0 20px;
+        }
+        nav ul li a {
+            font-family: "Poppins", sans-serif;
+            font-weight: 900;
+            font-style: italic;
+            color: white;
+            font-size: 17px;
+            padding: 7px 13px;
+            border-radius: 6px;
+            text-decoration: none;
+        }
+        nav ul li a:hover {
+            background-color: #e0e0e0;
+            color: #141b46;
+        }
+        .about {
+            text-align: center;
+            margin: 0 auto;
+            width: 70%;
+        }
+        .about h3 {
+            font-family: 'Serpentine', sans-serif;
+            font-size: 36px;
+        }
+        .about p {
+            font-family: 'Akrobat', sans-serif;
+            font-size: 20px;
+            font-style: italic;
+            color: #00000062;
+        }
+        .quote {
+            display: block;
+            margin: 0 auto;
+            text-align: center;
+            width: 80%;
+            height: 80%;
+            object-fit: cover; /* Ensures the image maintains aspect ratio */
+        }
+        h1 {
+            font-family: 'Serpentine', sans-serif;
+            text-align: center;
+            font-size: 30px;
+        }
+        .benefits {
+            display: flex;  
+            flex-direction: row-reverse; 
+            align-items: flex-start; 
+            gap: 20px; 
+            margin: 20px;
+        }
+
+        .benefits img {
+            margin-right: 40px;
+            margin-top: 15px;
+            width: 400px; 
+            height: 500px; 
+            border-radius: 15px; 
+        }
+
+        .benefits .text {
+            font-family: 'Akrobat', sans-serif; 
+            font-size: 18px; 
+            text-align: justify;
+            color: #333; 
+            line-height: 1.6;
+            margin-right: 80px;
+            width: 60%;
+        }
+
+        .benefits ul {
+            padding-left: 20px; 
+            margin-top: 10px; 
+            font-size: 18px; 
+        }
+
+        .benefits h3 {
+            font-size: 24px; 
+            margin-bottom: 10px;
+        }
+        .container {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 40px;
+            justify-content: center;
+        }
+        .card {
+            background: white;
+            width: 270px;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+            text-align: center;
+            cursor: pointer;
+            transition: transform 0.3s ease-in-out;
+        }
+        .card:hover {
+            transform: scale(1.05);
+        }
+        .card img {
+            width: 100%;
+            height: 150px;
+            border-radius: 10px;
+            object-fit: cover;
+        }
+        .card h3 {
+            font-family: 'Serpentine', sans-serif;
+            font-size: 14px;
+            color: #007bff;
+            margin-top: 10px;
+        }
+        .card p {
+            font-family: 'Akrobat', sans-serif;
+            font-size: 14px;
+            color: #333;
+        }
+
+        /* Modal Styling */
+        .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            width: 50%;
+            text-align: center;
+            position: relative;
+        }
+        .modal img {
+            width: 100%;
+            max-height: 450px;
+            border-radius: 10px;
+            object-fit: cover;
+            margin-bottom: 15px;
+        }
+        .close-btn {
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 20px;
+            cursor: pointer;
+        }
+        .modal h2 {
+            font-family: 'Serpentine', sans-serif;
+        }
+        .modal ul {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr); /* Two columns */
+            gap: 10px;
+            text-align: left;
+            padding-left: 20px;
+        }
+        .modal ul li {
+            font-family: 'Akrobat', sans-serif;
+            margin-bottom: 8px;
+            list-style-type: disc;
+        }
+        
+        footer {
+        background-color: #c70000;
+        font-family: 'Akrobat', sans-serif;
+        color: white;
+        padding: 20px;
+        text-align: center;
+        }
+
+        .social-links {
+        margin-bottom: 10px;
+        }
+
+        .social-links a {
+        color: white;
+        margin: 0 10px;
+        font-size: 24px; /* Icon size */
+        text-decoration: none;
+        }
+
+        .social-links a:hover {
+        color: #ffcccb; /* Lighter hover effect */
+        }
+
+        .credits {
+        font-size: 14px;
+        margin-top: 10px;
+        }
+       
