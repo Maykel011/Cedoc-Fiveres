@@ -133,4 +133,12 @@
             text-decoration: underline;
         }
 
-        
+        .warning-message {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 10px;
+            border-radius: 4px;
+            margin-bottom: 15px;
+            border: 1px solid #ffeeba;
+            text-align: center;
+        }

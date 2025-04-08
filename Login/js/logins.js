@@ -20,3 +20,42 @@
                 }, 2000);
             }, 3000);
         });
+
+        document.addEventListener('DOMContentLoaded', function() {
+            const loginForm = document.querySelector('.login-form');
+            
+            if(loginForm) {
+                loginForm.addEventListener('submit', function(event) {
+                    const loginBtn = this.querySelector('.login-button');
+                    const employeeNo = this.querySelector('input[name="employee_no"]').value;
+                    const password = this.querySelector('input[name="password"]').value;
+                    
+                    // Simple client-side validation
+                    if(!employeeNo || !password) {
+                        event.preventDefault();
+                        return;
+                    }
+                    
+                    // Disable button during submission
+                    loginBtn.disabled = true;
+                    loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+                });
+            }
+            
+            // Close modal when clicking outside
+            const modal = document.getElementById('lockoutModal');
+            if(modal) {
+                modal.addEventListener('click', function(e) {
+                    if(e.target === modal) {
+                        closeModal();
+                    }
+                });
+            }
+        });
+        
+        function closeModal() {
+            const modal = document.getElementById('lockoutModal');
+            if(modal) {
+                modal.style.display = 'none';
+            }
+        }   
