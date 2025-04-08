@@ -2,6 +2,15 @@
 include '../connection/Connection.php'; 
 include '../AdminBackEnd/MediaFilesBE.php';
 
+session_start();
+
+// Corrected check (using 'role' instead of 'user_role')
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'Admin' vs 'admin'
+    // Redirect to login page (not logout!)
+    header("Location: ../../../login/login.php");
+    exit();
+}
+
 ?>
 
 <!DOCTYPE html>
@@ -10,7 +19,7 @@ include '../AdminBackEnd/MediaFilesBE.php';
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES</title>
-    <link rel="stylesheet" href="../../Css/media-file.css">
+    <link rel="stylesheet" href="../../Css/mediafiles1.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -23,15 +32,39 @@ include '../AdminBackEnd/MediaFilesBE.php';
         <div class="right-side">
             <div class="user" id="userContainer">
                 <img src="../../assets/icon/users.png" alt="User" class="icon" id="userIcon">
-                <span class="admin-text">Admin</span>
+                <span class="admin-text">
+                    <?php 
+                    // Display first and last name if available, otherwise show "Admin"
+                    if(isset($_SESSION['first_name']) && isset($_SESSION['last_name'])) {
+                        echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']);
+                    } else {
+                        echo 'Admin';
+                    }
+                    ?>
+                </span>
                 <div class="user-dropdown" id="userDropdown">
-                <a href="profile.php"><img src="../../assets/icon/updateuser.png" alt="Profile Icon" class="dropdown-icon"> Profile</a>
-                    <a href="#"><img src="../../assets/icon/logout.png" alt="Logout Icon" class="dropdown-icon"> Logout</a>
+                    <a href="profile.php"><img src="../../assets/icon/updateuser.png" alt="Profile Icon" class="dropdown-icon"> Profile</a>
+                    <a href="#" id="logoutLink"><img src="../../assets/icon/logout.png" alt="Logout Icon" class="dropdown-icon"> Logout</a>
                 </div>
             </div>
         </div>
     </div>
 </header>
+
+<!-- Logout Modal -->
+<div id="logoutModal" class="logout-modal">
+    <div class="logout-modal-content">
+        <div class="logout-icon">
+            <i class="fas fa-sign-out-alt"></i>
+        </div>
+        <h3>Confirm Logout</h3>
+        <p>Are you sure you want to logout from your admin account?</p>
+        <div class="logout-modal-buttons">
+            <button id="logoutCancel" class="logout-modal-btn logout-modal-cancel">Cancel</button>
+            <button id="logoutConfirm" class="logout-modal-btn logout-modal-confirm">Logout</button>
+        </div>
+    </div>
+</div>
 
 <aside class="sidebar">
     <ul>
@@ -82,38 +115,32 @@ include '../AdminBackEnd/MediaFilesBE.php';
                     </tr>
                 </thead>
                 <tbody id="media-table-body">
-                <?php
-                $query = "SELECT * FROM media_folders ORDER BY date_modified DESC";
-                $result = $conn->query($query);
+    <?php
+    $query = "SELECT * FROM media_folders ORDER BY date_modified DESC";
+    $result = $conn->query($query);
 
-                while ($row = $result->fetch_assoc()) {
-                    echo "<tr>
-                        <td>📁 {$row['folder_name']}</td>
-                        <td>{$row['date_modified']}</td>
-                        <td>Folder</td>
-                        <td>{$row['num_contents']}</td>
-                        <td>
-                            <button class='rename-btn' data-id='{$row['id']}'>Rename</button>
-                            <button class='delete-btn' data-id='{$row['id']}'>Delete</button>
-                        </td>
-                    </tr>";
-                }
-                ?>
-            </tbody>
-        
-        </table>
-
-    </div>
-                <!-- Pagination Controls -->
-                <div class="pagination">
-        <button onclick="prevPage()" id="prev-btn" disabled>« Previous</button>
-        <span id="page-number">Page 1</span>
-        <button onclick="nextPage()" id="next-btn">Next »</button>
-    </div>
-</div>
-
-
-
+    while ($row = $result->fetch_assoc()) :
+    ?>
+        <tr id="folder-<?php echo $row['id']; ?>">
+            <td>
+                <a href="view-folder.php?folder=<?php echo urlencode($row['folder_name']); ?>" style="text-decoration: none; color: black;">
+                    <span class="folder-icon">📁</span>
+                    <span class="folder-name" id="folder-name-<?php echo $row['id']; ?>">
+                        <?php echo htmlspecialchars($row['folder_name']); ?>
+                    </span>
+                </a>
+                <input type="text" id="rename-input-<?php echo $row['id']; ?>" value="<?php echo htmlspecialchars($row['folder_name']); ?>" style="display:none;">
+            </td>
+            <td><?php echo date('Y-m-d h:i:s A', strtotime($row['date_modified'])); ?></td>
+            <td>Folder</td>
+            <td><?php echo htmlspecialchars($row['num_contents']); ?></td>
+            <td>
+                <button class="rename-btn" data-id="<?php echo $row['id']; ?>">Rename</button>
+                <button class="delete-btn" data-id="<?php echo $row['id']; ?>">Delete</button>
+            </td>
+        </tr>
+    <?php endwhile; ?>
+</tbody>
 
 
 
@@ -140,10 +167,16 @@ include '../AdminBackEnd/MediaFilesBE.php';
         <h2>Delete Folder</h2>
         <p id="deleteFolderName"></p>
         <p>Are you sure you want to delete this folder?</p>
+        <div id="pinCodeSection" style="margin: 15px 0;">
+            <label for="deletePinCode">Enter PIN code:</label>
+            <input type="password" id="deletePinCode" placeholder="6-digit PIN" maxlength="6" style="width: 90%; padding: 8px; margin-top: 5px;">
+            <p id="deletePinError" style="color: red; display: none;"></p>
+        </div>
         <button id="deleteFolderBtn">Delete</button>
         <button onclick="closeModal('deleteModal')">Cancel</button>
     </div>
 </div>
+
 
 <!-- Success Rename Modal -->
 <div id="renameSuccessModal" class="success-modal">
@@ -171,6 +204,6 @@ include '../AdminBackEnd/MediaFilesBE.php';
 
 
 
-<script src="../../js/mediafiles.js"></script>
+<script src="../../js/mediafiles123.js"></script>
 </body>
 </html>
