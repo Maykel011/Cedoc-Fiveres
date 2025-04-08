@@ -134,11 +134,13 @@
         }
 
         .warning-message {
-            background-color: #fff3cd;
             color: #856404;
-            padding: 10px;
-            border-radius: 4px;
-            margin-bottom: 15px;
+            background-color: #fff3cd;
             border: 1px solid #ffeeba;
+            padding: 10px;
+            margin-bottom: 15px;
+            border-radius: 4px;
+            font-weight: bold;
             text-align: center;
         }
+        

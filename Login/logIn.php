@@ -66,11 +66,11 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 
                 // Determine lockout duration based on failed attempts
                 if($new_attempts >= 6) {
-                    $lock_time = date('Y-m-d H:i:s', strtotime('+24 hours'));
+                    $lock_time = date('Y-m-d H:i:s', strtotime('+30 minutes')); // Changed from 30 hours to 30 minutes
                 } elseif($new_attempts == 5) {
-                    $lock_time = date('Y-m-d H:i:s', strtotime('+60 minutes'));
+                    $lock_time = date('Y-m-d H:i:s', strtotime('+20 minutes'));
                 } elseif($new_attempts == 4) {
-                    $lock_time = date('Y-m-d H:i:s', strtotime('+30 minutes'));
+                    $lock_time = date('Y-m-d H:i:s', strtotime('+10 minutes'));
                 }
                 
                 // Update failed attempts and lock time
@@ -83,13 +83,13 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 
                 // Store warning message
                 if($new_attempts >= 3) {
-                    $warning = "Warning: $new_attempts failed attempts. ";
+                    $warning = "Warning: $new_attempts attempts. ";
                     if($new_attempts == 3) {
-                        $warning .= "4 failed attempts will result in a 30-minute lockout.";
+                        $warning .= "Next failed attempt will result in a 10-minute lockout.";
                     } elseif($new_attempts == 4) {
-                        $warning .= "Next failed attempt will result in a 60-minute lockout.";
+                        $warning .= "Next attempt will result in a 20-minute lockout.";
                     } elseif($new_attempts == 5) {
-                        $warning .= "Next failed attempt will lock your account for 24 hours.";
+                        $warning .= "Next attempt will lock your account for 30 minutes."; // Updated this message
                     }
                     $_SESSION['login_warning'] = $warning;
                 }
