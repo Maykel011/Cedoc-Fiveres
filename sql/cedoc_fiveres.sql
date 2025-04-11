@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Apr 08, 2025 at 03:33 AM
+-- Generation Time: Apr 10, 2025 at 03:31 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -123,15 +123,19 @@ CREATE TABLE `users` (
   `password` varchar(255) NOT NULL,
   `pin_code` varchar(6) DEFAULT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
-  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+  `failed_attempts` int NOT NULL DEFAULT '0',
+  `locked_until` datetime DEFAULT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `users`
 --
 
-INSERT INTO `users` (`id`, `employee_no`, `first_name`, `last_name`, `position`, `role`, `email`, `password`, `pin_code`, `created_at`, `updated_at`) VALUES
-(8, 'MZ-5062', 'Arthur Nathan', 'Alcantara', 'Supervisor', 'Admin', 'nathantwotoy@gmail.com', '$2y$10$gyLSpDU.f8lgLefC7L6t.e36.jMaGxeSmIO6M4XRYkE2a6WknrHdi', '111222', '2025-04-02 07:50:28', '2025-04-03 07:13:13');
+INSERT INTO `users` (`id`, `employee_no`, `first_name`, `last_name`, `position`, `role`, `email`, `password`, `pin_code`, `created_at`, `updated_at`, `failed_attempts`, `locked_until`) VALUES
+(8, 'MZ-5062', 'Arthur Nathan', 'Alcantara', 'Supervisor', 'Admin', 'nathantwotoy@gmail.com', '$2y$10$gyLSpDU.f8lgLefC7L6t.e36.jMaGxeSmIO6M4XRYkE2a6WknrHdi', '111222', '2025-04-02 07:50:28', '2025-04-08 06:24:09', 5, '2025-04-08 06:44:09'),
+(10, 'MZ-5063', 'brixter', 'luquing', 'Supervisor', 'Admin', 'biksterlooking@gmail.com', '$2y$10$DVDKTjp/aHI636sp.xwI2O6QqkxJVbCD/zCIYc3GYYnbAVF8sGVfC', '123456', '2025-04-08 05:22:49', '2025-04-08 06:02:13', 4, '2025-04-08 06:32:13'),
+(11, 'MZ-5064', 'brixter1', 'luquing1', 'Supervisor', 'Admin', 'biksterlooking1@gmail.com', '$2y$10$HJMO81X8vH5L0ZxzaMUJ2ePeHULB.l77dMPd0PzDoq/71qJo79.WG', '123456', '2025-04-08 06:01:16', '2025-04-10 03:31:01', 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -224,7 +228,7 @@ ALTER TABLE `media_folders`
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
 
 --
 -- AUTO_INCREMENT for table `vehicle_runs`
