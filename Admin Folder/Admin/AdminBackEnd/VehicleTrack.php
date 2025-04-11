@@ -1,16 +1,6 @@
 <?php
 session_start();
-
-$servername = "localhost";
-$username = "root";
-$password = "";
-$dbname = "cedoc_fiveres";
-
-$conn = new mysqli($servername, $username, $password, $dbname);
-
-if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
-}
+include '../connection/Connection.php'; // Database connection
 
 // Fetch dropdown options for Vehicle Team and Case Type
 $vehicle_teams = ["Alpha", "Bravo", "Charlie"," Delta"];
