@@ -266,11 +266,7 @@ tbody tr:hover {
 }
 
 /* Action Buttons */
-.action-cell {
-    display: flex;
-    gap: 5px;
-    white-space: nowrap;
-}
+
 
 .action-btn {
     width: 30px;

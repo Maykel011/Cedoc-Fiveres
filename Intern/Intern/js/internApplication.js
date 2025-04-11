@@ -1,15 +1,4 @@
-function updateDateTime() {
-    const now = new Date();
-    const options = { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric', hour: 'numeric', minute: 'numeric', hour12: true };
-    const dateTimeStr = now.toLocaleString('en-US', options).replace(',', ' |').replace(' at ', ' | ');
-    document.getElementById('datetime').textContent = dateTimeStr;
-}
-function updateYear() {
-    const year = new Date().getFullYear();
-    document.getElementById('program-year').textContent = year;
-}
-setInterval(updateDateTime, 1000);
-window.onload = updateYear;
+
 
 
 //Para sa dropdown pag *pag click ng other sa select may lalabas na textbox
