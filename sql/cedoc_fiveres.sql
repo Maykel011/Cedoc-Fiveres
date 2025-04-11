@@ -126,7 +126,11 @@ CREATE TABLE `users` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `failed_attempts` int NOT NULL DEFAULT '0',
   `locked_until` datetime DEFAULT NULL
+<<<<<<< HEAD
 ) ;
+=======
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+>>>>>>> ee2dfdeff4ac59a62955ecff7a6f996bf544064e
 
 --
 -- Dumping data for table `users`
