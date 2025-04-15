@@ -22,6 +22,7 @@ $vehicleRuns = getVehicleRunsData();
     <title>CEDOC FIVERES</title>
     <link rel="stylesheet" href="../../Css/AdminVHLruns.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
 
 <body>
@@ -174,7 +175,8 @@ $vehicleRuns = getVehicleRunsData();
                             $backToBaseTime = date('m/d/Y H:i', strtotime($run['back_to_base_time']));
                             $imageHtml = 'No image';
                             if (!empty($run['case_image'])) {
-                                $imageHtml = '<a href="../../' . htmlspecialchars($run['case_image']) . '" target="_blank" class="image-preview-link">View Image</a>';
+                                $filename = basename($run['case_image']);
+                                $imageHtml = '<a href="../../' . htmlspecialchars($run['case_image']) . '" target="_blank" class="image-preview-link" data-filename="' . htmlspecialchars($filename) . '">View Image</a>';
                             }
                             $transportOfficer = !empty($run['transport_officer']) ? htmlspecialchars($run['transport_officer']) : 'N/A';
                             ?>
@@ -204,6 +206,7 @@ $vehicleRuns = getVehicleRunsData();
         </div>
     </div>
     </div>
+    
 
     <!-- Upload Case Modal -->
     <div id="uploadCaseModal" class="upload-modal-content">

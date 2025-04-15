@@ -377,17 +377,15 @@ body,html {
     }
 }
 
-/* Table - Modern Enhanced Version */
+/* Table - Modern Enhanced Version with Clear Dividers */
 table {
     width: 100%;
-    border-collapse: separate; /* Changed for better border-radius support */
-    border-spacing: 0;
+    border-collapse: collapse; /* Changed back to collapse for solid lines */
     background: white;
     border-radius: 12px;
     overflow: hidden;
     box-shadow: 0 4px 20px rgba(0, 51, 102, 0.1);
     transition: all 0.3s ease;
-    backdrop-filter: blur(2px);
 }
 
 table:hover {
@@ -424,19 +422,19 @@ th:not(:last-child)::after {
     background: rgba(255, 255, 255, 0.2);
 }
 
-/* Table Body - Enhanced Readability */
+/* Table Body - Clear Horizontal Dividers */
 tbody tr {
     transition: all 0.25s ease;
-    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    border-bottom: 1px solid #e0e0e0; /* Solid light gray line between rows */
 }
 
 tbody tr:last-child {
-    border-bottom: none;
+    border-bottom: none; /* Remove border from last row */
 }
 
 tbody tr:hover {
     background-color: rgba(0, 102, 204, 0.03);
-    transform: translateX(2px);
+
 }
 
 td {
@@ -444,13 +442,25 @@ td {
     vertical-align: middle;
     font-family: 'Inter', sans-serif;
     color: #333;
+    position: relative;
+}
+
+/* Add subtle separator between cells (optional) */
+td:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 25%;
+    height: 50%;
+    width: 1px;
+    background: rgba(0, 0, 0, 0.05);
 }
 
 /* Action Buttons Container - Modern Layout */
 .action-buttons {
     display: flex;
     gap: 10px;
-    justify-content: flex-start;
+    justify-content: center;
     padding: 8px 0;
     flex-wrap: wrap;
 }
