@@ -1,21 +1,34 @@
 <?php
 include '../connection/Connection.php';
 
+// Check if current user is Super Admin
+function isSuperAdmin($conn) {
+    if (!isset($_SESSION['user_id'])) return false;
+    $userId = $_SESSION['user_id'];
+    $result = $conn->query("SELECT role FROM users WHERE id = $userId");
+    if ($result && $row = $result->fetch_assoc()) {
+        return $row['role'] === 'Super Admin';
+    }
+    return false;
+}
+
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $isSuperAdmin = isSuperAdmin($conn);
+    
     if (isset($_POST['action'])) {
         switch ($_POST['action']) {
             case 'create_user':
-                createUser($conn);
+                createUser($conn, $isSuperAdmin);
                 break;
             case 'update_user':
-                updateUser($conn);
+                updateUser($conn, $isSuperAdmin);
                 break;
             case 'update_user_partial':
-                updateUserPartial($conn);
+                updateUserPartial($conn, $isSuperAdmin);
                 break;
             case 'delete_user':
-                deleteUser($conn);
+                deleteUser($conn, $isSuperAdmin);
                 break;
         }
     }
@@ -44,7 +57,7 @@ function getUsers($conn) {
     return $users;
 }
 
-function createUser($conn) {
+function createUser($conn, $isSuperAdmin) {
     $required = ['employee_no', 'first_name', 'last_name', 'position', 'role', 'email', 'password'];
     foreach ($required as $field) {
         if (empty($_POST[$field])) {
@@ -55,7 +68,13 @@ function createUser($conn) {
 
     $role = $conn->real_escape_string($_POST['role']);
     
-    // Check admin limit if creating an admin
+    // Only Super Admin can create Super Admin
+    if ($role === 'Super Admin' && !$isSuperAdmin) {
+        echo json_encode(['status' => 'error', 'message' => 'Only Super Admin can create Super Admin accounts']);
+        return;
+    }
+    
+    // Check admin limit if creating an admin (excluding Super Admin)
     if ($role === 'Admin') {
         $adminCount = $conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'Admin'")->fetch_assoc()['count'];
         if ($adminCount >= 5) {
@@ -90,7 +109,7 @@ function createUser($conn) {
     $stmt->close();
 }
 
-function updateUser($conn) {
+function updateUser($conn, $isSuperAdmin) {
     if (empty($_POST['id'])) {
         echo json_encode(['status' => 'error', 'message' => 'User ID is required']);
         return;
@@ -99,7 +118,22 @@ function updateUser($conn) {
     $id = (int)$_POST['id'];
     $role = $conn->real_escape_string($_POST['role']);
     
-    // Check admin limit if changing to admin
+    // Check if trying to modify a Super Admin
+    if (!$isSuperAdmin) {
+        $targetUser = $conn->query("SELECT role FROM users WHERE id = $id")->fetch_assoc();
+        if ($targetUser['role'] === 'Super Admin') {
+            echo json_encode(['status' => 'error', 'message' => 'Only Super Admin can modify Super Admin accounts']);
+            return;
+        }
+    }
+    
+    // Only Super Admin can change role to Super Admin
+    if ($role === 'Super Admin' && !$isSuperAdmin) {
+        echo json_encode(['status' => 'error', 'message' => 'Only Super Admin can assign Super Admin role']);
+        return;
+    }
+    
+    // Check admin limit if changing to admin (excluding Super Admin)
     if ($role === 'Admin') {
         // Get current role of the user being updated
         $currentRole = $conn->query("SELECT role FROM users WHERE id = $id")->fetch_assoc()['role'];
@@ -174,7 +208,7 @@ function updateUser($conn) {
     $stmt->close();
 }
 
-function updateUserPartial($conn) {
+function updateUserPartial($conn, $isSuperAdmin) {
     if (empty($_POST['id']) || empty($_POST['container_type'])) {
         echo json_encode(['status' => 'error', 'message' => 'Missing required fields']);
         return;
@@ -184,9 +218,17 @@ function updateUserPartial($conn) {
     $containerType = $conn->real_escape_string($_POST['container_type']);
 
     // Verify user exists
-    $userCheck = $conn->query("SELECT id FROM users WHERE id = $id");
+    $userCheck = $conn->query("SELECT id, role FROM users WHERE id = $id");
     if ($userCheck->num_rows === 0) {
         echo json_encode(['status' => 'error', 'message' => 'User not found']);
+        return;
+    }
+    
+    $user = $userCheck->fetch_assoc();
+    
+    // Check if trying to modify a Super Admin
+    if (!$isSuperAdmin && $user['role'] === 'Super Admin') {
+        echo json_encode(['status' => 'error', 'message' => 'Only Super Admin can modify Super Admin accounts']);
         return;
     }
 
@@ -195,7 +237,7 @@ function updateUserPartial($conn) {
             updateProfile($conn, $id);
             break;
         case 'designation':
-            updateDesignation($conn, $id);
+            updateDesignation($conn, $id, $isSuperAdmin);
             break;
         case 'password':
             updatePassword($conn, $id);
@@ -207,7 +249,6 @@ function updateUserPartial($conn) {
             echo json_encode(['status' => 'error', 'message' => 'Invalid container type']);
     }
     
-    // Add this line to prevent double response
     return;
 }
 
@@ -243,7 +284,7 @@ function updateProfile($conn, $id) {
     $stmt->close();
 }
 
-function updateDesignation($conn, $id) {
+function updateDesignation($conn, $id, $isSuperAdmin) {
     $required = ['position', 'role'];
     foreach ($required as $field) {
         if (empty($_POST[$field])) {
@@ -255,7 +296,13 @@ function updateDesignation($conn, $id) {
     $position = $conn->real_escape_string($_POST['position']);
     $role = $conn->real_escape_string($_POST['role']);
     
-    // Check admin limit if changing to admin
+    // Only Super Admin can assign Super Admin role
+    if ($role === 'Super Admin' && !$isSuperAdmin) {
+        echo json_encode(['status' => 'error', 'message' => 'Only Super Admin can assign Super Admin role']);
+        return;
+    }
+    
+    // Check admin limit if changing to admin (excluding Super Admin)
     if ($role === 'Admin') {
         // Get current role of the user being updated
         $currentRole = $conn->query("SELECT role FROM users WHERE id = $id")->fetch_assoc()['role'];
@@ -375,7 +422,7 @@ function verifyCurrentPin($conn, $id, $pin) {
     return ($pin === $user['pin_code']);
 }
 
-function deleteUser($conn) {
+function deleteUser($conn, $isSuperAdmin) {
     if (empty($_POST['id'])) {
         echo json_encode(['status' => 'error', 'message' => 'User ID is required']);
         return;
@@ -383,6 +430,21 @@ function deleteUser($conn) {
 
     $id = (int)$_POST['id'];
     
+    // Check if trying to delete a Super Admin
+    if (!$isSuperAdmin) {
+        $targetUser = $conn->query("SELECT role FROM users WHERE id = $id")->fetch_assoc();
+        if ($targetUser['role'] === 'Super Admin') {
+            echo json_encode(['status' => 'error', 'message' => 'Only Super Admin can delete Super Admin accounts']);
+            return;
+        }
+    }
+    
+    // Prevent deleting own account
+    if (isset($_SESSION['user_id']) && $id == $_SESSION['user_id']) {
+        echo json_encode(['status' => 'error', 'message' => 'You cannot delete your own account']);
+        return;
+    }
+
     $stmt = $conn->prepare("DELETE FROM users WHERE id=?");
     $stmt->bind_param("i", $id);
     

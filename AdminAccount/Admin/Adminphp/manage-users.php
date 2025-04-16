@@ -5,7 +5,7 @@ include '../AdminBackEnd/ManageUserBE.php';
 session_start();
 
 // Corrected check (using 'role' instead of 'user_role')
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'Admin' vs 'admin'
+if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Super Admin')) {
     // Redirect to login page (not logout!)
     header("Location: ../../../login/login.php");
     exit();
@@ -168,10 +168,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
                         <div class="form-group">
                             <label for="create_role">Role</label>
                             <select id="create_role" name="role" required>
-                                <option value="" selected disabled>Choose role...</option>
-                                <option value="Admin">Admin</option>
-                                <option value="User">User</option>
-                            </select>
+    <option value="" selected disabled>Choose role...</option>
+    <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin'): ?>
+        <option value="Super Admin">Super Admin</option>
+    <?php endif; ?>
+    <option value="Admin">Admin</option>
+    <option value="User">User</option>
+</select>
                             <small id="createAdminLimitMessage" style="color: red; display: none;">Maximum of 5 admin users reached</small>
                         </div>
                     </div>
@@ -255,9 +258,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
                         <div class="form-group">
                             <label for="edit_role">Role</label>
                             <select id="edit_role" name="role" required>
-                                <option value="Admin">Admin</option>
-                                <option value="User">User</option>
-                            </select>
+    <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin'): ?>
+        <option value="Super Admin">Super Admin</option>
+    <?php endif; ?>
+    <option value="Admin">Admin</option>
+    <option value="User">User</option>
+</select>
                             <small id="editAdminLimitMessage" style="color: red; display: none;">Maximum of 5 admin users reached</small>
                         </div>
                         <button type="button" class="btn save-container" data-container="designation">Save Designation</button>
@@ -349,7 +355,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
         </div>
     </div>
 
-    <script src="../../js/usermngs.js"></script>
+    <script src="../../js/Management-Users.js"></script>
 </body>
 
 </html>

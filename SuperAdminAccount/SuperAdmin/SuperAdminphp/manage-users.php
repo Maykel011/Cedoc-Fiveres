@@ -5,7 +5,7 @@ include '../AdminBackEnd/ManageUserBE.php';
 session_start();
 
 // Corrected check (using 'role' instead of 'user_role')
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'Admin' vs 'admin'
+if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Super Admin')) {
     // Redirect to login page (not logout!)
     header("Location: ../../../login/login.php");
     exit();
@@ -18,9 +18,10 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
 
 <head>
     <meta charset="UTF-8">
+    <meta name="is-super-admin" content="<?php echo (isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin') ? 'true' : 'false'; ?>">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES</title>
-    <link rel="stylesheet" href="../../Css/manageusers.css">
+    <link rel="stylesheet" href="../../Css/SManagerUsers.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -59,7 +60,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
                 <i class="fas fa-sign-out-alt"></i>
             </div>
             <h3>Confirm Logout</h3>
-            <p>Are you sure you want to logout from your admin account?</p>
+            <p>Are you sure you want to logout from your account?</p>
             <div class="logout-modal-buttons">
                 <button id="logoutCancel" class="logout-modal-btn logout-modal-cancel">Cancel</button>
                 <button id="logoutConfirm" class="logout-modal-btn logout-modal-confirm">Logout</button>
@@ -70,7 +71,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
     <aside class="sidebar">
         <ul>
             <li class="dashboard">
-                <a href="adminDashboard.php"><img src="../../Assets/Icon/Analysis.png" alt="Dashboard Icon" class="sidebar-icon"> Admin Dashboard</a>
+                <a href="SuperAdminDashboard.php"><img src="../../Assets/Icon/Analysis.png" alt="Dashboard Icon" class="sidebar-icon">Dashboard</a>
             </li>
             <li class="media-files">
                 <a href="media-files.php"><img src="../../Assets/Icon/file.png" alt="Media Files Icon" class="sidebar-icon"> Media Files</a>
@@ -103,18 +104,20 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
                 </div>
 
             <table>
-                <thead>
-                    <tr>
-                        <th>Employee No.</th>
-                        <th>Name</th>
-                        <th>Position</th>
-                        <th>Role</th>
-                        <th>Email</th>
-                        <th>Password</th>
-                        <th>Pin-code</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
+            <thead>
+    <tr>
+        <th>Employee No.</th>
+        <th>Name</th>
+        <th>Position</th>
+        <th>Role</th>
+        <th>Email</th>
+        <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin'): ?>
+            <th>Password</th>
+        <?php endif; ?>
+        <th>Pin-code</th>
+        <th>Action</th>
+    </tr>
+</thead>
                 <tbody id="manage-user">
                     <!-- Users will be loaded here dynamically -->
                 </tbody>
@@ -168,10 +171,13 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
                         <div class="form-group">
                             <label for="create_role">Role</label>
                             <select id="create_role" name="role" required>
-                                <option value="" selected disabled>Choose role...</option>
-                                <option value="Admin">Admin</option>
-                                <option value="User">User</option>
-                            </select>
+    <option value="" selected disabled>Choose role...</option>
+    <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin'): ?>
+        <option value="Super Admin">Super Admin</option>
+    <?php endif; ?>
+    <option value="Admin">Admin</option>
+    <option value="User">User</option>
+</select>
                             <small id="createAdminLimitMessage" style="color: red; display: none;">Maximum of 5 admin users reached</small>
                         </div>
                     </div>
@@ -255,9 +261,12 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
                         <div class="form-group">
                             <label for="edit_role">Role</label>
                             <select id="edit_role" name="role" required>
-                                <option value="Admin">Admin</option>
-                                <option value="User">User</option>
-                            </select>
+    <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin'): ?>
+        <option value="Super Admin">Super Admin</option>
+    <?php endif; ?>
+    <option value="Admin">Admin</option>
+    <option value="User">User</option>
+</select>
                             <small id="editAdminLimitMessage" style="color: red; display: none;">Maximum of 5 admin users reached</small>
                         </div>
                         <button type="button" class="btn save-container" data-container="designation">Save Designation</button>
@@ -349,7 +358,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
         </div>
     </div>
 
-    <script src="../../js/usermngs.js"></script>
+    <script src="../../js/Supermanagements.js"></script>
 </body>
 
 </html>

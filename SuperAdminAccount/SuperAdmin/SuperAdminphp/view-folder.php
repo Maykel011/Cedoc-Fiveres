@@ -5,7 +5,7 @@ include '../AdminBackEnd/ViewFolderBE.php';
 session_start();
 
 // Corrected check (using 'role' instead of 'user_role')
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'Admin' vs 'admin'
+if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Super Admin')) {
     // Redirect to login page (not logout!)
     header("Location: ../../../login/login.php");
     exit();
@@ -59,7 +59,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
             <i class="fas fa-sign-out-alt"></i>
         </div>
         <h3>Confirm Logout</h3>
-        <p>Are you sure you want to logout from your admin account?</p>
+        <p>Are you sure you want to logout from your account?</p>
         <div class="logout-modal-buttons">
             <button id="logoutCancel" class="logout-modal-btn logout-modal-cancel">Cancel</button>
             <button id="logoutConfirm" class="logout-modal-btn logout-modal-confirm">Logout</button>
@@ -70,7 +70,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
 <aside class="sidebar">
     <ul>
         <li class="dashboard">
-            <a href="adminDashboard.php"><img src="../../Assets/Icon/Analysis.png" alt="Dashboard Icon" class="sidebar-icon"> Admin Dashboard</a>
+            <a href="SuperAdminDashboard.php"><img src="../../Assets/Icon/Analysis.png" alt="Dashboard Icon" class="sidebar-icon"> Admin Dashboard</a>
         </li>
         <li class="media-files">
             <a href="media-files.php"><img src="../../Assets/Icon/file.png" alt="Media Files Icon" class="sidebar-icon"> Media Files</a>

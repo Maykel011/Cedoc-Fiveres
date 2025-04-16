@@ -13,6 +13,66 @@ document.addEventListener("DOMContentLoaded", function() {
     const editPositionSelect = document.getElementById('edit_position');
     const editOtherPositionInput = document.getElementById('edit_other_position');
 
+    // Check if current user is Super Admin
+    const isSuperAdmin = document.querySelector('meta[name="is-super-admin"]')?.content === 'true';
+   
+    function setupPasswordVisibilityToggles() {
+        const isSuperAdmin = document.querySelector('meta[name="is-super-admin"]')?.content === 'true';
+        if (!isSuperAdmin) return;
+    
+        document.querySelectorAll('.password-cell, .pincode-cell').forEach(cell => {
+            const originalValue = cell.dataset.originalValue || cell.textContent.trim();
+            cell.dataset.originalValue = originalValue; // Store original value in data attribute
+            
+            if (originalValue !== 'N/A') {
+                const toggle = document.createElement('span');
+                toggle.className = 'password-toggle';
+                toggle.innerHTML = `
+                    <svg class="eye-icon" viewBox="0 0 24 24">
+                        <path class="eye-open" d="M12 9a3 3 0 0 1 3 3 3 3 0 0 1-3 3 3 3 0 0 1-3-3 3 3 0 0 1 3-3m0-4.5c5 0 9.27 3.11 11 7.5-1.73 4.39-6 7.5-11 7.5S2.73 16.39 1 12c1.73-4.39 6-7.5 11-7.5z"/>
+                        <path class="eye-closed" d="M11.83 9L15 12.16V12a3 3 0 0 0-3-3h-.17m-4.3.8l1.55 1.55c-.05.21-.08.42-.08.65a3 3 0 0 0 3 3c.22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53a5 5 0 0 1-5-5c0-.79.2-1.53.53-2.2M2 4.27l2.28 2.28.45.45C3.08 8.3 1.78 10 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.43.42L19.73 22 21 20.73 3.27 3M12 7a5 5 0 0 1 5 5c0 .64-.13 1.26-.36 1.82l2.93 2.93c1.5-1.25 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-4 .7l2.17 2.15C10.74 7.13 11.35 7 12 7z" style="display:none"/>
+                    </svg>
+                `;
+                
+                // Initially show masked value
+                cell.textContent = cell.classList.contains('password-cell') ? '••••••••' : '••••••';
+                
+                toggle.addEventListener('click', function(e) {
+                    e.stopPropagation();
+                    const icon = this.querySelector('.eye-icon');
+                    const eyeOpen = icon.querySelector('.eye-open');
+                    const eyeClosed = icon.querySelector('.eye-closed');
+                    
+                    if (this.classList.contains('visible')) {
+                        // Hide the password
+                        eyeOpen.style.display = 'block';
+                        eyeClosed.style.display = 'none';
+                        this.classList.remove('visible');
+                        cell.textContent = cell.classList.contains('password-cell') ? '••••••••' : '••••••';
+                    } else {
+                        // Show the password
+                        eyeOpen.style.display = 'none';
+                        eyeClosed.style.display = 'block';
+                        this.classList.add('visible');
+                        cell.textContent = originalValue;
+                        
+                        // Auto-hide after 5 seconds
+                        setTimeout(() => {
+                            if (this.classList.contains('visible')) {
+                                eyeOpen.style.display = 'block';
+                                eyeClosed.style.display = 'none';
+                                this.classList.remove('visible');
+                                cell.textContent = cell.classList.contains('password-cell') ? '••••••••' : '••••••';
+                            }
+                        }, 5000);
+                    }
+                });
+                
+                cell.appendChild(toggle);
+            }
+        });
+    }
+    
     // Toggle dropdown visibility
     function toggleDropdown(show = null) {
         if (userDropdown) {
@@ -391,40 +451,108 @@ document.addEventListener("DOMContentLoaded", function() {
             .catch(error => console.error('Error loading users:', error));
     }
 
-    function renderUsers(users) {
-        const tbody = document.getElementById('manage-user');
-        if (!tbody) return;
-        
-        tbody.innerHTML = '';
-        
-        if (users.length === 0) {
-            const row = document.createElement('tr');
-            row.innerHTML = `<td colspan="8" class="no-users">No users found</td>`;
-            tbody.appendChild(row);
-            return;
-        }
-        
-        users.forEach(user => {
-            const row = document.createElement('tr');
-            row.innerHTML = `
-                <td>${user.employee_no}</td>
-                <td>${user.name}</td>
-                <td>${user.position}</td>
-                <td>${user.role}</td>
-                <td>${user.email}</td>
-                <td>••••••••</td>
-                <td>${user.pin_code}</td>
-                <td></td>
-            `;
-            
-            const actionCell = row.querySelector('td:last-child');
-            actionCell.appendChild(createKebabMenu(user.id));
-            
-            tbody.appendChild(row);
-        });
+// Update the renderUsers function to add appropriate classes
+function renderUsers(users) {
+    const tbody = document.getElementById('manage-user');
+    if (!tbody) return;
+    
+    tbody.innerHTML = '';
+    
+    if (users.length === 0) {
+        const row = document.createElement('tr');
+        row.innerHTML = `<td colspan="8" class="no-users">No users found</td>`;
+        tbody.appendChild(row);
+        return;
     }
+    
+    users.forEach(user => {
+        const row = document.createElement('tr');
+        
+        // Add special class for Super Admin
+        const rowClass = user.role === 'Super Admin' ? 'super-admin-row' : '';
+        row.className = rowClass;
+        
+        row.innerHTML = `
+            <td>${user.employee_no}</td>
+            <td>${user.name} ${user.role === 'Super Admin' ? '<span class="super-admin-badge">Super Admin</span>' : ''}</td>
+            <td>${user.position}</td>
+            <td>${user.role}</td>
+            <td>${user.email}</td>
+            <td class="password-cell">••••••••</td>
+            <td class="pincode-cell">••••••</td>
+            <td></td>
+        `;
+        
+        // Store original values in data attributes
+        const passwordCell = row.querySelector('.password-cell');
+        const pinCell = row.querySelector('.pincode-cell');
+        passwordCell.dataset.password = user.password || 'N/A';
+        pinCell.dataset.pincode = user.pin_code || 'N/A';
+        
+        const actionCell = row.querySelector('td:last-child');
+        actionCell.appendChild(createActionButtons(user.id, user.role));
+        
+        tbody.appendChild(row);
+    });
+}
 
-    function createKebabMenu(userId) {
+function createActionButtons(userId, userRole) {
+    // Create container for both buttons
+    const container = document.createElement('div');
+    container.className = 'action-buttons-container';
+    
+    // Add show credentials button
+    const showCredsBtn = document.createElement('button');
+    showCredsBtn.className = 'show-creds-btn';
+    showCredsBtn.title = 'Show Credentials';
+    showCredsBtn.innerHTML = '<i class="fas fa-key"></i>';
+    
+    showCredsBtn.addEventListener('click', function(e) {
+        e.stopPropagation();
+        const row = this.closest('tr');
+        const passwordCell = row.querySelector('.password-cell');
+        const pinCell = row.querySelector('.pincode-cell');
+        
+        if (passwordCell.classList.contains('visible')) {
+            // Hide credentials
+            passwordCell.textContent = '••••••••';
+            pinCell.textContent = '••••••';
+            passwordCell.classList.remove('visible');
+            pinCell.classList.remove('visible');
+            this.innerHTML = '<i class="fas fa-key"></i>';
+            this.title = 'Show Credentials';
+        } else {
+            // Show credentials
+            passwordCell.textContent = passwordCell.dataset.password;
+            pinCell.textContent = pinCell.dataset.pincode;
+            passwordCell.classList.add('visible');
+            pinCell.classList.add('visible');
+            this.innerHTML = '<i class="fas fa-eye-slash"></i>';
+            this.title = 'Hide Credentials';
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                if (passwordCell.classList.contains('visible')) {
+                    passwordCell.textContent = '••••••••';
+                    pinCell.textContent = '••••••';
+                    passwordCell.classList.remove('visible');
+                    pinCell.classList.remove('visible');
+                    this.innerHTML = '<i class="fas fa-key"></i>';
+                    this.title = 'Show Credentials';
+                }
+            }, 5000);
+        }
+    });
+    
+    container.appendChild(showCredsBtn);
+    
+    // Add kebab menu
+    container.appendChild(createKebabMenu(userId, userRole));
+    
+    return container;
+}
+
+    function createKebabMenu(userId, userRole) {
         // Create menu container
         const menuContainer = document.createElement('div');
         menuContainer.className = 'kebab-menu';
@@ -449,6 +577,13 @@ document.addEventListener("DOMContentLoaded", function() {
         deleteButton.className = 'delete-btn';
         deleteButton.innerHTML = '<i class="fas fa-trash"></i> Delete';
         deleteButton.dataset.id = userId;
+        
+        // Disable delete for Super Admin unless current user is Super Admin
+        if (userRole === 'Super Admin' && !isSuperAdmin) {
+            deleteButton.disabled = true;
+            deleteButton.title = 'Only Super Admin can delete Super Admin accounts';
+            deleteButton.classList.add('disabled-action');
+        }
         
         // Append buttons to dropdown
         dropdownMenu.appendChild(editButton);
@@ -483,8 +618,10 @@ document.addEventListener("DOMContentLoaded", function() {
         // Delete button functionality
         deleteButton.addEventListener('click', function(e) {
             e.stopPropagation();
-            confirmDeleteUser(userId);
-            dropdownMenu.classList.remove('show');
+            if (!deleteButton.disabled) {
+                confirmDeleteUser(userId);
+                dropdownMenu.classList.remove('show');
+            }
         });
         
         // Close dropdown when clicking elsewhere
@@ -499,6 +636,41 @@ document.addEventListener("DOMContentLoaded", function() {
         // Check admin limit before opening
         checkAdminLimit('create');
         if (createUserForm) createUserForm.reset();
+        
+        // Set role options based on current user's role
+        const roleSelect = document.getElementById('create_role');
+        if (roleSelect) {
+            // Clear existing options
+            roleSelect.innerHTML = '';
+            
+            // Add default option
+            const defaultOption = document.createElement('option');
+            defaultOption.value = '';
+            defaultOption.textContent = 'Choose role...';
+            defaultOption.selected = true;
+            defaultOption.disabled = true;
+            roleSelect.appendChild(defaultOption);
+            
+            // Add Super Admin option only if current user is Super Admin
+            if (isSuperAdmin) {
+                const superAdminOption = document.createElement('option');
+                superAdminOption.value = 'Super Admin';
+                superAdminOption.textContent = 'Super Admin';
+                roleSelect.appendChild(superAdminOption);
+            }
+            
+            // Add regular Admin and User options
+            const adminOption = document.createElement('option');
+            adminOption.value = 'Admin';
+            adminOption.textContent = 'Admin';
+            roleSelect.appendChild(adminOption);
+            
+            const userOption = document.createElement('option');
+            userOption.value = 'User';
+            userOption.textContent = 'User';
+            roleSelect.appendChild(userOption);
+        }
+        
         if (createOtherPositionInput) {
             createOtherPositionInput.style.display = 'none';
             createOtherPositionInput.required = false;
@@ -532,6 +704,25 @@ document.addEventListener("DOMContentLoaded", function() {
                 firstName = nameParts[0] || '';
                 lastName = '';
             }
+            const isSuperAdmin = document.querySelector('meta[name="is-super-admin"]')?.content === 'true';
+    
+            if (isSuperAdmin) {
+                // Remove current password/pincode fields
+                document.getElementById('current_password').closest('.form-group').style.display = 'none';
+                document.getElementById('current_pin').closest('.form-group').style.display = 'none';
+                
+                // Update labels
+                document.querySelector('label[for="new_password"]').textContent = 'New Password (force update)';
+                document.querySelector('label[for="new_pin"]').textContent = 'New 6-Digit PIN (force update)';
+            } else {
+                // Show current password/pincode fields for non-Super Admin
+                document.getElementById('current_password').closest('.form-group').style.display = 'block';
+                document.getElementById('current_pin').closest('.form-group').style.display = 'block';
+                
+                // Restore original labels
+                document.querySelector('label[for="new_password"]').textContent = 'New Password';
+                document.querySelector('label[for="new_pin"]').textContent = 'New 6-Digit PIN';
+            }
         }
         
         // Fill the form
@@ -558,15 +749,42 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
         
-        document.getElementById('edit_role').value = user.role;
+        // Set role options based on current user's role
+        const roleSelect = document.getElementById('edit_role');
+        if (roleSelect) {
+            // Clear existing options
+            roleSelect.innerHTML = '';
+            
+            // Add Super Admin option only if current user is Super Admin
+            if (isSuperAdmin) {
+                const superAdminOption = document.createElement('option');
+                superAdminOption.value = 'Super Admin';
+                superAdminOption.textContent = 'Super Admin';
+                roleSelect.appendChild(superAdminOption);
+            }
+            
+            // Add regular Admin and User options
+            const adminOption = document.createElement('option');
+            adminOption.value = 'Admin';
+            adminOption.textContent = 'Admin';
+            roleSelect.appendChild(adminOption);
+            
+            const userOption = document.createElement('option');
+            userOption.value = 'User';
+            userOption.textContent = 'User';
+            roleSelect.appendChild(userOption);
+            
+            // Set the current role
+            roleSelect.value = user.role;
+        }
         
-        // Clear password and pin fields
-        document.getElementById('current_password').value = '';
-        document.getElementById('new_password').value = '';
-        document.getElementById('confirm_password').value = '';
-        document.getElementById('current_pin').value = '';
-        document.getElementById('new_pin').value = '';
-        document.getElementById('confirm_pin').value = '';
+            // Clear password and pin fields
+    document.getElementById('current_password').value = '';
+    document.getElementById('new_password').value = '';
+    document.getElementById('confirm_password').value = '';
+    document.getElementById('current_pin').value = '';
+    document.getElementById('new_pin').value = '';
+    document.getElementById('confirm_pin').value = '';
         
         // Check admin limit
         checkAdminLimit('edit', user.role);
@@ -575,6 +793,18 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function confirmDeleteUser(userId) {
+        const user = allUsers.find(u => u.id == userId);
+        if (!user) return;
+        
+        // Check if trying to delete the last Super Admin
+        if (user.role === 'Super Admin') {
+            const superAdminCount = allUsers.filter(u => u.role === 'Super Admin').length;
+            if (superAdminCount <= 1) {
+                showErrorModal('Cannot delete the last Super Admin');
+                return;
+            }
+        }
+        
         currentUserId = userId;
         if (deleteModal) deleteModal.style.display = 'block';
     }
@@ -672,7 +902,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const user = allUsers.find(u => u.id == userId);
         if (!user) return;
         
-        // Check admin limit if changing to admin
+        // Check admin limit if changing to admin (excluding Super Admin)
         if (role === 'Admin' && user.role !== 'Admin') {
             const adminCount = allUsers.filter(u => u.role === 'Admin').length;
             if (adminCount >= 5) {
@@ -789,17 +1019,22 @@ document.addEventListener("DOMContentLoaded", function() {
     }
 
     function checkAdminLimit(context = 'create', currentRole = null) {
+        // Count only Admin users (excluding Super Admin)
         const adminCount = allUsers.filter(user => user.role === 'Admin').length;
         const limitReached = adminCount >= 5;
         
         if (context === 'create') {
             const adminLimitMessage = document.getElementById('createAdminLimitMessage');
             const saveBtn = createUserForm?.querySelector('.btn.save');
+            const roleSelect = document.getElementById('create_role');
             
-            if (limitReached && adminLimitMessage && saveBtn) {
-                document.getElementById('create_role').value = 'User';
+            if (limitReached && adminLimitMessage && saveBtn && roleSelect) {
+                // Don't change role if Super Admin is selected
+                if (roleSelect.value !== 'Super Admin') {
+                    roleSelect.value = 'User';
+                }
                 adminLimitMessage.style.display = 'block';
-                saveBtn.disabled = true;
+                saveBtn.disabled = (roleSelect.value === 'Admin');
             } else if (adminLimitMessage && saveBtn) {
                 adminLimitMessage.style.display = 'none';
                 saveBtn.disabled = false;
@@ -810,9 +1045,12 @@ document.addEventListener("DOMContentLoaded", function() {
             const roleSelect = document.getElementById('edit_role');
             
             if (limitReached && currentRole !== 'Admin' && adminLimitMessage && saveBtn && roleSelect) {
-                roleSelect.value = currentRole;
+                // Don't change role if Super Admin is selected
+                if (roleSelect.value !== 'Super Admin') {
+                    roleSelect.value = currentRole;
+                }
                 adminLimitMessage.style.display = 'block';
-                saveBtn.disabled = true;
+                saveBtn.disabled = (roleSelect.value === 'Admin');
             } else if (adminLimitMessage && saveBtn) {
                 adminLimitMessage.style.display = 'none';
                 saveBtn.disabled = false;

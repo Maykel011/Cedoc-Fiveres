@@ -902,3 +902,87 @@ th {
 .table-container::-webkit-scrollbar-thumb:hover {
     background: #555;
 }
+
+.password-toggle {
+    margin-left: 8px;
+    cursor: pointer;
+    vertical-align: middle;
+    display: inline-flex;
+    align-items: center;
+}
+
+.eye-icon {
+    width: 18px;
+    height: 18px;
+    fill: #666;
+    transition: fill 0.2s;
+}
+
+.password-toggle:hover .eye-icon {
+    fill: #333;
+}
+
+.password-cell, .pincode-cell {
+    position: relative;
+    user-select: none;
+}
+
+
+/* Style for Super Admin badge */
+.super-admin-badge {
+    background-color: #f44336;
+    color: white;
+    padding: 2px 6px;
+    border-radius: 12px;
+    font-size: 0.8em;
+    margin-left: 5px;
+}
+
+.super-admin-row {
+    background-color: rgba(244, 67, 54, 0.05);
+}
+
+.action-buttons-container {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+}
+
+.show-password-btn {
+    background: none;
+    border: none;
+    color: #555;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.show-password-btn:hover {
+    color: #333;
+    background-color: #f0f0f0;
+}
+
+.password-cell.visible {
+    font-family: monospace;
+}
+
+.show-creds-btn {
+    background: none;
+    border: none;
+    color: #555;
+    cursor: pointer;
+    padding: 5px;
+    border-radius: 4px;
+    transition: all 0.2s;
+}
+
+.show-creds-btn:hover {
+    color: #333;
+    background-color: #f0f0f0;
+}
+
+.password-cell.visible,
+.pincode-cell.visible {
+    font-family: monospace;
+}
