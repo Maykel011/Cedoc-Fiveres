@@ -206,7 +206,12 @@ document.addEventListener("DOMContentLoaded", function() {
                             const otherPosition = formData.get('other_position');
                             
                             // Use other position if "Other" is selected
-                            if (position === 'Other' && otherPosition) {
+                            if (position === 'Other') {
+                                if (!otherPosition) {
+                                    alert('Please specify the position');
+                                    isValid = false;
+                                    break;
+                                }
                                 containerData.append('position', otherPosition);
                             } else {
                                 containerData.append('position', position);
@@ -537,7 +542,7 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('edit_email').value = user.email;
         
         // Handle position field
-        if (user.position !== 'Head' && user.position !== 'Supervisor' && user.position !== 'Employee') {
+        if (user.position !== 'Head' && user.position !== 'Supervisor' && user.position !== 'Employee' && user.position !== 'Other') {
             document.getElementById('edit_position').value = 'Other';
             if (editOtherPositionInput) {
                 editOtherPositionInput.value = user.position;
@@ -588,7 +593,11 @@ document.addEventListener("DOMContentLoaded", function() {
         formData.set('name', `${firstName} ${lastName}`.trim());
         
         // Use other position if "Other" is selected
-        if (position === 'Other' && otherPosition) {
+        if (position === 'Other') {
+            if (!otherPosition) {
+                alert('Please specify the position');
+                return;
+            }
             formData.set('position', otherPosition);
         }
         
@@ -615,16 +624,20 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                alert(data.message);
+                showSuccessModal(
+                    'editSuccessModal', 
+                    'uploadSuccessMessage', 
+                    'User created successfully'
+                );
                 if (createUserModal) createUserModal.style.display = 'none';
                 loadUsers();
             } else {
-                alert(data.message);
+                showErrorModal(data.message || 'An error occurred');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while creating user');
+            showErrorModal('An error occurred while creating user');
         });
     }
 
@@ -647,7 +660,11 @@ document.addEventListener("DOMContentLoaded", function() {
         formData.set('name', `${firstName} ${lastName}`.trim());
         
         // Use other position if "Other" is selected
-        if (position === 'Other' && otherPosition) {
+        if (position === 'Other') {
+            if (!otherPosition) {
+                alert('Please specify the position');
+                return;
+            }
             formData.set('position', otherPosition);
         }
         
@@ -704,16 +721,20 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                alert(data.message);
+                showSuccessModal(
+                    'editSuccessModal', 
+                    'uploadSuccessMessage', 
+                    'User updated successfully'
+                );
                 if (editUserModal) editUserModal.style.display = 'none';
                 loadUsers();
             } else {
-                alert(data.message);
+                showErrorModal(data.message || 'An error occurred');
             }
         })
         .catch(error => {
             console.error('Error:', error);
-            alert('An error occurred while updating user');
+            showErrorModal('An error occurred while updating user');
         });
     }
 
@@ -731,16 +752,20 @@ document.addEventListener("DOMContentLoaded", function() {
         .then(response => response.json())
         .then(data => {
             if (data.status === 'success') {
-                alert(data.message);
+                showSuccessModal(
+                    'deleteSuccessModal', 
+                    'deleteSuccessMessage', 
+                    'User deleted successfully'
+                );
                 loadUsers();
             } else {
-                alert(data.message);
+                showErrorModal(data.message || 'An error occurred');
             }
             if (deleteModal) deleteModal.style.display = 'none';
         })
         .catch(error => {
             console.error('Error deleting user:', error);
-            alert('Error deleting user');
+            showErrorModal('Error deleting user');
             if (deleteModal) deleteModal.style.display = 'none';
         });
     }

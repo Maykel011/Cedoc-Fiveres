@@ -270,15 +270,23 @@ function updateDesignation($conn, $id) {
         }
     }
 
-    $stmt = $conn->prepare("UPDATE users SET position=?, role=? WHERE id=?");
-    $stmt->bind_param("ssi", $position, $role, $id);
-    
-    if ($stmt->execute()) {
-        echo json_encode(['status' => 'success', 'message' => 'Designation updated successfully']);
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'Error updating designation: ' . $conn->error]);
+    try {
+        $stmt = $conn->prepare("UPDATE users SET position=?, role=? WHERE id=?");
+        if (!$stmt) {
+            throw new Exception("Prepare failed: " . $conn->error);
+        }
+        
+        $stmt->bind_param("ssi", $position, $role, $id);
+        
+        if ($stmt->execute()) {
+            echo json_encode(['status' => 'success', 'message' => 'Designation updated successfully']);
+        } else {
+            throw new Exception("Execute failed: " . $stmt->error);
+        }
+        $stmt->close();
+    } catch (Exception $e) {
+        echo json_encode(['status' => 'error', 'message' => 'Error updating designation: ' . $e->getMessage()]);
     }
-    $stmt->close();
 }
 
 function updatePassword($conn, $id) {
