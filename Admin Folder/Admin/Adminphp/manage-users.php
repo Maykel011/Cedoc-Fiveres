@@ -92,15 +92,15 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
             <h1 class="main-title">Manage Users</h1>
             <br>
             <div class="top-controls">
-                <div class="search-container">
-                    <input type="text" id="searchInput" placeholder="Search users...">
-                    <button id="searchBtn"><i class="fas fa-search"></i></button>
-                </div>
+                    <div class="search-container">
+                        <input type="text" id="searchInput" placeholder="Search users...">
+                        <button id="searchBtn"><i class="fas fa-search"></i></button>
+                    </div>
 
-                <div class="folder-container">
-                    <button class="create-folder-btn" id="createUserBtn">Create Users</button>
+                    <div class="folder-container">
+                        <button class="create-folder-btn" id="createUserBtn">Create Users</button>
+                    </div>
                 </div>
-            </div>
 
             <table>
                 <thead>

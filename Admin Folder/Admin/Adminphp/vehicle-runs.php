@@ -431,7 +431,7 @@ $vehicleRuns = getVehicleRunsData();
         <h2 id="deleteSuccessMessage">Deleted Successfully</h2>
     </div>
 </div>
-    <script src="../../js/AdminVHLRuns.js"></script>
+    <script src="../../js/AdminVHLRun.js"></script>
 </body>
 
 </html>
