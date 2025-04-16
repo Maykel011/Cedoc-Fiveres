@@ -1,0 +1,374 @@
+@font-face {
+    font-family: 'Akrobat';
+    src: url('AkrobatB.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    /* font-family: 'Akrobat', sans-serif; */
+}
+
+@font-face {
+    font-family: 'SerpentineBold';
+    src: url('SerpentineBold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+    /* font-family: 'SerpentineBold', sans-serif; */
+}
+
+
+body,html {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    height: 100%;
+    overflow: hidden; /* Prevent full page scrolling */
+
+}
+
+
+
+/* HEADER */
+.header {
+    
+    display: flex;
+    align-items: center; /* Vertically center items */
+    justify-content: center; /* Center content */
+    background-color: #9c0000;
+    color: white;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    width: 100%;
+}
+
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+}
+
+/* MAIN CONTENT */
+.main-content {
+    margin-left: 250px; /* Ensure content doesn't overlap sidebar */
+    padding: 20px;
+    flex-grow: 1; /* Allow content to expand */
+    height: 100vh;
+    overflow-y: auto; /* Enable scrolling for main content only */
+    background-color: #f9f9f9;
+}
+
+
+
+/* Centered Title */
+.main-title {
+    font-family: 'SerpentineBold', sans-serif;
+    font-size: 30px;
+    font-weight: bold;
+    color: rgb(0, 0, 0); /* Adjust for visibility */
+    margin: 0;
+    position: relative; /* Keeps it below the header */
+}
+
+.left-side {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: 55px;
+    margin-right: 15px;
+    
+}
+
+
+.right-side {
+    margin-right: 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.icon {
+    height: 30px;
+    margin-left: 20px;
+    cursor: pointer;
+}
+
+.icon:hover {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+/* SIDEBAR */
+.sidebar {
+    height: calc(100vh - 100px);
+    background: #2c3e50;
+    position: fixed;
+    top: auto;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    padding-top: 10px;
+    min-width: 250px;
+    max-width: 250px;
+    height: 100vh; /* Fixed full height */
+    overflow-y: auto; /* Allows scrolling inside the sidebar */
+}
+
+
+.sidebar ul {
+    list-style: none;
+    padding: 0px;
+    margin: 0;
+}
+
+.sidebar li {
+    margin: 5px 0;
+}
+
+/* Sidebar Links */
+.sidebar a, .dropdown-btn {
+    font-family: 'Akrobat', sans-serif;
+    text-decoration: none;
+    color: rgb(255, 255, 255);
+    font-size: 1.2em;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease, transform 0.2s ease-in-out;
+}
+
+/* Align icons and text */
+.sidebar a .text, .dropdown-btn .text {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.sidebar-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    transition: transform 0.2s ease-in-out;
+}
+
+/* Hover Effect with Zoom */
+.sidebar a:hover, .dropdown-btn:hover {
+    background: linear-gradient(135deg, #ff3d3d, #b30000);
+    border-radius: 5px;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Smooth Zoom for Sidebar Icons */
+.sidebar a:hover .sidebar-icon, .dropdown-btn:hover .sidebar-icon {
+    transform: scale(1.2);
+}
+
+/* Fade-in and Fade-out Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+/* USER DROPDOWN */
+.user {
+    font-family: 'Akrobat', sans-serif;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Space between icon and text */
+    padding: 10px;
+}
+
+/* User Icon */
+.user .icon {
+    width: 30px;
+    height: 30px;
+}
+
+/* Admin Text */
+.admin-text {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+/* Dropdown Menu */
+.user-dropdown {
+    position: absolute;
+    top: 45px; /* Adjusted to align under the user icon */
+    right: 0;
+    background: #fff;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    overflow: hidden;
+    width: 180px;
+    display: none;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 100;
+}
+
+/* Dropdown Items */
+.user-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Icons inside dropdown */
+.user-dropdown a img {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.2s ease-in-out;
+}
+
+/* Hover Effect */
+.user-dropdown a:hover {
+   background: linear-gradient(135deg, #ff3d3d, #b30000);
+    color: white;
+}
+
+/* Zoom-in effect for icons on hover */
+.user-dropdown a:hover img {
+    transform: scale(1.1);
+}
+
+/* Show dropdown */
+.user-dropdown.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Divider between items */
+.user-dropdown a:not(:last-child) {
+    border-bottom: 1px solid #eee;
+}
+
+/* Main container styling */
+.main-container {
+    max-width: 1200px; /* Increased width */
+    margin: 0 auto;
+    padding: 30px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+
+    /* Enable scrolling */
+    max-height: 600px; /* Adjust as needed */
+    overflow-y: auto; /* Allows scrolling when content overflows */
+}
+
+
+/* Common container styling */
+.profile-container, 
+.update-password-container, 
+.delete-pincode-container {
+    font-family: 'Akrobat', sans-serif;
+    margin-bottom: 30px;
+    padding: 25px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease-in-out;
+}
+
+.profile-container:hover, 
+.update-password-container:hover, 
+.delete-pincode-container:hover {
+    transform: translateY(-5px);
+}
+
+h2 {
+    color: #333;
+    margin-bottom: 10px;
+    font-size: 24px;
+    font-weight: 700;
+    text-align: left; /* Ensure alignment */
+    display: block;
+}
+
+label {
+    display: block;
+    font-size: 16px;
+    font-weight: 500;
+    margin-bottom: 5px;
+}
+
+
+p {
+    color: #666;
+    font-size: 14px;
+}
+
+input {
+    font-family: 'Akrobat', sans-serif;
+    padding: 12px;
+    margin-top: 8px;
+    margin-bottom: 15px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 16px;
+    transition: all 0.3s ease-in-out;
+    display: block;
+    width: 100%; /* Ensure it takes up correct width */
+    max-width: 400px; /* Prevents stretching too much */
+}
+
+input:focus {
+    border-color: #007bff;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 123, 255, 0.5);
+}
+
+/* Custom save button styling */
+.custom-save-button {
+    font-family: 'Akrobat', sans-serif;
+    display: block;
+    width: 15%;
+    padding: 12px;
+    background: linear-gradient(135deg, #2c3e50, #34495e);
+
+
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-size: 18px;
+    font-weight: bold;
+    text-transform: uppercase;
+    transition: background 0.3s ease-in-out;
+}
+
+.custom-save-button:hover {
+    background: linear-gradient(135deg, #ff3d3d, #b30000);
+
+}
+
+
+

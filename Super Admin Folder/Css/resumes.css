@@ -1,0 +1,434 @@
+@font-face {
+    font-family: 'Akrobat';
+    src: url('AkrobatB.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    /* font-family: 'Akrobat', sans-serif; */
+}
+
+
+@font-face {
+    font-family: 'SerpentineBold';
+    src: url('Serpentinebold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+    /* font-family: 'SerpentineBold', sans-serif; */
+}
+
+body,html {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    height: 100%;
+    overflow: hidden; /* Prevent full page scrolling */
+
+}
+
+
+/* HEADER */
+.header {
+    
+    display: flex;
+    align-items: center; /* Vertically center items */
+    justify-content: center; /* Center content */
+    background-color: #9c0000;
+    color: white;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    width: 100%;
+}
+
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+}
+
+/* MAIN CONTENT */
+.main-content {
+    margin-left: 250px; /* Adjust for sidebar */
+    padding: 20px;
+    text-align: center; /* Centers content inside the div */
+    position: relative;
+}
+
+/* Centered Title */
+.main-title {
+    font-family: 'SerpentineBold', sans-serif;
+    font-size: 30px;
+    font-weight: bold;
+    color: rgb(0, 0, 0); /* Adjust for visibility */
+    margin: 0;
+    position: relative; /* Keeps it below the header */
+}
+
+.left-side {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: 55px;
+    margin-right: 15px;
+    
+}
+
+
+.right-side {
+    margin-right: 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.icon {
+    height: 30px;
+    margin-left: 20px;
+    cursor: pointer;
+}
+
+.icon:hover {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+/* SIDEBAR */
+.sidebar {
+    height: calc(100vh - 100px);
+    background: #2c3e50;
+    position: fixed;
+    top: auto;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    padding-top: 10px;
+    min-width: 250px;
+    max-width: 250px;
+    height: 100vh; /* Fixed full height */
+    overflow-y: auto; /* Allows scrolling inside the sidebar */
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0px;
+    margin: 0;
+}
+
+.sidebar li {
+    margin: 5px 0;
+}
+
+/* Sidebar Links */
+.sidebar a, .dropdown-btn {
+    font-family: 'Akrobat', sans-serif;
+    text-decoration: none;
+    color: rgb(255, 255, 255);
+    font-size: 1.2em;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease, transform 0.2s ease-in-out;
+}
+
+/* Align icons and text */
+.sidebar a .text, .dropdown-btn .text {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.sidebar-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    transition: transform 0.2s ease-in-out;
+}
+
+/* Hover Effect with Zoom */
+.sidebar a:hover, .dropdown-btn:hover {
+    background-color: #ff0000;
+    border-radius: 5px;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Smooth Zoom for Sidebar Icons */
+.sidebar a:hover .sidebar-icon, .dropdown-btn:hover .sidebar-icon {
+    transform: scale(1.2);
+}
+
+/* Fade-in and Fade-out Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+/* USER DROPDOWN */
+.user {
+    font-family: 'Akrobat', sans-serif;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Space between icon and text */
+    padding: 10px;
+}
+
+/* User Icon */
+.user .icon {
+    width: 30px;
+    height: 30px;
+}
+
+/* Admin Text */
+.admin-text {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+/* Dropdown Menu */
+.user-dropdown {
+    position: absolute;
+    top: 45px; /* Adjusted to align under the user icon */
+    right: 0;
+    background: #fff;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    overflow: hidden;
+    width: 180px;
+    display: none;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 100;
+}
+
+/* Dropdown Items */
+.user-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Icons inside dropdown */
+.user-dropdown a img {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.2s ease-in-out;
+}
+
+/* Hover Effect */
+.user-dropdown a:hover {
+    background: #e40000;
+    color: white;
+}
+
+/* Zoom-in effect for icons on hover */
+.user-dropdown a:hover img {
+    transform: scale(1.1);
+}
+
+/* Show dropdown */
+.user-dropdown.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Divider between items */
+.user-dropdown a:not(:last-child) {
+    border-bottom: 1px solid #eee;
+}
+
+
+        /* Custom Logout Modal Styles */
+        .logout-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .logout-modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .logout-modal h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.5rem;
+        }
+        
+        .logout-modal p {
+            color: #666;
+            margin-bottom: 25px;
+        }
+        
+        .logout-modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .logout-modal-btn {
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: none;
+        }
+        
+        .logout-modal-cancel {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+        
+        .logout-modal-cancel:hover {
+            background-color: #d0d0d0;
+        }
+        
+        .logout-modal-confirm {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .logout-modal-confirm:hover {
+            background-color: #c0392b;
+        }
+        
+        .logout-icon {
+            font-size: 3rem;
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+
+                /* Table Container Styles */
+.table-container {
+    padding: 20px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow-y: auto;
+    max-height: calc(100vh - 200px);
+}
+
+/* Table Styles */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    table-layout: fixed;
+}
+
+thead {
+    background: #003366;
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+}
+
+th, td {
+    padding: 12px 15px;
+    text-align: left;
+    border-bottom: 1px solid #ddd;
+    word-wrap: break-word;
+    overflow-wrap: break-word;
+}
+
+th {
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 13px;
+    letter-spacing: 0.5px;
+}
+
+tbody tr:hover {
+    background-color: #f8f9fa;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+    .sidebar {
+        width: 100%;
+        max-width: 100%;
+        height: auto;
+        position: relative;
+    }
+    
+    .main-content {
+        margin-left: 0;
+        max-width: 100%;
+    }
+    
+    .search-filter-container {
+        flex-direction: column;
+    }
+    
+    .search-box {
+        max-width: 100%;
+    }
+    
+    table {
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+}
+
+@media (max-height: 600px) {
+    .table-container {
+        max-height: 50vh;
+    }
+}
+
+@media (max-height: 400px) {
+    .table-container {
+        max-height: 40vh;
+    }
+}

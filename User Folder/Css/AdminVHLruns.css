@@ -1,0 +1,1478 @@
+@font-face {
+    font-family: 'Akrobat';
+    src: url('AkrobatB.otf') format('opentype');
+    font-weight: normal;
+    font-style: normal;
+    /* font-family: 'Akrobat', sans-serif; */
+}
+
+
+@font-face {
+    font-family: 'SerpentineBold';
+    src: url('Serpentinebold.otf') format('opentype');
+    font-weight: bold;
+    font-style: normal;
+    /* font-family: 'SerpentineBold', sans-serif; */
+}
+
+body,html {
+    margin: 0;
+    font-family: Arial, sans-serif;
+    height: 100%;
+    overflow: hidden; /* Prevent full page scrolling */
+
+}
+
+
+/* HEADER */
+.header {
+    
+    display: flex;
+    align-items: center; /* Vertically center items */
+    justify-content: center; /* Center content */
+    background-color: #9c0000;
+    color: white;
+    padding: 15px;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
+    width: 100%;
+}
+
+
+.header-content {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    align-items: center;
+}
+
+/* MAIN CONTENT */
+.main-content {
+    margin-left: 250px; /* Adjust for sidebar */
+    padding: 20px;
+    text-align: center; /* Centers content inside the div */
+    position: relative;
+}
+
+/* Centered Title */
+.main-title {
+    font-family: 'SerpentineBold', sans-serif;
+    font-size: 30px;
+    font-weight: bold;
+    color: rgb(0, 0, 0); /* Adjust for visibility */
+    margin: 0;
+    position: relative; /* Keeps it below the header */
+}
+
+.left-side {
+    display: flex;
+    align-items: center;
+}
+
+.logo {
+    height: 55px;
+    margin-right: 15px;
+    
+}
+
+
+.right-side {
+    margin-right: 40px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.icon {
+    height: 30px;
+    margin-left: 20px;
+    cursor: pointer;
+}
+
+.icon:hover {
+    opacity: 0.8;
+    transition: opacity 0.3s ease;
+}
+
+/* SIDEBAR */
+.sidebar {
+    height: calc(100vh - 100px);
+    background: #2c3e50;
+    position: fixed;
+    top: auto;
+    left: 0;
+    display: flex;
+    flex-direction: column;
+    padding-top: 10px;
+    min-width: 250px;
+    max-width: 250px;
+    height: 100vh; /* Fixed full height */
+    overflow-y: auto; /* Allows scrolling inside the sidebar */
+}
+
+.sidebar ul {
+    list-style: none;
+    padding: 0px;
+    margin: 0;
+}
+
+.sidebar li {
+    margin: 5px 0;
+}
+
+/* Sidebar Links */
+.sidebar a, .dropdown-btn {
+    font-family: 'Akrobat', sans-serif;
+    text-decoration: none;
+    color: rgb(255, 255, 255);
+    font-size: 1.2em;
+    padding: 10px 20px;
+    display: flex;
+    align-items: center;
+    transition: background-color 0.3s ease, transform 0.2s ease-in-out;
+}
+
+/* Align icons and text */
+.sidebar a .text, .dropdown-btn .text {
+    flex-grow: 1;
+    text-align: left;
+}
+
+.sidebar-icon {
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    transition: transform 0.2s ease-in-out;
+}
+
+/* Hover Effect with Zoom */
+.sidebar a:hover, .dropdown-btn:hover {
+    background-color: #ff0000;
+    border-radius: 5px;
+    color: white;
+    transform: scale(1.05);
+}
+
+/* Smooth Zoom for Sidebar Icons */
+.sidebar a:hover .sidebar-icon, .dropdown-btn:hover .sidebar-icon {
+    transform: scale(1.2);
+}
+
+/* Fade-in and Fade-out Animations */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes fadeOut {
+    from {
+        opacity: 1;
+        transform: translateY(0);
+    }
+    to {
+        opacity: 0;
+        transform: translateY(-10px);
+    }
+}
+
+/* USER DROPDOWN */
+.user {
+    font-family: 'Akrobat', sans-serif;
+    position: relative;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Space between icon and text */
+    padding: 10px;
+}
+
+/* User Icon */
+.user .icon {
+    width: 30px;
+    height: 30px;
+}
+
+/* Admin Text */
+.admin-text {
+    font-size: 14px;
+    font-weight: bold;
+    color: #ffffff;
+}
+
+/* Dropdown Menu */
+.user-dropdown {
+    position: absolute;
+    top: 45px; /* Adjusted to align under the user icon */
+    right: 0;
+    background: #fff;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.15);
+    border-radius: 8px;
+    overflow: hidden;
+    width: 180px;
+    display: none;
+    opacity: 0;
+    transform: translateY(-10px);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    z-index: 100;
+}
+
+/* Dropdown Items */
+.user-dropdown a {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 15px;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    transition: background 0.3s ease, color 0.3s ease;
+}
+
+/* Icons inside dropdown */
+.user-dropdown a img {
+    width: 18px;
+    height: 18px;
+    transition: transform 0.2s ease-in-out;
+}
+
+/* Hover Effect */
+.user-dropdown a:hover {
+    background: #e40000;
+    color: white;
+}
+
+/* Zoom-in effect for icons on hover */
+.user-dropdown a:hover img {
+    transform: scale(1.1);
+}
+
+/* Show dropdown */
+.user-dropdown.show {
+    display: block;
+    opacity: 1;
+    transform: translateY(0);
+}
+
+/* Divider between items */
+.user-dropdown a:not(:last-child) {
+    border-bottom: 1px solid #eee;
+}
+
+
+        /* Custom Logout Modal Styles */
+        .logout-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+        
+        .logout-modal-content {
+            background-color: #fff;
+            padding: 30px;
+            border-radius: 8px;
+            width: 400px;
+            max-width: 90%;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+            text-align: center;
+            animation: modalFadeIn 0.3s ease-out;
+        }
+        
+        @keyframes modalFadeIn {
+            from { opacity: 0; transform: translateY(-20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .logout-modal h3 {
+            margin-top: 0;
+            color: #333;
+            font-size: 1.5rem;
+        }
+        
+        .logout-modal p {
+            color: #666;
+            margin-bottom: 25px;
+        }
+        
+        .logout-modal-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+        }
+        
+        .logout-modal-btn {
+            padding: 10px 20px;
+            border-radius: 4px;
+            cursor: pointer;
+            font-weight: 500;
+            transition: all 0.2s;
+            border: none;
+        }
+        
+        .logout-modal-cancel {
+            background-color: #e0e0e0;
+            color: #333;
+        }
+        
+        .logout-modal-cancel:hover {
+            background-color: #d0d0d0;
+        }
+        
+        .logout-modal-confirm {
+            background-color: #e74c3c;
+            color: white;
+        }
+        
+        .logout-modal-confirm:hover {
+            background-color: #c0392b;
+        }
+        
+        .logout-icon {
+            font-size: 3rem;
+            color: #e74c3c;
+            margin-bottom: 15px;
+        }
+
+/* Table container */
+.table-container {
+    padding: 20px;
+    background: #f9f9f9;
+    border-radius: 10px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    overflow: auto; /* Combined overflow property */
+    max-width: 100%;
+    max-height: 79vh;
+    display: block;
+}
+/* Position Back Button to the right */
+.table-container {
+    display: flex;
+    flex-direction: column;
+}
+
+
+
+/* Adjust for smaller screens */
+@media (max-height: 600px) {
+    .table-container {
+        max-height: 50vh; /* Reduce height on smaller screens */
+    }
+}
+
+@media (max-height: 400px) {
+    .table-container {
+        max-height: 40vh; /* Further reduction for very small screens */
+    }
+}
+
+/* Table - Modern Enhanced Version with Clear Dividers */
+table {
+    width: 100%;
+    border-collapse: collapse; /* Changed back to collapse for solid lines */
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 51, 102, 0.1);
+    transition: all 0.3s ease;
+}
+
+table:hover {
+    box-shadow: 0 6px 24px rgba(0, 51, 102, 0.15);
+}
+
+/* Table Header - Premium Style */
+thead {
+    font-family: 'Akrobat', sans-serif;
+    background: linear-gradient(135deg, #003366 0%, #004080 100%);
+    color: white;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+th {
+    padding: 16px 12px;
+    text-align: left;
+    font-weight: 600;
+    position: relative;
+}
+
+th:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 20%;
+    height: 60%;
+    width: 1px;
+    background: rgba(255, 255, 255, 0.2);
+}
+
+/* Table Body - Clear Horizontal Dividers */
+tbody tr {
+    transition: all 0.25s ease;
+    border-bottom: 1px solid #e0e0e0; /* Solid light gray line between rows */
+}
+
+tbody tr:last-child {
+    border-bottom: none; /* Remove border from last row */
+}
+
+tbody tr:hover {
+    background-color: rgba(0, 102, 204, 0.03);
+
+}
+
+td {
+    padding: 14px 12px;
+    vertical-align: middle;
+    font-family: 'Inter', sans-serif;
+    color: #333;
+    position: relative;
+}
+
+/* Add subtle separator between cells (optional) */
+td:not(:last-child)::after {
+    content: "";
+    position: absolute;
+    right: 0;
+    top: 25%;
+    height: 50%;
+    width: 1px;
+    background: rgba(0, 0, 0, 0.05);
+}
+
+/* Action Buttons Container - Modern Layout */
+.action-buttons {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    padding: 8px 0;
+    flex-wrap: wrap;
+}
+
+/* Base Button Styles - Material Design Inspired */
+.edit-btn, 
+.delete-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    padding: 8px 16px;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+    border: none;
+    outline: none;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    min-width: 80px;
+}
+
+/* Edit Button - Gradient Style */
+.edit-btn {
+    background: linear-gradient(135deg, #3498db 0%, #2c81ba 100%);
+    color: white;
+}
+
+.edit-btn:hover {
+    background: linear-gradient(135deg, #2980b9 0%, #236fa1 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(41, 128, 185, 0.3);
+}
+
+.edit-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(41, 128, 185, 0.3);
+}
+
+/* Delete Button - Modern Red */
+.delete-btn {
+    background: linear-gradient(135deg, #ff5e5e 0%, #e74c3c 100%);
+    color: white;
+}
+
+.delete-btn:hover {
+    background: linear-gradient(135deg, #e74c3c 0%, #c0392b 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(231, 76, 60, 0.3);
+}
+
+.delete-btn:active {
+    transform: translateY(0);
+    box-shadow: 0 2px 4px rgba(231, 76, 60, 0.3);
+}
+
+/* Icons - Animated */
+.edit-btn i,
+.delete-btn i {
+    font-size: 14px;
+    transition: transform 0.3s ease;
+}
+
+.edit-btn:hover i {
+    transform: rotate(-10deg);
+}
+
+.delete-btn:hover i {
+    transform: scale(1.1);
+}
+
+/* Zebra Striping for Better Readability */
+tbody tr:nth-child(even) {
+    background-color: rgba(0, 0, 0, 0.01);
+}
+
+tbody tr:nth-child(even):hover {
+    background-color: rgba(0, 102, 204, 0.05);
+}
+
+/* Responsive adjustments - Mobile First Approach */
+@media (max-width: 768px) {
+    table {
+        border-radius: 8px;
+    }
+    
+    th, td {
+        padding: 12px 8px;
+    }
+    
+    .action-buttons {
+        gap: 8px;
+    }
+    
+    .edit-btn, 
+    .delete-btn {
+        padding: 6px 12px;
+        font-size: 13px;
+        min-width: 70px;
+    }
+}
+
+/* Animation for new rows */
+@keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+}
+
+tbody tr {
+    animation: fadeIn 0.4s ease-out forwards;
+}
+
+/* Loading State */
+tbody tr.loading {
+    animation: pulse 1.5s infinite;
+    opacity: 0.6;
+}
+
+@keyframes pulse {
+    0% { opacity: 0.6; }
+    50% { opacity: 0.3; }
+    100% { opacity: 0.6; }
+}
+
+/* ====================== */
+/* TOP CONTROLS CONTAINER */
+/* ====================== */
+.top-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    margin-bottom: 15px;
+}
+
+/* ==================== */
+/* FIRST LINE CONTROLS */
+/* ==================== */
+.first-line-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.first-line-controls .left-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    width: 30%;
+}
+
+/* ==================== */
+/* SECOND LINE CONTROLS */
+/* ==================== */
+.second-line-controls {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    width: 100%;
+}
+
+.second-line-controls .left-controls {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    width: 45.3%;
+}
+
+/* ==================== */
+/* RIGHT-ALIGNED BUTTON CONTAINERS */
+/* ==================== */
+.upload-case-content,
+.delete-selected-content {
+    display: flex;
+    justify-content: flex-end;
+}
+
+/* ============== */
+/* SEARCH INPUT */
+/* ============== */
+.search-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+.search-input {
+    flex: 1;
+    font-family: 'Akrobat', sans-serif;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    height: 40px;
+    box-sizing: border-box;
+    min-width: 200px;
+}
+
+/* ================= */
+/* DATE RANGE PICKER */
+/* ================= */
+.date-range-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.date-input {
+    display: flex;
+    align-items: center;
+    gap: 5px;
+}
+
+.date-input label {
+    font-family: 'Akrobat', sans-serif;
+    font-weight: 600;
+    color: #333;
+    white-space: nowrap;
+}
+
+.date-filter {
+    font-family: 'Akrobat', sans-serif;
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    height: 40px;
+    box-sizing: border-box;
+}
+
+/* ==================== */
+/* SECOND LINE CONTROLS */
+/* (Dropdown Filters) */
+/* ==================== */
+.filter-container {
+    flex: 1;
+    display: flex;
+    align-items: center;
+}
+
+/* ================ */
+/* DROPDOWN FILTERS */
+/* ================ */
+.filter-dropdown {
+    flex: 1;
+    font-family: 'Akrobat', sans-serif;
+    padding: 10px;
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    font-size: 14px;
+    background-color: white;
+    cursor: pointer;
+    height: 40px;
+    box-sizing: border-box;
+    min-width: 150px;
+}
+
+/* ============== */
+/* FOCUS STATES */
+/* ============== */
+.search-input:focus,
+.filter-dropdown:focus,
+.date-filter:focus {
+    outline: none;
+    border-color: #003366;
+    box-shadow: 0 0 0 2px rgba(0, 51, 102, 0.2);
+}
+
+/* ==================== */
+/* CLEAR FILTERS BUTTON */
+/* ==================== */
+.clear-filters-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 15px;
+    height: 40px;
+    background-color: #6383a2;
+    border: 1px solid #eeeded;
+    border-radius: 5px;
+    color: #ffffff;
+    font-family: 'Akrobat', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.clear-filters-btn:hover {
+    background-color: #dc3545;
+    color: white;
+}
+
+.x-icon {
+    font-size: 14px;
+    transition: transform 0.3s ease;
+}
+
+.clear-filters-btn:hover .x-icon {
+    transform: rotate(90deg);
+}
+
+/* ==================== */
+/* ACTION BUTTONS */
+/* ==================== */
+.action-btn {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 20px;
+    height: 40px;
+    border: none;
+    border-radius: 5px;
+    font-family: 'Akrobat', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.upload-btn {
+    background: linear-gradient(135deg, #003366, #004080);
+    color: white;
+}
+
+
+.delete-btn {
+    background-color: #dc3545;
+    color: white;
+}
+
+.delete-btn:hover {
+    background-color: #c82333;
+}
+
+.action-btn i {
+    font-size: 14px;
+}
+
+/* ================== */
+/* RESPONSIVE ADJUSTMENTS */
+/* ================== */
+@media (max-width: 768px) {
+    .first-line-controls,
+    .second-line-controls {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .first-line-controls .left-controls,
+    .second-line-controls .left-controls {
+        width: 100%;
+        flex-direction: column;
+    }
+    
+    .date-range-container {
+        justify-content: space-between;
+        width: 100%;
+    }
+    
+    .search-input,
+    .filter-dropdown {
+        width: 100%;
+    }
+    
+    .upload-case-content,
+    .delete-selected-content {
+        width: 100%;
+        justify-content: center;
+        margin-top: 10px;
+    }
+    
+    .second-line-controls {
+        position: relative;
+        padding-bottom: 50px;
+    }
+    
+    .clear-filters-btn {
+        width: 100%;
+        justify-content: center;
+    }
+    
+    .action-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+/* Success Modal */
+.deletesuccess-modal {
+    font-family: 'Akrobat', sans-serif;
+    display: none;
+    position: fixed;
+    z-index: 1100;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: #2ecc71;
+    color: white;
+    padding: 20px 40px;
+    border-radius: 10px;
+    font-size: 18px;
+    text-align: center;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    animation: fadeInScale 0.3s ease-out forwards;
+}
+
+/* Add slight pop-up effect */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -55%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Success Modal Content */
+.success-modal-content {
+    padding: 15px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Check Icon */
+.success-modal-content::before {
+    content: "✔"; /* Unicode checkmark */
+    font-size: 24px;
+    font-weight: bold;
+    display: inline-block;
+    background: white;
+    color: #2ecc71;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+}
+
+/* Fade-out effect when hiding */
+.success-modal.hide {
+    opacity: 0;
+    transform: translate(-50%, -45%) scale(0.9);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Close Button */
+.successclose {
+    float: right;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Add slight pop-up effect */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -55%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+
+/* Upload Case Modal - Modern Styling with Dark Blue Gradient */
+.upload-modal-content {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(5px);
+    z-index: 1000;
+    justify-content: center;
+    align-items: center;
+    animation: fadeIn 0.3s ease-out;
+    overflow: hidden;
+}
+
+@keyframes fadeIn {
+    from { opacity: 0; }
+    to { opacity: 1; }
+}
+
+.upload-modal-inner {
+    background: white;
+    border-radius: 12px;
+    width: 90%;
+    max-width: 650px;
+    max-height: 90vh;
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+    transform: translateY(-20px);
+    transition: transform 0.3s ease-out;
+    border: 1px solid rgba(255, 255, 255, 0.2);
+    
+    /* Custom Scrollbar */
+    scrollbar-width: thin;
+    scrollbar-color: #003366 #f9fafc;
+}
+
+/* Custom Scrollbar for Webkit browsers */
+.upload-modal-inner::-webkit-scrollbar {
+    width: 8px;
+    height: 8px;
+}
+
+.upload-modal-inner::-webkit-scrollbar-track {
+    background: #f9fafc;
+    border-radius: 0 12px 12px 0;
+}
+
+.upload-modal-inner::-webkit-scrollbar-thumb {
+    background-color: #003366;
+    border-radius: 4px;
+    border: 2px solid #f9fafc;
+}
+
+.upload-modal-inner::-webkit-scrollbar-thumb:hover {
+    background-color: #004080;
+}
+
+.upload-modal-inner::-webkit-scrollbar-corner {
+    background: #f9fafc;
+    border-radius: 0 12px 0 0;
+}
+
+/* Firefox scrollbar */
+@supports (scrollbar-color: red blue) {
+    .upload-modal-inner {
+        scrollbar-width: thin;
+        scrollbar-color: #003366 #f9fafc;
+        border-radius: 12px;
+    }
+}
+
+.upload-modal-content.show .upload-modal-inner {
+    transform: translateY(0);
+}
+
+/* Dark Blue Gradient Header */
+.upload-modal-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 20px 25px;
+    background: linear-gradient(135deg, #003366, #004080);
+    color: white;
+    border-radius: 12px 12px 0 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    box-shadow: 0 2px 10px rgba(0, 51, 102, 0.3);
+}
+
+.upload-modal-header h3 {
+    margin: 0;
+    font-size: 1.4rem;
+    font-weight: 600;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.upload-modal-close {
+    font-size: 1.8rem;
+    cursor: pointer;
+    transition: transform 0.2s;
+    line-height: 1;
+    color: white;
+}
+
+.upload-modal-close:hover {
+    transform: scale(1.1);
+    color: #f0f0f0;
+}
+
+.upload-modal-body {
+    padding: 25px;
+    background-color: #f9fafc;
+}
+
+/* Form Styling - Updated to match blue theme */
+#caseUploadForm {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    width: 100%;
+    box-sizing: border-box;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="datetime-local"]:focus,
+.form-group select:focus,
+.form-group textarea:focus {
+    border-color: #003366;
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(0, 51, 102, 0.2);
+}
+
+/* File Upload Styling - Blue theme */
+.file-upload-label i {
+    color: #003366;
+}
+
+.file-upload-label:hover {
+    border-color: #003366;
+}
+
+/* Form Actions - Blue gradient buttons */
+.submit-btn {
+    background: linear-gradient(135deg, #003366, #004080);
+    box-shadow: 0 4px 6px rgba(0, 51, 102, 0.2);
+    color: white;
+}
+
+.submit-btn:hover {
+    background: linear-gradient(135deg, #004080, #003366);
+    box-shadow: 0 6px 8px rgba(0, 51, 102, 0.3);
+    transform: translateY(-2px);
+}
+
+/* Upload Case Button in Main UI */
+#uploadCase {
+    background: linear-gradient(135deg, #003366, #004080);
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 5px rgba(0, 51, 102, 0.2);
+}
+
+#uploadCase:hover {
+    background: linear-gradient(135deg, #004080, #003366);
+    box-shadow: 0 4px 8px rgba(0, 51, 102, 0.3);
+    transform: translateY(-2px);
+}
+
+#uploadCase:active {
+    transform: translateY(0);
+}
+
+/* Floating Labels Effect - Blue */
+.form-group.focused label {
+    color: #003366;
+}
+
+/* Loading State - White spinner on blue */
+.submit-btn.loading i {
+    color: white;
+}
+
+/* Keep all other existing styles the same */
+.form-row {
+    display: flex;
+    gap: 20px;
+    width: 100%;
+}
+
+.form-row.date-time-row {
+    gap: 30px;
+}
+
+.form-group {
+    flex: 1;
+    margin-bottom: 5px;
+    min-width: 0;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 500;
+    color: #4a5568;
+    font-size: 0.95rem;
+}
+
+.form-group input[type="text"],
+.form-group input[type="datetime-local"],
+.form-group select,
+.form-group textarea {
+    width: 100%;
+    padding: 12px 15px;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    background-color: white;
+    box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+    box-sizing: border-box;
+}
+
+.form-group textarea {
+    min-height: 100px;
+    resize: vertical;
+    line-height: 1.5;
+}
+
+.file-upload-wrapper {
+    position: relative;
+    margin-top: 5px;
+}
+
+.file-upload-label {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 10px;
+    padding: 15px;
+    background-color: #f8fafc;
+    border: 2px dashed #cbd5e0;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s;
+    text-align: center;
+    color: #4a5568;
+}
+
+.file-upload-filename {
+    display: block;
+    margin-top: 8px;
+    font-size: 0.85rem;
+    color: #718096;
+    text-align: center;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 15px;
+    margin-top: 20px;
+    padding-top: 20px;
+    border-top: 1px solid #edf2f7;
+}
+
+.cancel-btn, .submit-btn {
+    padding: 12px 25px;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    font-size: 0.95rem;
+    transition: all 0.3s;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.cancel-btn {
+    background-color: #edf2f7;
+    color: #4a5568;
+}
+
+.cancel-btn:hover {
+    background-color: #e2e8f0;
+    transform: translateY(-2px);
+}
+
+.submit-btn:active {
+    transform: translateY(0);
+}
+
+@media (max-width: 768px) {
+    .form-row {
+        flex-direction: column;
+        gap: 15px;
+    }
+    
+    .form-row.date-time-row {
+        gap: 15px;
+    }
+    
+    .upload-modal-inner {
+        width: 95%;
+        max-height: 85vh;
+    }
+    
+    .upload-modal-header {
+        padding: 15px 20px;
+    }
+    
+    .upload-modal-body {
+        padding: 20px;
+    }
+    
+    .form-actions {
+        flex-direction: column-reverse;
+        gap: 10px;
+    }
+    
+    .cancel-btn, .submit-btn {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+input:invalid, select:invalid, textarea:invalid {
+    border-color: #fc8181 !important;
+}
+
+input:invalid:focus, select:invalid:focus, textarea:invalid:focus {
+    box-shadow: 0 0 0 3px rgba(252, 129, 129, 0.2) !important;
+}
+
+.error-message {
+    color: #e53e3e;
+    font-size: 0.85rem;
+    margin-top: 5px;
+    display: none;
+}
+
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+/* Autocomplete suggestions */
+.autocomplete-suggestions {
+    display: none;
+    position: absolute;
+    background: white;
+    border: 1px solid #ddd;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000;
+    width: calc(100% - 2px);
+}
+
+.autocomplete-suggestion {
+    padding: 8px 12px;
+    cursor: pointer;
+}
+
+.autocomplete-suggestion:hover {
+    background-color: #f5f5f5;
+}
+
+/* Current image styling */
+.current-image {
+    margin-top: 10px;
+    padding: 10px;
+    background: #f9f9f9;
+    border-radius: 4px;
+}
+
+.current-image p {
+    margin: 0 0 5px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.remove-image-btn {
+    margin-top: 5px;
+    background: #ff6b6b;
+    color: white;
+    border: none;
+    padding: 5px 10px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 12px;
+}
+
+.remove-image-btn:hover {
+    background: #ff5252;
+}
+
+/* Delete Modal Content */
+
+.deletecustom-modal {
+    display: none; /* Hidden by default */
+    position: fixed;
+    z-index: 1000; /* Ensure it's above other elements */
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    width: 100%;
+    max-width: 400px; /* Adjust width if needed */
+    background: rgba(0, 0, 0, 0.3); /* Optional: Adds a background overlay */
+    padding: 1000px;
+    backdrop-filter: blur(5px);
+}
+
+.delete-modal-content {
+    font-family: 'Akrobat', sans-serif;
+    background: #fff;
+    padding: 20px;
+    width: 100%;
+    max-width: 350px; /* Keeps the modal size */
+    border-radius: 8px;
+    box-shadow: 0px 4px 10px rgba(0, 0, 0, 0.2);
+    text-align: center;
+}
+
+.delete-modal-content h2 {
+    color: #d9534f;
+}
+
+.delete-modal-content button {
+    font-family: 'Akrobat', sans-serif;
+    background-color: #d9534f;
+    color: white;
+    border: none;
+    padding: 10px 15px;
+    margin-top: 10px;
+    cursor: pointer;
+    border-radius: 5px;
+    transition: 0.3s ease-in-out;
+    margin: 2px;
+}
+
+.delete-modal-content button:hover {
+    font-family: 'Akrobat', sans-serif;
+    background-color: #c9302c;
+}
+
+/* Success Modal */
+.deletesuccess-modal {
+    font-family: 'Akrobat', sans-serif;
+    display: none;
+    position: fixed;
+    z-index: 1100;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    background: #2ecc71;
+    color: white;
+    padding: 20px 40px;
+    border-radius: 10px;
+    font-size: 18px;
+    text-align: center;
+    box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.3);
+    opacity: 0;
+    transition: opacity 0.3s ease, transform 0.3s ease;
+    animation: fadeInScale 0.3s ease-out forwards;
+}
+
+/* Add slight pop-up effect */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -55%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
+/* Success Modal Content */
+.success-modal-content {
+    padding: 15px;
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+/* Check Icon */
+.success-modal-content::before {
+    content: "✔"; /* Unicode checkmark */
+    font-size: 24px;
+    font-weight: bold;
+    display: inline-block;
+    background: white;
+    color: #2ecc71;
+    border-radius: 50%;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    text-align: center;
+}
+
+/* Fade-out effect when hiding */
+.success-modal.hide {
+    opacity: 0;
+    transform: translate(-50%, -45%) scale(0.9);
+    transition: opacity 0.3s ease, transform 0.3s ease;
+}
+
+/* Close Button */
+.successclose {
+    float: right;
+    font-size: 22px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+/* Add slight pop-up effect */
+@keyframes fadeInScale {
+    from {
+        opacity: 0;
+        transform: translate(-50%, -55%) scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: translate(-50%, -50%) scale(1);
+    }
+}
+
