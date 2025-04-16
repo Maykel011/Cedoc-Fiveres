@@ -4,10 +4,12 @@ include './connection/Connection.php';
 
 // Check if user is already logged in
 if(isset($_SESSION['user_id'])) {
-    if($_SESSION['role'] == 'Admin') {
-        header("Location: ../Admin Folder/Admin/Adminphp/adminDashboard.php");
+    if($_SESSION['role'] == 'Super Admin') {
+        header("Location: ../SuperAdminAccount/SuperAdmin/SuperAdminphp/SuperAdminDashboard.php");
+    } elseif($_SESSION['role'] == 'Admin') {
+        header("Location: ../AdminAccount/Admin/Adminphp/adminDashboard.php");
     } else {
-        header("Location: UserDashboard.php");
+        header("Location: ../UserAccount/Users/Userphp/UserDashboard.php");
     }
     exit();
 }
@@ -53,10 +55,12 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $_SESSION['email'] = $user['email'];
                 
                 // Redirect based on role
-                if($user['role'] == 'Admin') {
-                    header("Location: ../Admin Folder/Admin/Adminphp/adminDashboard.php");
+                if($user['role'] == 'Super Admin') {
+                    header("Location: ../SuperAdminAccount/SuperAdmin/SuperAdminphp/SuperAdminDashboard.php");
+                } elseif($user['role'] == 'Admin') {
+                    header("Location: ../AdminAccount/Admin/Adminphp/adminDashboard.php");
                 } else {
-                    header("Location: UserDashboard.php");
+                    header("Location: ../UserAccount/Users/Userphp/UserDashboard.php");
                 }
                 exit();
             } else {
@@ -66,7 +70,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 
                 // Determine lockout duration based on failed attempts
                 if($new_attempts >= 6) {
-                    $lock_time = date('Y-m-d H:i:s', strtotime('+30 minutes')); // Changed from 30 hours to 30 minutes
+                    $lock_time = date('Y-m-d H:i:s', strtotime('+30 minutes'));
                 } elseif($new_attempts == 5) {
                     $lock_time = date('Y-m-d H:i:s', strtotime('+20 minutes'));
                 } elseif($new_attempts == 4) {
@@ -89,7 +93,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                     } elseif($new_attempts == 4) {
                         $warning .= "Next attempt will result in a 20-minute lockout.";
                     } elseif($new_attempts == 5) {
-                        $warning .= "Next attempt will lock your account for 30 minutes."; // Updated this message
+                        $warning .= "Next attempt will lock your account for 30 minutes.";
                     }
                     $_SESSION['login_warning'] = $warning;
                 }

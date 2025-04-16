@@ -118,13 +118,9 @@ document.addEventListener("DOMContentLoaded", function() {
     // State variables
     let allUsers = [];
     let currentUserId = null;
-    let isSuperAdmin = false;
 
     // Initialize
     if (createUserBtn || editUserForm) {
-        // Check if current user is Super Admin
-        isSuperAdmin = document.querySelector('.admin-text')?.dataset?.role === 'Super Admin';
-        
         loadUsers();
         setupEventListeners();
     }
@@ -235,7 +231,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             const confirmPassword = formData.get('confirm_password');
                             
                             if (newPassword || confirmPassword) {
-                                if (!isSuperAdmin && !currentPassword) {
+                                if (!currentPassword) {
                                     alert('Current password is required to change password');
                                     isValid = false;
                                 } else if (!newPassword) {
@@ -248,9 +244,7 @@ document.addEventListener("DOMContentLoaded", function() {
                                     alert('New password and confirmation do not match');
                                     isValid = false;
                                 } else {
-                                    if (!isSuperAdmin) {
-                                        containerData.append('current_password', currentPassword);
-                                    }
+                                    containerData.append('current_password', currentPassword);
                                     containerData.append('new_password', newPassword);
                                     containerData.append('confirm_password', confirmPassword);
                                 }
@@ -265,7 +259,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             const confirmPin = formData.get('confirm_pin');
                             
                             if (newPin || confirmPin) {
-                                if (!isSuperAdmin && !currentPin) {
+                                if (!currentPin) {
                                     alert('Current PIN is required to change PIN');
                                     isValid = false;
                                 } else if (!newPin) {
@@ -281,9 +275,7 @@ document.addEventListener("DOMContentLoaded", function() {
                                     alert('PIN code must be exactly 6 digits');
                                     isValid = false;
                                 } else {
-                                    if (!isSuperAdmin) {
-                                        containerData.append('current_pin', currentPin);
-                                    }
+                                    containerData.append('current_pin', currentPin);
                                     containerData.append('new_pin', newPin);
                                     containerData.append('confirm_pin', confirmPin);
                                 }
@@ -420,28 +412,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 <td>${user.position}</td>
                 <td>${user.role}</td>
                 <td>${user.email}</td>
-                <td class="password-cell">
-                    ${isSuperAdmin && user.password !== '••••••••' ? 
-                        `<span class="password-text">${user.password}</span>
-                         <button class="toggle-password" data-password="${user.password}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
-                                <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
-                            </svg>
-                         </button>` : 
-                        user.password}
-                </td>
-                <td class="pincode-cell">
-                    ${isSuperAdmin && user.pin_code !== '••••••' ? 
-                        `<span class="pincode-text">${user.pin_code}</span>
-                         <button class="toggle-pincode" data-pincode="${user.pin_code}">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" viewBox="0 0 16 16">
-                                <path d="M16 8s-3-5.5-8-5.5S0 8 0 8s3 5.5 8 5.5S16 8 16 8zM1.173 8a13.133 13.133 0 0 1 1.66-2.043C4.12 4.668 5.88 3.5 8 3.5c2.12 0 3.879 1.168 5.168 2.457A13.133 13.133 0 0 1 14.828 8c-.058.087-.122.183-.195.288-.335.48-.83 1.12-1.465 1.755C11.879 11.332 10.119 12.5 8 12.5c-2.12 0-3.879-1.168-5.168-2.457A13.134 13.134 0 0 1 1.172 8z"/>
-                                <path d="M8 5.5a2.5 2.5 0 1 0 0 5 2.5 2.5 0 0 0 0-5zM4.5 8a3.5 3.5 0 1 1 7 0 3.5 3.5 0 0 1-7 0z"/>
-                            </svg>
-                         </button>` : 
-                        user.pin_code}
-                </td>
+                <td>••••••••</td>
+                <td>${user.pin_code}</td>
                 <td></td>
             `;
             
@@ -449,36 +421,6 @@ document.addEventListener("DOMContentLoaded", function() {
             actionCell.appendChild(createKebabMenu(user.id));
             
             tbody.appendChild(row);
-        });
-
-        // Add event listeners for password toggles
-        document.querySelectorAll('.toggle-password').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const passwordText = this.parentElement.querySelector('.password-text');
-                if (passwordText) {
-                    if (passwordText.textContent === this.dataset.password) {
-                        passwordText.textContent = '••••••••';
-                    } else {
-                        passwordText.textContent = this.dataset.password;
-                    }
-                }
-            });
-        });
-
-        // Add event listeners for pincode toggles
-        document.querySelectorAll('.toggle-pincode').forEach(button => {
-            button.addEventListener('click', function(e) {
-                e.stopPropagation();
-                const pincodeText = this.parentElement.querySelector('.pincode-text');
-                if (pincodeText) {
-                    if (pincodeText.textContent === this.dataset.pincode) {
-                        pincodeText.textContent = '••••••';
-                    } else {
-                        pincodeText.textContent = this.dataset.pincode;
-                    }
-                }
-            });
         });
     }
 
@@ -619,32 +561,15 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('edit_role').value = user.role;
         
         // Clear password and pin fields
-        if (document.getElementById('current_password')) {
-            document.getElementById('current_password').value = '';
-        }
+        document.getElementById('current_password').value = '';
         document.getElementById('new_password').value = '';
         document.getElementById('confirm_password').value = '';
-        if (document.getElementById('current_pin')) {
-            document.getElementById('current_pin').value = '';
-        }
+        document.getElementById('current_pin').value = '';
         document.getElementById('new_pin').value = '';
         document.getElementById('confirm_pin').value = '';
         
         // Check admin limit
         checkAdminLimit('edit', user.role);
-        
-        // Hide current password/pin fields for Super Admin
-        if (isSuperAdmin) {
-            const currentPasswordField = document.getElementById('current_password');
-            const currentPinField = document.getElementById('current_pin');
-            
-            if (currentPasswordField) {
-                currentPasswordField.closest('.form-group').style.display = 'none';
-            }
-            if (currentPinField) {
-                currentPinField.closest('.form-group').style.display = 'none';
-            }
-        }
         
         if (editUserModal) editUserModal.style.display = 'block';
     }
@@ -944,14 +869,11 @@ document.addEventListener("DOMContentLoaded", function() {
 
 // Password validation function
 function validatePasswordFields() {
-    const currentPassword = document.getElementById('current_password')?.value;
+    const currentPassword = document.getElementById('current_password').value;
     const newPassword = document.getElementById('new_password').value;
     const confirmPassword = document.getElementById('confirm_password').value;
 
-    // Skip current password validation for Super Admin
-    const isSuperAdmin = document.querySelector('.admin-text')?.textContent?.includes('Super Admin') || false;
-    
-    if (!isSuperAdmin && !currentPassword) {
+    if (!currentPassword) {
         alert('Current password is required');
         return false;
     }
@@ -978,14 +900,11 @@ function validatePasswordFields() {
 
 // PIN validation function
 function validatePinFields() {
-    const currentPin = document.getElementById('current_pin')?.value;
+    const currentPin = document.getElementById('current_pin').value;
     const newPin = document.getElementById('new_pin').value;
     const confirmPin = document.getElementById('confirm_pin').value;
 
-    // Skip current pin validation for Super Admin
-    const isSuperAdmin = document.querySelector('.admin-text')?.textContent?.includes('Super Admin') || false;
-    
-    if (!isSuperAdmin && !currentPin) {
+    if (!currentPin) {
         alert('Current PIN is required');
         return false;
     }

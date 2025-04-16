@@ -4,8 +4,9 @@ include '../AdminBackEnd/ManageUserBE.php';
 
 session_start();
 
-// Check if user is logged in and has Admin or Super Admin role
-if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Super Admin')) {
+// Corrected check (using 'role' instead of 'user_role')
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'Admin' vs 'admin'
+    // Redirect to login page (not logout!)
     header("Location: ../../../login/login.php");
     exit();
 }
@@ -21,29 +22,6 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
     <title>CEDOC FIVERES</title>
     <link rel="stylesheet" href="../../Css/manageusers.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-    <style>/* Add to manageusers.css */
-.password-cell, .pincode-cell {
-    position: relative;
-    white-space: nowrap;
-}
-
-.toggle-password, .toggle-pincode {
-    background: none;
-    border: none;
-    cursor: pointer;
-    margin-left: 5px;
-    color: #666;
-    padding: 0;
-}
-
-.toggle-password:hover, .toggle-pincode:hover {
-    color: #333;
-}
-
-.password-text, .pincode-text {
-    display: inline-block;
-    min-width: 80px;
-}</style>
 </head>
 
 <body>
@@ -55,15 +33,13 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
         <div class="right-side">
             <div class="user" id="userContainer">
                 <img src="../../assets/icon/users.png" alt="User" class="icon" id="userIcon">
-                <span class="admin-text" data-role="<?php echo htmlspecialchars($_SESSION['role']); ?>">
+                <span class="admin-text">
                     <?php 
-                    if(isset($_SESSION['first_name'])) {
-                        echo htmlspecialchars($_SESSION['first_name']);
-                        if(isset($_SESSION['last_name'])) {
-                            echo ' ' . htmlspecialchars($_SESSION['last_name']);
-                        }
+                    // Display first and last name if available, otherwise show "Admin"
+                    if(isset($_SESSION['first_name']) && isset($_SESSION['last_name'])) {
+                        echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']);
                     } else {
-                        echo htmlspecialchars($_SESSION['role'] ?? 'User');
+                        echo 'Admin';
                     }
                     ?>
                 </span>
@@ -108,11 +84,6 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
             <li class="manage-users">
                 <a href="manage-users.php"><img src="../../Assets/Icon/user-management.png" alt="Manage Users Icon" class="sidebar-icon"> Manage Users</a>
             </li>
-            <?php if($_SESSION['role'] === 'Super Admin'): ?>
-            <li class="system-settings">
-                <a href="system-settings.php"><img src="../../Assets/Icon/settings.png" alt="Settings Icon" class="sidebar-icon"> System Settings</a>
-            </li>
-            <?php endif; ?>
         </ul>
     </aside>
 
@@ -200,9 +171,6 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                                 <option value="" selected disabled>Choose role...</option>
                                 <option value="Admin">Admin</option>
                                 <option value="User">User</option>
-                                <?php if($_SESSION['role'] === 'Super Admin'): ?>
-    <option value="Super Admin">Super Admin</option>
-<?php endif; ?>
                             </select>
                             <small id="createAdminLimitMessage" style="color: red; display: none;">Maximum of 5 admin users reached</small>
                         </div>
@@ -247,6 +215,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                     <div class="profile-container">
                         <div class="container-header">
                             <h3>Profile Information</h3>
+
                         </div>
                         <div class="form-group">
                             <label for="edit_employee_no">Employee No.</label>
@@ -270,7 +239,9 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                     <div class="designation-container">
                         <div class="container-header">
                             <h3>Designation</h3>
+
                         </div>
+
                          <div class="form-group">
                             <label for="edit_position">Position</label>
                             <select id="edit_position" name="position" required>
@@ -286,9 +257,6 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                             <select id="edit_role" name="role" required>
                                 <option value="Admin">Admin</option>
                                 <option value="User">User</option>
-                                <?php if($_SESSION['role'] === 'Super Admin'): ?>
-                                <option value="Super Admin">Super Admin</option>
-                                <?php endif; ?>
                             </select>
                             <small id="editAdminLimitMessage" style="color: red; display: none;">Maximum of 5 admin users reached</small>
                         </div>
@@ -298,13 +266,12 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                     <div class="password-container">
                         <div class="container-header">
                             <h3>Update Password</h3>
+
                         </div>
-                        <?php if($_SESSION['role'] !== 'Super Admin'): ?>
                         <div class="form-group">
                             <label for="current_password">Current Password</label>
                             <input type="password" id="current_password" name="current_password">
                         </div>
-                        <?php endif; ?>
                         <div class="form-group">
                             <label for="new_password">New Password</label>
                             <input type="password" id="new_password" name="new_password">
@@ -319,13 +286,12 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                     <div class="pincode-container">
                         <div class="container-header">
                             <h3>Update PIN Code</h3>
+
                         </div>
-                        <?php if($_SESSION['role'] !== 'Super Admin'): ?>
                         <div class="form-group">
                             <label for="current_pin">Current 6-Digit PIN</label>
                             <input type="text" id="current_pin" name="current_pin" maxlength="6">
                         </div>
-                        <?php endif; ?>
                         <div class="form-group">
                             <label for="new_pin">New 6-Digit PIN</label>
                             <input type="text" id="new_pin" name="new_pin" maxlength="6">
@@ -383,7 +349,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
         </div>
     </div>
 
-    <script src="../../js/usermagement.js"></script>
+    <script src="../../js/usermngs.js"></script>
 </body>
 
 </html>
