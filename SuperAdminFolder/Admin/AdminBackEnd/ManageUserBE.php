@@ -17,6 +17,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'delete_user':
                 deleteUser($conn);
                 break;
+            case 'get_user_credentials':
+                getUserCredentials($conn);
+                break;
         }
     }
     exit;
@@ -24,15 +27,23 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 // Get all users for display
 if (isset($_GET['get_users'])) {
-    echo json_encode(getUsers($conn));
+    $showSensitive = isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin';
+    echo json_encode(getUsers($conn, $showSensitive));
     exit;
 }
 
-function getUsers($conn) {
+function getUsers($conn, $showSensitive = false) {
     $sql = "SELECT id, employee_no, CONCAT(first_name, ' ', last_name) AS name, 
-                   position, role, email, 
-                   CASE WHEN pin_code IS NOT NULL THEN '••••••' ELSE 'N/A' END AS pin_code 
-            FROM users";
+                   position, role, email, ";
+    
+    if ($showSensitive) {
+        $sql .= "password, pin_code ";
+    } else {
+        $sql .= "CASE WHEN password IS NOT NULL THEN '••••••••' ELSE 'N/A' END AS password, 
+                CASE WHEN pin_code IS NOT NULL THEN '••••••' ELSE 'N/A' END AS pin_code ";
+    }
+    
+    $sql .= "FROM users";
     $result = $conn->query($sql);
     
     $users = [];
@@ -133,9 +144,12 @@ function updateUser($conn) {
     $params = [$employee_no, $first_name, $last_name, $position, $role, $email, $pin_code];
     $types = "sssssss";
 
+    // Check if current user is Super Admin (can change passwords/pins without verification)
+    $isSuperAdmin = isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin';
+
     // Add password if provided
     if (!empty($_POST['new_password'])) {
-        if (!verifyCurrentPassword($conn, $id, $_POST['current_password'])) {
+        if (!$isSuperAdmin && !verifyCurrentPassword($conn, $id, $_POST['current_password'])) {
             echo json_encode(['status' => 'error', 'message' => 'Current password is incorrect']);
             return;
         }
@@ -148,7 +162,7 @@ function updateUser($conn) {
 
     // Add pin code if provided
     if (!empty($_POST['new_pin'])) {
-        if (!verifyCurrentPin($conn, $id, $_POST['current_pin'])) {
+        if (!$isSuperAdmin && !verifyCurrentPin($conn, $id, $_POST['current_pin'])) {
             echo json_encode(['status' => 'error', 'message' => 'Current PIN is incorrect']);
             return;
         }
@@ -190,6 +204,9 @@ function updateUserPartial($conn) {
         return;
     }
 
+    // Check if current user is Super Admin (can change passwords/pins without verification)
+    $isSuperAdmin = isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin';
+
     switch ($containerType) {
         case 'profile':
             updateProfile($conn, $id);
@@ -198,16 +215,15 @@ function updateUserPartial($conn) {
             updateDesignation($conn, $id);
             break;
         case 'password':
-            updatePassword($conn, $id);
+            updatePassword($conn, $id, $isSuperAdmin);
             break;
         case 'pincode':
-            updatePinCode($conn, $id);
+            updatePinCode($conn, $id, $isSuperAdmin);
             break;
         default:
             echo json_encode(['status' => 'error', 'message' => 'Invalid container type']);
     }
     
-    // Add this line to prevent double response
     return;
 }
 
@@ -289,8 +305,8 @@ function updateDesignation($conn, $id) {
     }
 }
 
-function updatePassword($conn, $id) {
-    $required = ['current_password', 'new_password', 'confirm_password'];
+function updatePassword($conn, $id, $isSuperAdmin = false) {
+    $required = ['new_password', 'confirm_password'];
     foreach ($required as $field) {
         if (empty($_POST[$field])) {
             echo json_encode(['status' => 'error', 'message' => "$field is required"]);
@@ -303,9 +319,16 @@ function updatePassword($conn, $id) {
         return;
     }
 
-    if (!verifyCurrentPassword($conn, $id, $_POST['current_password'])) {
-        echo json_encode(['status' => 'error', 'message' => 'Current password is incorrect']);
-        return;
+    if (!$isSuperAdmin) {
+        if (empty($_POST['current_password'])) {
+            echo json_encode(['status' => 'error', 'message' => 'Current password is required']);
+            return;
+        }
+        
+        if (!verifyCurrentPassword($conn, $id, $_POST['current_password'])) {
+            echo json_encode(['status' => 'error', 'message' => 'Current password is incorrect']);
+            return;
+        }
     }
 
     $password = password_hash($_POST['new_password'], PASSWORD_DEFAULT);
@@ -321,8 +344,8 @@ function updatePassword($conn, $id) {
     $stmt->close();
 }
 
-function updatePinCode($conn, $id) {
-    $required = ['current_pin', 'new_pin', 'confirm_pin'];
+function updatePinCode($conn, $id, $isSuperAdmin = false) {
+    $required = ['new_pin', 'confirm_pin'];
     foreach ($required as $field) {
         if (empty($_POST[$field])) {
             echo json_encode(['status' => 'error', 'message' => "$field is required"]);
@@ -335,9 +358,21 @@ function updatePinCode($conn, $id) {
         return;
     }
 
-    if (!verifyCurrentPin($conn, $id, $_POST['current_pin'])) {
-        echo json_encode(['status' => 'error', 'message' => 'Current PIN is incorrect']);
+    if (strlen($_POST['new_pin']) !== 6 || !ctype_digit($_POST['new_pin'])) {
+        echo json_encode(['status' => 'error', 'message' => 'PIN code must be exactly 6 digits']);
         return;
+    }
+
+    if (!$isSuperAdmin) {
+        if (empty($_POST['current_pin'])) {
+            echo json_encode(['status' => 'error', 'message' => 'Current PIN is required']);
+            return;
+        }
+        
+        if (!verifyCurrentPin($conn, $id, $_POST['current_pin'])) {
+            echo json_encode(['status' => 'error', 'message' => 'Current PIN is incorrect']);
+            return;
+        }
     }
 
     $pin_code = $conn->real_escape_string($_POST['new_pin']);
@@ -392,5 +427,33 @@ function deleteUser($conn) {
         echo json_encode(['status' => 'error', 'message' => 'Error deleting user: ' . $conn->error]);
     }
     $stmt->close();
+}
+
+function getUserCredentials($conn) {
+    if (empty($_GET['id'])) {
+        echo json_encode(['status' => 'error', 'message' => 'User ID is required']);
+        return;
+    }
+
+    $id = (int)$_GET['id'];
+    
+    $stmt = $conn->prepare("SELECT password, pin_code FROM users WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows === 0) {
+        echo json_encode(['status' => 'error', 'message' => 'User not found']);
+        return;
+    }
+    
+    $user = $result->fetch_assoc();
+    $stmt->close();
+    
+    echo json_encode([
+        'status' => 'success',
+        'password' => $user['password'],
+        'pin_code' => $user['pin_code']
+    ]);
 }
 ?>
