@@ -2,7 +2,7 @@
 include '../connection/Connection.php';
 include '../AdminBackEnd/ManageUserBE.php';
 
-session_start();
+
 
 // Corrected check (using 'role' instead of 'user_role')
 if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Super Admin')) {
@@ -18,11 +18,12 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
 
 <head>
     <meta charset="UTF-8">
-    <meta name="is-super-admin" content="<?php echo (isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin') ? 'true' : 'false'; ?>">
+    <meta name="is-super-admin" content="true">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES</title>
-    <link rel="stylesheet" href="../../Css/SManagerUsers.css">
+    <link rel="stylesheet" href="../../Css/SAManagerUsers.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 </head>
 
 <body>
@@ -261,12 +262,12 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                         <div class="form-group">
                             <label for="edit_role">Role</label>
                             <select id="edit_role" name="role" required>
-    <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin'): ?>
-        <option value="Super Admin">Super Admin</option>
-    <?php endif; ?>
-    <option value="Admin">Admin</option>
-    <option value="User">User</option>
-</select>
+                                <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin'): ?>
+                                    <option value="Super Admin">Super Admin</option>
+                                <?php endif; ?>
+                                <option value="Admin">Admin</option>
+                                <option value="User">User</option>
+                            </select>
                             <small id="editAdminLimitMessage" style="color: red; display: none;">Maximum of 5 admin users reached</small>
                         </div>
                         <button type="button" class="btn save-container" data-container="designation">Save Designation</button>
@@ -321,6 +322,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
         </div>
     </div>
 
+
     <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="modal">
         <div class="custom-modal-content">
@@ -358,7 +360,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
         </div>
     </div>
 
-    <script src="../../js/Supermanagements.js"></script>
+    <script src="../../js/SAmanagements.js"></script>
 </body>
 
 </html>

@@ -1,17 +1,24 @@
 <?php
 include '../connection/Connection.php';
+session_start();
 
 // Check if current user is Super Admin
 function isSuperAdmin($conn) {
-    if (!isset($_SESSION['user_id'])) return false;
+    if (!isset($_SESSION['user_id'])) {
+        error_log("No user_id in session");
+        return false;
+    }
     $userId = $_SESSION['user_id'];
+    error_log("Checking Super Admin status for user ID: $userId");
+    
     $result = $conn->query("SELECT role FROM users WHERE id = $userId");
     if ($result && $row = $result->fetch_assoc()) {
+        error_log("User role: " . $row['role']);
         return $row['role'] === 'Super Admin';
     }
+    error_log("Failed to fetch user role");
     return false;
 }
-
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $isSuperAdmin = isSuperAdmin($conn);
@@ -179,7 +186,7 @@ function updateUser($conn, $isSuperAdmin) {
             return;
         }
         
-        $password = password_hash($_POST['new_password'], PASSWORD_DEFAULT);
+        $password = $conn->real_escape_string($_POST['password']);
         $query .= ", password=?";
         $params[] = $password;
         $types .= "s";
@@ -342,6 +349,7 @@ function updateDesignation($conn, $id, $isSuperAdmin) {
 }
 
 // Update the updatePassword function to skip current password verification for Super Admin
+// Update the updatePassword function to skip current password verification for Super Admin
 function updatePassword($conn, $id) {
     $isSuperAdmin = isSuperAdmin($conn);
     $required = ['new_password', 'confirm_password'];
@@ -381,7 +389,6 @@ function updatePassword($conn, $id) {
     }
     $stmt->close();
 }
-
 
 // Update the updatePinCode function similarly
 function updatePinCode($conn, $id) {
@@ -424,16 +431,18 @@ function updatePinCode($conn, $id) {
     $stmt->close();
 }
 
-function verifyCurrentPassword($conn, $id, $password) {
-    $stmt = $conn->prepare("SELECT password FROM users WHERE id = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $user = $result->fetch_assoc();
-    $stmt->close();
-    
-    return ($password === $user['password']);
-}
+// Simplify verifyCurrentPassword function:
+    function verifyCurrentPassword($conn, $id, $password) {
+        $stmt = $conn->prepare("SELECT password FROM users WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        $stmt->close();
+        
+        // Use password_verify if passwords are hashed
+        return password_verify($password, $user['password']);
+    }
 
 function verifyCurrentPin($conn, $id, $pin) {
     $stmt = $conn->prepare("SELECT pin_code FROM users WHERE id = ?");

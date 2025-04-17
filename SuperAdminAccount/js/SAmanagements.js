@@ -64,7 +64,7 @@ document.addEventListener("DOMContentLoaded", function() {
                                 this.classList.remove('visible');
                                 cell.textContent = cell.classList.contains('password-cell') ? '••••••••' : '••••••';
                             }
-                        }, 5000);
+                        }, 500);
                     }
                 });
                 
@@ -256,7 +256,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             
                             if (!formData.get('employee_no') || !formData.get('first_name') || 
                                 !formData.get('last_name') || !formData.get('email')) {
-                                alert('All profile fields are required');
+                                showErrorModal('All profile fields are required');
                                 isValid = false;
                             }
                             break;
@@ -268,7 +268,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             // Use other position if "Other" is selected
                             if (position === 'Other') {
                                 if (!otherPosition) {
-                                    alert('Please specify the position');
+                                    showErrorModal('Please specify the position');
                                     isValid = false;
                                     break;
                                 }
@@ -280,69 +280,81 @@ document.addEventListener("DOMContentLoaded", function() {
                             containerData.append('role', formData.get('role'));
                             
                             if (!position || !formData.get('role')) {
-                                alert('Both position and role are required');
+                                showErrorModal('Both position and role are required');
                                 isValid = false;
                             }
                             break;
 
-                        case 'password':
-                            const currentPassword = formData.get('current_password');
-                            const newPassword = formData.get('new_password');
-                            const confirmPassword = formData.get('confirm_password');
-                            
-                            if (newPassword || confirmPassword) {
-                                if (!currentPassword) {
-                                    alert('Current password is required to change password');
-                                    isValid = false;
-                                } else if (!newPassword) {
-                                    alert('New password is required');
-                                    isValid = false;
-                                } else if (!confirmPassword) {
-                                    alert('Please confirm your new password');
-                                    isValid = false;
-                                } else if (newPassword !== confirmPassword) {
-                                    alert('New password and confirmation do not match');
-                                    isValid = false;
+                       // In the containerType === 'password' case:
+                            case 'password':
+                                const currentPassword = formData.get('current_password');
+                                const newPassword = formData.get('new_password');
+                                const confirmPassword = formData.get('confirm_password');
+                                
+                                if (newPassword || confirmPassword) {
+                                    if (newPassword !== confirmPassword) {
+                                        showErrorModal('New password and confirmation do not match');
+                                        isValid = false;
+                                    }
+                                    
+                                    // Only validate current password if not Super Admin
+                                    if (!isSuperAdmin && !currentPassword) {
+                                        showErrorModal('Current password is required to change password');
+                                        isValid = false;
+                                    } else if (!newPassword) {
+                                        showErrorModal('New password is required');
+                                        isValid = false;
+                                    } else if (!confirmPassword) {
+                                        showErrorModal('Please confirm your new password');
+                                        isValid = false;
+                                    } else {
+                                        if (!isSuperAdmin) {
+                                            containerData.append('current_password', currentPassword);
+                                        }
+                                        containerData.append('new_password', newPassword);
+                                        containerData.append('confirm_password', confirmPassword);
+                                    }
                                 } else {
-                                    containerData.append('current_password', currentPassword);
-                                    containerData.append('new_password', newPassword);
-                                    containerData.append('confirm_password', confirmPassword);
+                                    isValid = true;
                                 }
-                            } else {
-                                isValid = true;
-                            }
-                            break;
+                                break;
 
-                        case 'pincode':
-                            const currentPin = formData.get('current_pin');
-                            const newPin = formData.get('new_pin');
-                            const confirmPin = formData.get('confirm_pin');
-                            
-                            if (newPin || confirmPin) {
-                                if (!currentPin) {
-                                    alert('Current PIN is required to change PIN');
-                                    isValid = false;
-                                } else if (!newPin) {
-                                    alert('New PIN is required');
-                                    isValid = false;
-                                } else if (!confirmPin) {
-                                    alert('Please confirm your new PIN');
-                                    isValid = false;
-                                } else if (newPin !== confirmPin) {
-                                    alert('New PIN and confirmation do not match');
-                                    isValid = false;
-                                } else if (newPin.length !== 6 || !/^\d+$/.test(newPin)) {
-                                    alert('PIN code must be exactly 6 digits');
-                                    isValid = false;
+                        // In the containerType === 'pincode' case:
+                            case 'pincode':
+                                const currentPin = formData.get('current_pin');
+                                const newPin = formData.get('new_pin');
+                                const confirmPin = formData.get('confirm_pin');
+                                
+                                if (newPin || confirmPin) {
+                                    if (newPin !== confirmPin) {
+                                        showErrorModal('New PIN and confirmation do not match');
+                                        isValid = false;
+                                    } else if (newPin && (newPin.length !== 6 || !/^\d+$/.test(newPin))) {
+                                        showErrorModal('PIN code must be exactly 6 digits');
+                                        isValid = false;
+                                    }
+                                    
+                                    // Only validate current PIN if not Super Admin
+                                    if (!isSuperAdmin && !currentPin) {
+                                        showErrorModal('Current PIN is required to change PIN');
+                                        isValid = false;
+                                    } else if (!newPin) {
+                                        showErrorModal('New PIN is required');
+                                        isValid = false;
+                                    } else if (!confirmPin) {
+                                        showErrorModal('Please confirm your new PIN');
+                                        isValid = false;
+                                    } else {
+                                        if (!isSuperAdmin) {
+                                            containerData.append('current_pin', currentPin);
+                                        }
+                                        containerData.append('new_pin', newPin);
+                                        containerData.append('confirm_pin', confirmPin);
+                                    }
                                 } else {
-                                    containerData.append('current_pin', currentPin);
-                                    containerData.append('new_pin', newPin);
-                                    containerData.append('confirm_pin', confirmPin);
+                                    isValid = true;
                                 }
-                            } else {
-                                isValid = true;
-                            }
-                            break;
+                                break;
                     }
 
                     if (!isValid) return;
@@ -400,7 +412,7 @@ document.addEventListener("DOMContentLoaded", function() {
                                     
                                     setTimeout(() => {
                                         adminLimitMessage.style.display = 'none';
-                                    }, 5000);
+                                    }, 500);
                                 }
                             }
                             showErrorModal(data.message || 'An error occurred');
@@ -417,6 +429,26 @@ document.addEventListener("DOMContentLoaded", function() {
                 });
             });
         }
+
+                    
+                    // Add this to your setupEventListeners function
+                    document.querySelectorAll('.update-pin-btn').forEach(btn => {
+                        btn.addEventListener('click', function() {
+                            const userId = this.dataset.userId;
+                            openPinModal(userId);
+                        });
+                    });
+
+                    // Add this to your createActionButtons function (where you create the action buttons for each user)
+                    const updatePinBtn = document.createElement('button');
+                    updatePinBtn.className = 'update-pin-btn';
+                    updatePinBtn.dataset.userId = user.id;
+                    updatePinBtn.innerHTML = '<i class="fas fa-lock"></i> Update PIN';
+                    updatePinBtn.addEventListener('click', function(e) {
+                        e.stopPropagation();
+                        openPinModal(this.dataset.userId);
+                    });
+                    actionCell.appendChild(updatePinBtn);
         
         // Delete Modal
         if (deleteModal) {
@@ -451,106 +483,105 @@ document.addEventListener("DOMContentLoaded", function() {
             .catch(error => console.error('Error loading users:', error));
     }
 
-// Update the renderUsers function to add appropriate classes
-function renderUsers(users) {
-    const tbody = document.getElementById('manage-user');
-    if (!tbody) return;
-    
-    tbody.innerHTML = '';
-    
-    if (users.length === 0) {
-        const row = document.createElement('tr');
-        row.innerHTML = `<td colspan="8" class="no-users">No users found</td>`;
-        tbody.appendChild(row);
-        return;
-    }
-    
-    users.forEach(user => {
-        const row = document.createElement('tr');
+    function renderUsers(users) {
+        const tbody = document.getElementById('manage-user');
+        if (!tbody) return;
         
-        // Add special class for Super Admin
-        const rowClass = user.role === 'Super Admin' ? 'super-admin-row' : '';
-        row.className = rowClass;
+        tbody.innerHTML = '';
         
-        row.innerHTML = `
-            <td>${user.employee_no}</td>
-            <td>${user.name} ${user.role === 'Super Admin' ? '<span class="super-admin-badge">Super Admin</span>' : ''}</td>
-            <td>${user.position}</td>
-            <td>${user.role}</td>
-            <td>${user.email}</td>
-            <td class="password-cell">••••••••</td>
-            <td class="pincode-cell">••••••</td>
-            <td></td>
-        `;
-        
-        // Store original values in data attributes
-        const passwordCell = row.querySelector('.password-cell');
-        const pinCell = row.querySelector('.pincode-cell');
-        passwordCell.dataset.password = user.password || 'N/A';
-        pinCell.dataset.pincode = user.pin_code || 'N/A';
-        
-        const actionCell = row.querySelector('td:last-child');
-        actionCell.appendChild(createActionButtons(user.id, user.role));
-        
-        tbody.appendChild(row);
-    });
-}
-
-function createActionButtons(userId, userRole) {
-    // Create container for both buttons
-    const container = document.createElement('div');
-    container.className = 'action-buttons-container';
-    
-    // Add show credentials button
-    const showCredsBtn = document.createElement('button');
-    showCredsBtn.className = 'show-creds-btn';
-    showCredsBtn.title = 'Show Credentials';
-    showCredsBtn.innerHTML = '<i class="fas fa-key"></i>';
-    
-    showCredsBtn.addEventListener('click', function(e) {
-        e.stopPropagation();
-        const row = this.closest('tr');
-        const passwordCell = row.querySelector('.password-cell');
-        const pinCell = row.querySelector('.pincode-cell');
-        
-        if (passwordCell.classList.contains('visible')) {
-            // Hide credentials
-            passwordCell.textContent = '••••••••';
-            pinCell.textContent = '••••••';
-            passwordCell.classList.remove('visible');
-            pinCell.classList.remove('visible');
-            this.innerHTML = '<i class="fas fa-key"></i>';
-            this.title = 'Show Credentials';
-        } else {
-            // Show credentials
-            passwordCell.textContent = passwordCell.dataset.password;
-            pinCell.textContent = pinCell.dataset.pincode;
-            passwordCell.classList.add('visible');
-            pinCell.classList.add('visible');
-            this.innerHTML = '<i class="fas fa-eye-slash"></i>';
-            this.title = 'Hide Credentials';
-            
-            // Auto-hide after 5 seconds
-            setTimeout(() => {
-                if (passwordCell.classList.contains('visible')) {
-                    passwordCell.textContent = '••••••••';
-                    pinCell.textContent = '••••••';
-                    passwordCell.classList.remove('visible');
-                    pinCell.classList.remove('visible');
-                    this.innerHTML = '<i class="fas fa-key"></i>';
-                    this.title = 'Show Credentials';
-                }
-            }, 5000);
+        if (users.length === 0) {
+            const row = document.createElement('tr');
+            row.innerHTML = `<td colspan="8" class="no-users">No users found</td>`;
+            tbody.appendChild(row);
+            return;
         }
-    });
-    
-    container.appendChild(showCredsBtn);
-    
-    // Add kebab menu
-    container.appendChild(createKebabMenu(userId, userRole));
-    
-    return container;
-}
+        
+        users.forEach(user => {
+            const row = document.createElement('tr');
+            
+            // Add special class for Super Admin
+            const rowClass = user.role === 'Super Admin' ? 'super-admin-row' : '';
+            row.className = rowClass;
+            
+            row.innerHTML = `
+                <td>${user.employee_no}</td>
+                <td>${user.name} ${user.role === 'Super Admin' ? '<span class="super-admin-badge">Super Admin</span>' : ''}</td>
+                <td>${user.position}</td>
+                <td>${user.role}</td>
+                <td>${user.email}</td>
+                <td class="password-cell">••••••••</td>
+                <td class="pincode-cell">••••••</td>
+                <td></td>
+            `;
+            
+            // Store original values in data attributes
+            const passwordCell = row.querySelector('.password-cell');
+            const pinCell = row.querySelector('.pincode-cell');
+            passwordCell.dataset.password = user.password || 'N/A';
+            pinCell.dataset.pincode = user.pin_code || 'N/A';
+            
+            const actionCell = row.querySelector('td:last-child');
+            actionCell.appendChild(createActionButtons(user.id, user.role));
+            
+            tbody.appendChild(row);
+        });
+    }
+
+    function createActionButtons(userId, userRole) {
+        // Create container for both buttons
+        const container = document.createElement('div');
+        container.className = 'action-buttons-container';
+        
+        // Add show credentials button
+        const showCredsBtn = document.createElement('button');
+        showCredsBtn.className = 'show-creds-btn';
+        showCredsBtn.title = 'Show Credentials';
+        showCredsBtn.innerHTML = '<i class="fas fa-key"></i>';
+        
+        showCredsBtn.addEventListener('click', function(e) {
+            e.stopPropagation();
+            const row = this.closest('tr');
+            const passwordCell = row.querySelector('.password-cell');
+            const pinCell = row.querySelector('.pincode-cell');
+            
+            if (passwordCell.classList.contains('visible')) {
+                // Hide credentials
+                passwordCell.textContent = '••••••••';
+                pinCell.textContent = '••••••';
+                passwordCell.classList.remove('visible');
+                pinCell.classList.remove('visible');
+                this.innerHTML = '<i class="fas fa-key"></i>';
+                this.title = 'Show Credentials';
+            } else {
+                // Show credentials
+                passwordCell.textContent = passwordCell.dataset.password;
+                pinCell.textContent = pinCell.dataset.pincode;
+                passwordCell.classList.add('visible');
+                pinCell.classList.add('visible');
+                this.innerHTML = '<i class="fas fa-eye-slash"></i>';
+                this.title = 'Hide Credentials';
+                
+                // Auto-hide after 5 seconds
+                setTimeout(() => {
+                    if (passwordCell.classList.contains('visible')) {
+                        passwordCell.textContent = '••••••••';
+                        pinCell.textContent = '••••••';
+                        passwordCell.classList.remove('visible');
+                        pinCell.classList.remove('visible');
+                        this.innerHTML = '<i class="fas fa-key"></i>';
+                        this.title = 'Show Credentials';
+                    }
+                }, 5000);
+            }
+        });
+        
+        container.appendChild(showCredsBtn);
+        
+        // Add kebab menu
+        container.appendChild(createKebabMenu(userId, userRole));
+        
+        return container;
+    }
 
     function createKebabMenu(userId, userRole) {
         // Create menu container
@@ -825,7 +856,7 @@ function createActionButtons(userId, userRole) {
         // Use other position if "Other" is selected
         if (position === 'Other') {
             if (!otherPosition) {
-                alert('Please specify the position');
+                showErrorModal('Please specify the position');
                 return;
             }
             formData.set('position', otherPosition);
@@ -835,7 +866,7 @@ function createActionButtons(userId, userRole) {
         if (role === 'Admin') {
             const adminCount = allUsers.filter(user => user.role === 'Admin').length;
             if (adminCount >= 5) {
-                alert('Maximum of 5 admin users allowed');
+                showErrorModal('Maximum of 5 admin users allowed');
                 return;
             }
         }
@@ -843,7 +874,7 @@ function createActionButtons(userId, userRole) {
         // PIN code validation
         const pinCode = formData.get('pin_code');
         if (pinCode && (pinCode.length !== 6 || !/^\d+$/.test(pinCode))) {
-            alert('PIN code must be exactly 6 digits');
+            showErrorModal('PIN code must be exactly 6 digits');
             return;
         }
         
@@ -873,6 +904,7 @@ function createActionButtons(userId, userRole) {
 
     function handleEditUser(e) {
         e.preventDefault();
+        console.log("Edit form submitted"); // Debug log
         
         const formData = new FormData(editUserForm);
         const firstName = formData.get('first_name');
@@ -892,7 +924,7 @@ function createActionButtons(userId, userRole) {
         // Use other position if "Other" is selected
         if (position === 'Other') {
             if (!otherPosition) {
-                alert('Please specify the position');
+                showErrorModal('Please specify the position');
                 return;
             }
             formData.set('position', otherPosition);
@@ -906,27 +938,34 @@ function createActionButtons(userId, userRole) {
         if (role === 'Admin' && user.role !== 'Admin') {
             const adminCount = allUsers.filter(u => u.role === 'Admin').length;
             if (adminCount >= 5) {
-                alert('Maximum of 5 admin users allowed');
+                showErrorModal('Maximum of 5 admin users allowed');
                 return;
             }
         }
         
         // Password validation
-        if (newPassword || confirmPassword) {
-            if (newPassword !== confirmPassword) {
-                alert('New password and confirmation do not match');
-                return;
-            }
+        // Password validation - skip current password check for Super Admin
+    if (newPassword || confirmPassword) {
+        if (newPassword !== confirmPassword) {
+            showErrorModal('New password and confirmation do not match');
+            return;
         }
+        
+        // Only validate current password if not Super Admin
+        if (!isSuperAdmin && !formData.get('current_password')) {
+            showErrorModal('Current password is required');
+            return;
+        }
+    }
         
         // PIN code validation
         if (newPin || confirmPin) {
             if (newPin !== confirmPin) {
-                alert('New PIN and confirmation do not match');
+                showErrorModal('New PIN and confirmation do not match');
                 return;
             }
             if (newPin && (newPin.length !== 6 || !/^\d+$/.test(newPin))) {
-                alert('PIN code must be exactly 6 digits');
+                showErrorModal('PIN code must be exactly 6 digits');
                 return;
             }
         }
@@ -1078,7 +1117,7 @@ function createActionButtons(userId, userRole) {
             modal.style.opacity = '0';
             modal.style.transform = 'translate(-50%, -45%) scale(0.9)';
             setTimeout(() => modal.style.display = 'none', 300);
-        }, 3000);
+        }, 1000);
     }
 
     // Function to show error modal
@@ -1101,7 +1140,7 @@ function createActionButtons(userId, userRole) {
             modal.style.opacity = '0';
             modal.style.transform = 'translate(-50%, -45%) scale(0.9)';
             setTimeout(() => modal.style.display = 'none', 300);
-        }, 5000);
+        }, 1000);
     }
 });
 
@@ -1112,23 +1151,23 @@ function validatePasswordFields() {
     const confirmPassword = document.getElementById('confirm_password').value;
 
     if (!currentPassword) {
-        alert('Current password is required');
+        showErrorModal('Current password is required');
         return false;
     }
 
     if (newPassword || confirmPassword) {
         if (!newPassword) {
-            alert('New password is required');
+            showErrorModal('New password is required');
             return false;
         }
 
         if (!confirmPassword) {
-            alert('Please confirm your new password');
+            showErrorModal('Please confirm your new password');
             return false;
         }
 
         if (newPassword !== confirmPassword) {
-            alert('New password and confirmation do not match');
+            showErrorModal('New password and confirmation do not match');
             return false;
         }
     }
@@ -1143,28 +1182,28 @@ function validatePinFields() {
     const confirmPin = document.getElementById('confirm_pin').value;
 
     if (!currentPin) {
-        alert('Current PIN is required');
+        showErrorModal('Current PIN is required');
         return false;
     }
 
     if (newPin || confirmPin) {
         if (!newPin) {
-            alert('New PIN is required');
+            showErrorModal('New PIN is required');
             return false;
         }
 
         if (!confirmPin) {
-            alert('Please confirm your new PIN');
+            showErrorModal('Please confirm your new PIN');
             return false;
         }
 
         if (newPin !== confirmPin) {
-            alert('New PIN and confirmation do not match');
+            showErrorModal('New PIN and confirmation do not match');
             return false;
         }
 
         if (newPin.length !== 6 || !/^\d+$/.test(newPin)) {
-            alert('PIN code must be exactly 6 digits');
+            showErrorModal('PIN code must be exactly 6 digits');
             return false;
         }
     }
