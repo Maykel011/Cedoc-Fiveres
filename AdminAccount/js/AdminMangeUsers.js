@@ -564,31 +564,39 @@ document.addEventListener("DOMContentLoaded", function() {
     function renderUsers(users) {
         const tbody = document.getElementById('manage-user');
         if (!tbody) return;
-        
+    
         tbody.innerHTML = '';
-        
+    
         if (users.length === 0) {
             const row = document.createElement('tr');
             row.innerHTML = `<td colspan="8" class="no-users">No users found</td>`;
             tbody.appendChild(row);
             return;
         }
-        
+    
         users.forEach(user => {
             const row = document.createElement('tr');
-            
+    
             // Add special class for Super Admin
             const rowClass = user.role === 'Super Admin' ? 'super-admin-row' : '';
             row.className = rowClass;
-            
+    
+            // Generate badge HTML
+            let badgeHTML = '';
+            if (user.role === 'Super Admin') {
+                badgeHTML = `<div class="super-admin-badge">Super Admin</div>`;
+            } else if (user.role === 'Admin') {
+                badgeHTML = `<div class="admin-badge">Admin</div>`;
+            }
+    
             // Create name cell with badge below
             const nameCellContent = `
                 <div class="name-cell-wrapper">
                     <div class="user-name">${user.name}</div>
-                    ${user.role === 'Super Admin' ? '<div class="super-admin-badge">Super Admin</div>' : ''}
+                    ${badgeHTML}
                 </div>
             `;
-            
+    
             row.innerHTML = `
                 <td>${user.employee_no}</td>
                 <td>${nameCellContent}</td>
@@ -599,20 +607,19 @@ document.addEventListener("DOMContentLoaded", function() {
                 <td class="pincode-cell">••••••</td>
                 <td></td>
             `;
-            
-            // Store original values in data attributes
+    
             const passwordCell = row.querySelector('.password-cell');
             const pinCell = row.querySelector('.pincode-cell');
             passwordCell.dataset.originalValue = user.password || 'N/A';
             pinCell.dataset.originalValue = user.pin_code || 'N/A';
-            
+    
             const actionCell = row.querySelector('td:last-child');
             actionCell.appendChild(createActionButtons(user.id, user.role));
-            
+    
             tbody.appendChild(row);
         });
     }
-
+    
     function createActionButtons(userId, userRole) {
         // Create container for both buttons
         const container = document.createElement('div');
@@ -754,10 +761,9 @@ document.addEventListener("DOMContentLoaded", function() {
         checkAdminLimit('create');
         if (createUserForm) createUserForm.reset();
         
-        // Set role options based on current user's role
+        // Set role options - only show User role
         const roleSelect = document.getElementById('create_role');
         if (roleSelect) {
-            // Clear existing options
             roleSelect.innerHTML = '';
             
             // Add default option
@@ -768,20 +774,7 @@ document.addEventListener("DOMContentLoaded", function() {
             defaultOption.disabled = true;
             roleSelect.appendChild(defaultOption);
             
-            // Add Super Admin option only if current user is Super Admin
-            if (isSuperAdmin) {
-                const superAdminOption = document.createElement('option');
-                superAdminOption.value = 'Super Admin';
-                superAdminOption.textContent = 'Super Admin';
-                roleSelect.appendChild(superAdminOption);
-            }
-            
-            // Add regular Admin and User options
-            const adminOption = document.createElement('option');
-            adminOption.value = 'Admin';
-            adminOption.textContent = 'Admin';
-            roleSelect.appendChild(adminOption);
-            
+            // Only add User option
             const userOption = document.createElement('option');
             userOption.value = 'User';
             userOption.textContent = 'User';
@@ -821,25 +814,6 @@ document.addEventListener("DOMContentLoaded", function() {
                 firstName = nameParts[0] || '';
                 lastName = '';
             }
-            const isSuperAdmin = document.querySelector('meta[name="is-super-admin"]')?.content === 'true';
-    
-            if (isSuperAdmin) {
-                // Remove current password/pincode fields
-                document.getElementById('current_password').closest('.form-group').style.display = 'none';
-                document.getElementById('current_pin').closest('.form-group').style.display = 'none';
-                
-                // Update labels
-                document.querySelector('label[for="new_password"]').textContent = 'New Password (force update)';
-                document.querySelector('label[for="new_pin"]').textContent = 'New 6-Digit PIN (force update)';
-            } else {
-                // Show current password/pincode fields for non-Super Admin
-                document.getElementById('current_password').closest('.form-group').style.display = 'block';
-                document.getElementById('current_pin').closest('.form-group').style.display = 'block';
-                
-                // Restore original labels
-                document.querySelector('label[for="new_password"]').textContent = 'New Password';
-                document.querySelector('label[for="new_pin"]').textContent = 'New 6-Digit PIN';
-            }
         }
         
         // Fill the form
@@ -866,26 +840,12 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
         
-        // Set role options based on current user's role
+        // Set role options - only show User role
         const roleSelect = document.getElementById('edit_role');
         if (roleSelect) {
-            // Clear existing options
             roleSelect.innerHTML = '';
             
-            // Add Super Admin option only if current user is Super Admin
-            if (isSuperAdmin) {
-                const superAdminOption = document.createElement('option');
-                superAdminOption.value = 'Super Admin';
-                superAdminOption.textContent = 'Super Admin';
-                roleSelect.appendChild(superAdminOption);
-            }
-            
-            // Add regular Admin and User options
-            const adminOption = document.createElement('option');
-            adminOption.value = 'Admin';
-            adminOption.textContent = 'Admin';
-            roleSelect.appendChild(adminOption);
-            
+            // Only add User option
             const userOption = document.createElement('option');
             userOption.value = 'User';
             userOption.textContent = 'User';
@@ -895,16 +855,21 @@ document.addEventListener("DOMContentLoaded", function() {
             roleSelect.value = user.role;
         }
         
-            // Clear password and pin fields
-    document.getElementById('current_password').value = '';
-    document.getElementById('new_password').value = '';
-    document.getElementById('confirm_password').value = '';
-    document.getElementById('current_pin').value = '';
-    document.getElementById('new_pin').value = '';
-    document.getElementById('confirm_pin').value = '';
+        // Clear password and pin fields
+        document.getElementById('current_password').value = '';
+        document.getElementById('new_password').value = '';
+        document.getElementById('confirm_password').value = '';
+        document.getElementById('current_pin').value = '';
+        document.getElementById('new_pin').value = '';
+        document.getElementById('confirm_pin').value = '';
         
-        // Check admin limit
-        checkAdminLimit('edit', user.role);
+        // Always show current password/pin fields for non-Super Admins
+        document.getElementById('current_password').closest('.form-group').style.display = 'block';
+        document.getElementById('current_pin').closest('.form-group').style.display = 'block';
+        
+        // Update labels
+        document.querySelector('label[for="new_password"]').textContent = 'New Password';
+        document.querySelector('label[for="new_pin"]').textContent = 'New 6-Digit PIN';
         
         if (editUserModal) editUserModal.style.display = 'block';
     }

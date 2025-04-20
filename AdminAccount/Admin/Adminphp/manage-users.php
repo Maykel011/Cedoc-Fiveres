@@ -170,17 +170,12 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                             <input type="text" id="create_other_position" name="other_position" style="display: none; margin-top: 5px; width: 73%;" placeholder="Please specify position">
                         </div>
                         <div class="form-group">
-                            <label for="create_role">Role</label>
-                            <select id="create_role" name="role" required>
-    <option value="" selected disabled>Choose role...</option>
-    <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin'): ?>
-        <option value="Super Admin">Super Admin</option>
-    <?php endif; ?>
-    <option value="Admin">Admin</option>
-    <option value="User">User</option>
-</select>
-                            <small id="createAdminLimitMessage" style="color: red; display: none;">Maximum of 5 admin users reached</small>
-                        </div>
+    <label for="create_role">Role</label>
+    <select id="create_role" name="role" required>
+        <option value="" selected disabled>Choose role...</option>
+        <option value="User">User</option>
+    </select>
+</div>
                     </div>
 
                     <div class="password-container">
@@ -260,16 +255,11 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                             <input type="text" id="edit_other_position" name="other_position" style="display: none; margin-top: 5px; width: 73%;" placeholder="Please specify position">
                         </div>
                         <div class="form-group">
-                            <label for="edit_role">Role</label>
-                            <select id="edit_role" name="role" required>
-                                <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin'): ?>
-                                    <option value="Super Admin">Super Admin</option>
-                                <?php endif; ?>
-                                <option value="Admin">Admin</option>
-                                <option value="User">User</option>
-                            </select>
-                            <small id="editAdminLimitMessage" style="color: red; display: none;">Maximum of 5 admin users reached</small>
-                        </div>
+    <label for="edit_role">Role</label>
+    <select id="edit_role" name="role" required>
+        <option value="User">User</option>
+    </select>
+</div>
                         <button type="button" class="btn save-container" data-container="designation">Save Designation</button>
                     </div>
 

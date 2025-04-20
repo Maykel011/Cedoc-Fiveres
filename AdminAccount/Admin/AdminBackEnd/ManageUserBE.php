@@ -51,20 +51,30 @@ if (isset($_GET['get_users'])) {
 // Update the getUsers function in ManageUserBE.php
 function getUsers($conn) {
     $isSuperAdmin = isSuperAdmin($conn);
+    $currentUserId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
     
     // Get pagination parameters
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
     $offset = ($page - 1) * $limit;
     
-    // Get total count
-    $countQuery = $conn->query("SELECT COUNT(*) as total FROM users");
+    // Base query with conditions
+    $whereClause = "";
+    if (!$isSuperAdmin) {
+        // For non-Super Admins, show only their own account and user accounts
+        $whereClause = "WHERE (id = $currentUserId) OR role = 'User'";
+    }
+    
+    // Get total count with the same conditions
+    $countQuery = $conn->query("SELECT COUNT(*) as total FROM users $whereClause");
     $totalUsers = $countQuery->fetch_assoc()['total'];
     $totalPages = ceil($totalUsers / $limit);
     
-    // Get paginated users
+    // Get paginated users with the same conditions
     $sql = "SELECT id, employee_no, CONCAT(first_name, ' ', last_name) AS name, 
                    position, role, email, password, pin_code FROM users 
+            $whereClause
+            ORDER BY role DESC, name ASC
             LIMIT $limit OFFSET $offset";
     
     $result = $conn->query($sql);
