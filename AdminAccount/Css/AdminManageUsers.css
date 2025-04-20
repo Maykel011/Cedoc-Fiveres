@@ -1079,8 +1079,9 @@ th {
 }
 
 /* Admin badge styles */
+/* Add this to your CSS */
 .admin-badge {
-    background-color: #ae1212;
+    background-color: #3498db;
     color: white;
     border-radius: 12px;
     padding: 2px 8px;

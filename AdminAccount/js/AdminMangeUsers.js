@@ -435,12 +435,57 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         
         // Search functionality
-        if (searchBtn && searchInput) {
-            searchBtn.addEventListener('click', searchUsers);
-            searchInput.addEventListener('keyup', function(e) {
-                if (e.key === 'Enter') searchUsers();
-            });
+      // Search functionality - automatic with debounce
+let searchTimeout;
+if (searchInput) {
+    searchInput.addEventListener('input', function() {
+        // Clear previous timeout
+        clearTimeout(searchTimeout);
+        
+        // Set new timeout with debounce (300ms delay)
+        searchTimeout = setTimeout(() => {
+            const searchTerm = searchInput.value.trim().toLowerCase();
+            
+            if (!searchTerm) {
+                loadUsers(currentPage);
+                // Show pagination again when search is cleared
+                const paginationContainer = document.getElementById('paginationControls');
+                if (paginationContainer) {
+                    paginationContainer.style.display = 'flex';
+                }
+                return;
+            }
+            
+            const filteredUsers = allUsers.filter(user => 
+                (user.employee_no && user.employee_no.toLowerCase().includes(searchTerm)) ||
+                (user.name && user.name.toLowerCase().includes(searchTerm)) ||
+                (user.position && user.position.toLowerCase().includes(searchTerm)) ||
+                (user.role && user.role.toLowerCase().includes(searchTerm)) ||
+                (user.email && user.email.toLowerCase().includes(searchTerm))
+            );
+            
+            renderUsers(filteredUsers);
+            
+            // Hide pagination when searching
+            const paginationContainer = document.getElementById('paginationControls');
+            if (paginationContainer) {
+                paginationContainer.style.display = 'none';
+            }
+        }, 300); // 300ms debounce delay
+    });
+    
+    // Clear search when clicking the 'x' that appears in some browsers
+    searchInput.addEventListener('search', function() {
+        if (this.value === '') {
+            loadUsers(currentPage);
+            // Show pagination again when search is cleared
+            const paginationContainer = document.getElementById('paginationControls');
+            if (paginationContainer) {
+                paginationContainer.style.display = 'flex';
+            }
         }
+    });
+}
         
         // Close modals when clicking outside
         window.addEventListener('click', function(event) {

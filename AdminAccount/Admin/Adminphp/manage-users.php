@@ -103,7 +103,6 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                         <button class="create-folder-btn" id="createUserBtn">Create Users</button>
                     </div>
                 </div>
-
             <table>
             <thead>
     <tr>
