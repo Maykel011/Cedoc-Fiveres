@@ -770,7 +770,7 @@ table td:last-child {
 
 .kebab-dropdown {
     display: none;
-    position: fixed;
+    position: absolute;
     background-color: #ffffff;
     min-width: 150px;
     box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
