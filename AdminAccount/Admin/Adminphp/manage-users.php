@@ -161,21 +161,20 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                         <div class="form-group">
                             <label for="create_position">Position</label>
                             <select id="create_position" name="position" required>
-                                <option value="" selected disabled>Choose position...</option>
-                                <option value="Head">Head</option>
-                                <option value="Supervisor">Supervisor</option>
-                                <option value="Employee">Employee</option>
-                                <option value="Other">Other</option>
-                            </select>
+                            <option value="" selected disabled>Choose position...</option>
+                            <option value="Employee">Employee</option>
+                            <option value="Other">Other</option>
+                        </select>
                             <input type="text" id="create_other_position" name="other_position" style="display: none; margin-top: 5px; width: 73%;" placeholder="Please specify position">
                         </div>
+
                         <div class="form-group">
-    <label for="create_role">Role</label>
-    <select id="create_role" name="role" required>
-        <option value="" selected disabled>Choose role...</option>
-        <option value="User">User</option>
-    </select>
-</div>
+                            <label for="create_role">Role</label>
+                            <select id="create_role" name="role" required>
+                            <option value="" selected disabled>Choose role...</option>
+                            <option value="User">User</option>
+                        </select>
+                        </div>
                     </div>
 
                     <div class="password-container">
@@ -244,23 +243,22 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
 
                         </div>
 
-                         <div class="form-group">
-                            <label for="edit_position">Position</label>
-                            <select id="edit_position" name="position" required>
-                                <option value="Head">Head</option>
-                                <option value="Supervisor">Supervisor</option>
-                                <option value="Employee">Employee</option>
-                                <option value="Other">Other</option>
-                            </select>
-                            <input type="text" id="edit_other_position" name="other_position" style="display: none; margin-top: 5px; width: 73%;" placeholder="Please specify position">
-                        </div>
                         <div class="form-group">
-    <label for="edit_role">Role</label>
-    <select id="edit_role" name="role" required>
-        <option value="User">User</option>
-    </select>
-</div>
-                        <button type="button" class="btn save-container" data-container="designation">Save Designation</button>
+                        <label for="edit_position">Position</label>
+                        <select id="edit_position" name="position" required>
+                            <option value="Employee">Employee</option>
+                            <option value="Other">Other</option>
+                        </select>
+                        <input type="text" id="edit_other_position" name="other_position" style="display: none; margin-top: 5px; width: 73%;" placeholder="Please specify position">
+                    </div>
+
+                    <div class="form-group">
+                        <label for="edit_role">Role</label>
+                        <select id="edit_role" name="role" required>
+                            <option value="User">User</option>
+                        </select>
+                    </div>              
+                    <button type="button" class="btn save-container" data-container="designation">Save Designation</button>
                     </div>
 
                     <div class="password-container">

@@ -564,17 +564,24 @@ document.addEventListener("DOMContentLoaded", function() {
     function renderUsers(users) {
         const tbody = document.getElementById('manage-user');
         if (!tbody) return;
-    
+        
         tbody.innerHTML = '';
-    
+        
         if (users.length === 0) {
             const row = document.createElement('tr');
             row.innerHTML = `<td colspan="8" class="no-users">No users found</td>`;
             tbody.appendChild(row);
             return;
         }
-    
-        users.forEach(user => {
+        
+        // Sort users - admins first, then others
+        const sortedUsers = [...users].sort((a, b) => {
+            if (a.role === 'Admin' || a.role === 'Super Admin') return -1;
+            if (b.role === 'Admin' || b.role === 'Super Admin') return 1;
+            return 0;
+        });
+        
+        sortedUsers.forEach(user => {
             const row = document.createElement('tr');
     
             // Add special class for Super Admin
@@ -766,7 +773,6 @@ document.addEventListener("DOMContentLoaded", function() {
         if (roleSelect) {
             roleSelect.innerHTML = '';
             
-            // Add default option
             const defaultOption = document.createElement('option');
             defaultOption.value = '';
             defaultOption.textContent = 'Choose role...';
@@ -774,11 +780,33 @@ document.addEventListener("DOMContentLoaded", function() {
             defaultOption.disabled = true;
             roleSelect.appendChild(defaultOption);
             
-            // Only add User option
             const userOption = document.createElement('option');
             userOption.value = 'User';
             userOption.textContent = 'User';
             roleSelect.appendChild(userOption);
+        }
+        
+        // Set position options - only Employee and Other
+        const positionSelect = document.getElementById('create_position');
+        if (positionSelect) {
+            positionSelect.innerHTML = '';
+            
+            const defaultPosOption = document.createElement('option');
+            defaultPosOption.value = '';
+            defaultPosOption.textContent = 'Choose position...';
+            defaultPosOption.selected = true;
+            defaultPosOption.disabled = true;
+            positionSelect.appendChild(defaultPosOption);
+            
+            const employeeOption = document.createElement('option');
+            employeeOption.value = 'Employee';
+            employeeOption.textContent = 'Employee';
+            positionSelect.appendChild(employeeOption);
+            
+            const otherOption = document.createElement('option');
+            otherOption.value = 'Other';
+            otherOption.textContent = 'Other';
+            positionSelect.appendChild(otherOption);
         }
         
         if (createOtherPositionInput) {
@@ -797,19 +825,15 @@ document.addEventListener("DOMContentLoaded", function() {
         let firstName = '';
         let lastName = '';
         
-        // Check if the name contains a comma (last, first format)
         if (user.name.includes(',')) {
             const nameParts = user.name.split(',').map(part => part.trim());
             lastName = nameParts[0];
             firstName = nameParts[1] || '';
-        } 
-        // Otherwise split by spaces
-        else {
+        } else {
             const nameParts = user.name.split(' ');
-            // Assume last part is last name, everything else is first name
             if (nameParts.length > 1) {
-                lastName = nameParts.pop(); // Remove last element and assign to lastName
-                firstName = nameParts.join(' '); // Join remaining parts as firstName
+                lastName = nameParts.pop();
+                firstName = nameParts.join(' ');
             } else {
                 firstName = nameParts[0] || '';
                 lastName = '';
@@ -823,35 +847,53 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('edit_last_name').value = lastName;
         document.getElementById('edit_email').value = user.email;
         
-        // Handle position field
-        if (user.position !== 'Head' && user.position !== 'Supervisor' && user.position !== 'Employee' && user.position !== 'Other') {
-            document.getElementById('edit_position').value = 'Other';
-            if (editOtherPositionInput) {
-                editOtherPositionInput.value = user.position;
-                editOtherPositionInput.style.display = 'block';
-                editOtherPositionInput.required = true;
-            }
-        } else {
-            document.getElementById('edit_position').value = user.position;
-            if (editOtherPositionInput) {
-                editOtherPositionInput.style.display = 'none';
-                editOtherPositionInput.required = false;
-                editOtherPositionInput.value = '';
-            }
-        }
+        // Handle position field based on user role
+        const positionSelect = document.getElementById('edit_position');
+        const otherPositionInput = document.getElementById('edit_other_position');
         
-        // Set role options - only show User role
-        const roleSelect = document.getElementById('edit_role');
-        if (roleSelect) {
-            roleSelect.innerHTML = '';
+        if (user.role === 'Admin' || user.role === 'Super Admin') {
+            // For admin users, make position and role read-only
+            positionSelect.disabled = true;
+            positionSelect.innerHTML = `<option value="${user.position}" selected>${user.position}</option>`;
             
-            // Only add User option
+            const roleSelect = document.getElementById('edit_role');
+            roleSelect.disabled = true;
+            roleSelect.innerHTML = `<option value="${user.role}" selected>${user.role}</option>`;
+        } else {
+            // For regular users, only show Employee and Other options
+            positionSelect.disabled = false;
+            positionSelect.innerHTML = '';
+            
+            const employeeOption = document.createElement('option');
+            employeeOption.value = 'Employee';
+            employeeOption.textContent = 'Employee';
+            positionSelect.appendChild(employeeOption);
+            
+            const otherOption = document.createElement('option');
+            otherOption.value = 'Other';
+            otherOption.textContent = 'Other';
+            positionSelect.appendChild(otherOption);
+            
+            // Set current position
+            if (user.position !== 'Employee' && user.position !== 'Other') {
+                positionSelect.value = 'Other';
+                otherPositionInput.value = user.position;
+                otherPositionInput.style.display = 'block';
+                otherPositionInput.required = true;
+            } else {
+                positionSelect.value = user.position;
+                otherPositionInput.style.display = 'none';
+                otherPositionInput.required = false;
+                otherPositionInput.value = '';
+            }
+            
+            // Set role options - only show User role
+            const roleSelect = document.getElementById('edit_role');
+            roleSelect.innerHTML = '';
             const userOption = document.createElement('option');
             userOption.value = 'User';
             userOption.textContent = 'User';
             roleSelect.appendChild(userOption);
-            
-            // Set the current role
             roleSelect.value = user.role;
         }
         
