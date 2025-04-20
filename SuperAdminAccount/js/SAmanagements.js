@@ -15,7 +15,14 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Check if current user is Super Admin
     const isSuperAdmin = document.querySelector('meta[name="is-super-admin"]')?.content === 'true';
-   
+    
+    // Pagination variables
+    let currentPage = 1;
+    let totalPages = 1;
+    const limit = 10;
+    let allUsers = [];
+    let currentUserId = null;
+
     function setupPasswordVisibilityToggles() {
         const isSuperAdmin = document.querySelector('meta[name="is-super-admin"]')?.content === 'true';
         if (!isSuperAdmin) return;
@@ -26,13 +33,7 @@ document.addEventListener("DOMContentLoaded", function() {
             
             if (originalValue !== 'N/A') {
                 const toggle = document.createElement('span');
-                toggle.className = 'password-toggle';
-                toggle.innerHTML = `
-                    <svg class="eye-icon" viewBox="0 0 24 24">
-                        <path class="eye-open" d="M12 9a3 3 0 0 1 3 3 3 3 0 0 1-3 3 3 3 0 0 1-3-3 3 3 0 0 1 3-3m0-4.5c5 0 9.27 3.11 11 7.5-1.73 4.39-6 7.5-11 7.5S2.73 16.39 1 12c1.73-4.39 6-7.5 11-7.5z"/>
-                        <path class="eye-closed" d="M11.83 9L15 12.16V12a3 3 0 0 0-3-3h-.17m-4.3.8l1.55 1.55c-.05.21-.08.42-.08.65a3 3 0 0 0 3 3c.22 0 .44-.03.65-.08l1.55 1.55c-.67.33-1.41.53-2.2.53a5 5 0 0 1-5-5c0-.79.2-1.53.53-2.2M2 4.27l2.28 2.28.45.45C3.08 8.3 1.78 10 1 12c1.73 4.39 6 7.5 11 7.5 1.55 0 3.03-.3 4.38-.84l.43.42L19.73 22 21 20.73 3.27 3M12 7a5 5 0 0 1 5 5c0 .64-.13 1.26-.36 1.82l2.93 2.93c1.5-1.25 2.7-2.89 3.43-4.75-1.73-4.39-6-7.5-11-7.5-1.4 0-2.74.25-4 .7l2.17 2.15C10.74 7.13 11.35 7 12 7z" style="display:none"/>
-                    </svg>
-                `;
+              ;
                 
                 // Initially show masked value
                 cell.textContent = cell.classList.contains('password-cell') ? '••••••••' : '••••••';
@@ -175,10 +176,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const searchInput = document.getElementById('searchInput');
     const searchBtn = document.getElementById('searchBtn');
     
-    // State variables
-    let allUsers = [];
-    let currentUserId = null;
-
     // Initialize
     if (createUserBtn || editUserForm) {
         loadUsers();
@@ -401,7 +398,7 @@ document.addEventListener("DOMContentLoaded", function() {
                             );
 
                             if (containerType === 'designation') {
-                                loadUsers();
+                                loadUsers(currentPage);
                             }
                         } else {
                             if (containerType === 'designation' && data.message.includes('Maximum of 5 admin users')) {
@@ -430,26 +427,6 @@ document.addEventListener("DOMContentLoaded", function() {
             });
         }
 
-                    
-                    // Add this to your setupEventListeners function
-                    document.querySelectorAll('.update-pin-btn').forEach(btn => {
-                        btn.addEventListener('click', function() {
-                            const userId = this.dataset.userId;
-                            openPinModal(userId);
-                        });
-                    });
-
-                    // Add this to your createActionButtons function (where you create the action buttons for each user)
-                    const updatePinBtn = document.createElement('button');
-                    updatePinBtn.className = 'update-pin-btn';
-                    updatePinBtn.dataset.userId = user.id;
-                    updatePinBtn.innerHTML = '<i class="fas fa-lock"></i> Update PIN';
-                    updatePinBtn.addEventListener('click', function(e) {
-                        e.stopPropagation();
-                        openPinModal(this.dataset.userId);
-                    });
-                    actionCell.appendChild(updatePinBtn);
-        
         // Delete Modal
         if (deleteModal) {
             document.querySelector('#deleteModal .close')?.addEventListener('click', () => deleteModal.style.display = 'none');
@@ -473,14 +450,115 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    function loadUsers() {
-        fetch('../AdminBackEnd/ManageUserBE.php?get_users=1')
+    function loadUsers(page = 1) {
+        currentPage = page;
+        fetch(`../AdminBackEnd/ManageUserBE.php?get_users=1&page=${page}&limit=${limit}`)
             .then(response => response.json())
-            .then(users => {
-                allUsers = users;
-                renderUsers(users);
+            .then(data => {
+                allUsers = data.users;
+                totalPages = data.pagination.total_pages;
+                renderUsers(data.users);
+                updatePaginationControls(data.pagination);
+                setupPasswordVisibilityToggles();
             })
             .catch(error => console.error('Error loading users:', error));
+    }
+
+    function updatePaginationControls(pagination) {
+        const paginationContainer = document.getElementById('paginationControls');
+        if (!paginationContainer) {
+            // Create the container if it doesn't exist
+            const tableContainer = document.querySelector('.table-container');
+            if (!tableContainer) return;
+            
+            const newPaginationContainer = document.createElement('div');
+            newPaginationContainer.id = 'paginationControls';
+            newPaginationContainer.className = 'pagination-controls';
+            tableContainer.appendChild(newPaginationContainer);
+        } else {
+            paginationContainer.innerHTML = '';
+        }
+
+        // Previous button
+        const prevButton = document.createElement('button');
+        prevButton.className = 'pagination-btn';
+        prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        prevButton.disabled = currentPage === 1;
+        prevButton.addEventListener('click', () => {
+            if (currentPage > 1) {
+                loadUsers(currentPage - 1);
+            }
+        });
+        paginationContainer.appendChild(prevButton);
+
+        // Page numbers
+        const maxVisiblePages = 5;
+        let startPage = Math.max(1, currentPage - Math.floor(maxVisiblePages / 2));
+        let endPage = Math.min(totalPages, startPage + maxVisiblePages - 1);
+
+        // Adjust if we're at the end
+        if (endPage - startPage + 1 < maxVisiblePages) {
+            startPage = Math.max(1, endPage - maxVisiblePages + 1);
+        }
+
+        // Always show first page
+        if (startPage > 1) {
+            const firstPageButton = document.createElement('button');
+            firstPageButton.className = 'pagination-btn';
+            firstPageButton.textContent = '1';
+            firstPageButton.addEventListener('click', () => loadUsers(1));
+            paginationContainer.appendChild(firstPageButton);
+
+            if (startPage > 2) {
+                const ellipsis = document.createElement('span');
+                ellipsis.className = 'pagination-ellipsis';
+                ellipsis.textContent = '...';
+                paginationContainer.appendChild(ellipsis);
+            }
+        }
+
+        // Visible page range
+        for (let i = startPage; i <= endPage; i++) {
+            const pageButton = document.createElement('button');
+            pageButton.className = `pagination-btn ${i === currentPage ? 'active' : ''}`;
+            pageButton.textContent = i;
+            pageButton.addEventListener('click', () => loadUsers(i));
+            paginationContainer.appendChild(pageButton);
+        }
+
+        // Always show last page
+        if (endPage < totalPages) {
+            if (endPage < totalPages - 1) {
+                const ellipsis = document.createElement('span');
+                ellipsis.className = 'pagination-ellipsis';
+                ellipsis.textContent = '...';
+                paginationContainer.appendChild(ellipsis);
+            }
+
+            const lastPageButton = document.createElement('button');
+            lastPageButton.className = 'pagination-btn';
+            lastPageButton.textContent = totalPages;
+            lastPageButton.addEventListener('click', () => loadUsers(totalPages));
+            paginationContainer.appendChild(lastPageButton);
+        }
+
+        // Next button
+        const nextButton = document.createElement('button');
+        nextButton.className = 'pagination-btn';
+        nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        nextButton.disabled = currentPage === totalPages;
+        nextButton.addEventListener('click', () => {
+            if (currentPage < totalPages) {
+                loadUsers(currentPage + 1);
+            }
+        });
+        paginationContainer.appendChild(nextButton);
+
+        // Add page info
+        const pageInfo = document.createElement('span');
+        pageInfo.className = 'pagination-info';
+        pageInfo.textContent = `Page ${currentPage} of ${totalPages} | ${pagination.total_users} users`;
+        paginationContainer.appendChild(pageInfo);
     }
 
     function renderUsers(users) {
@@ -503,9 +581,17 @@ document.addEventListener("DOMContentLoaded", function() {
             const rowClass = user.role === 'Super Admin' ? 'super-admin-row' : '';
             row.className = rowClass;
             
+            // Create name cell with badge below
+            const nameCellContent = `
+                <div class="name-cell-wrapper">
+                    <div class="user-name">${user.name}</div>
+                    ${user.role === 'Super Admin' ? '<div class="super-admin-badge">Super Admin</div>' : ''}
+                </div>
+            `;
+            
             row.innerHTML = `
                 <td>${user.employee_no}</td>
-                <td>${user.name} ${user.role === 'Super Admin' ? '<span class="super-admin-badge">Super Admin</span>' : ''}</td>
+                <td>${nameCellContent}</td>
                 <td>${user.position}</td>
                 <td>${user.role}</td>
                 <td>${user.email}</td>
@@ -517,8 +603,8 @@ document.addEventListener("DOMContentLoaded", function() {
             // Store original values in data attributes
             const passwordCell = row.querySelector('.password-cell');
             const pinCell = row.querySelector('.pincode-cell');
-            passwordCell.dataset.password = user.password || 'N/A';
-            pinCell.dataset.pincode = user.pin_code || 'N/A';
+            passwordCell.dataset.originalValue = user.password || 'N/A';
+            pinCell.dataset.originalValue = user.pin_code || 'N/A';
             
             const actionCell = row.querySelector('td:last-child');
             actionCell.appendChild(createActionButtons(user.id, user.role));
@@ -554,8 +640,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 this.title = 'Show Credentials';
             } else {
                 // Show credentials
-                passwordCell.textContent = passwordCell.dataset.password;
-                pinCell.textContent = pinCell.dataset.pincode;
+                passwordCell.textContent = passwordCell.dataset.originalValue;
+                pinCell.textContent = pinCell.dataset.originalValue;
                 passwordCell.classList.add('visible');
                 pinCell.classList.add('visible');
                 this.innerHTML = '<i class="fas fa-eye-slash"></i>';
@@ -831,7 +917,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (user.role === 'Super Admin') {
             const superAdminCount = allUsers.filter(u => u.role === 'Super Admin').length;
             if (superAdminCount <= 1) {
-                showErrorModal('Cannot delete the last Super Admin');
+                showErrorModal('Cannot delete the last Super Admin account');
                 return;
             }
         }
@@ -891,7 +977,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     'User created successfully'
                 );
                 if (createUserModal) createUserModal.style.display = 'none';
-                loadUsers();
+                loadUsers(currentPage);
             } else {
                 showErrorModal(data.message || 'An error occurred');
             }
@@ -996,7 +1082,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     'User updated successfully'
                 );
                 if (editUserModal) editUserModal.style.display = 'none';
-                loadUsers();
+                loadUsers(currentPage);
             } else {
                 showErrorModal(data.message || 'An error occurred');
             }
@@ -1026,7 +1112,7 @@ document.addEventListener("DOMContentLoaded", function() {
                     'deleteSuccessMessage', 
                     'User deleted successfully'
                 );
-                loadUsers();
+                loadUsers(currentPage);
             } else {
                 showErrorModal(data.message || 'An error occurred');
             }
@@ -1042,7 +1128,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function searchUsers() {
         const searchTerm = searchInput.value.toLowerCase();
         if (!searchTerm) {
-            renderUsers(allUsers);
+            loadUsers(currentPage);
             return;
         }
         
@@ -1055,6 +1141,12 @@ document.addEventListener("DOMContentLoaded", function() {
         );
         
         renderUsers(filteredUsers);
+        
+        // Hide pagination when searching
+        const paginationContainer = document.getElementById('paginationControls');
+        if (paginationContainer) {
+            paginationContainer.style.display = 'none';
+        }
     }
 
     function checkAdminLimit(context = 'create', currentRole = null) {

@@ -1,17 +1,24 @@
 <?php
 include '../connection/Connection.php';
+session_start();
 
 // Check if current user is Super Admin
 function isSuperAdmin($conn) {
-    if (!isset($_SESSION['user_id'])) return false;
+    if (!isset($_SESSION['user_id'])) {
+        error_log("No user_id in session");
+        return false;
+    }
     $userId = $_SESSION['user_id'];
+    error_log("Checking Super Admin status for user ID: $userId");
+    
     $result = $conn->query("SELECT role FROM users WHERE id = $userId");
     if ($result && $row = $result->fetch_assoc()) {
+        error_log("User role: " . $row['role']);
         return $row['role'] === 'Super Admin';
     }
+    error_log("Failed to fetch user role");
     return false;
 }
-
 // Handle form submissions
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $isSuperAdmin = isSuperAdmin($conn);
@@ -41,20 +48,46 @@ if (isset($_GET['get_users'])) {
     exit;
 }
 
+// Update the getUsers function in ManageUserBE.php
 function getUsers($conn) {
+    $isSuperAdmin = isSuperAdmin($conn);
+    
+    // Get pagination parameters
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
+    $offset = ($page - 1) * $limit;
+    
+    // Get total count
+    $countQuery = $conn->query("SELECT COUNT(*) as total FROM users");
+    $totalUsers = $countQuery->fetch_assoc()['total'];
+    $totalPages = ceil($totalUsers / $limit);
+    
+    // Get paginated users
     $sql = "SELECT id, employee_no, CONCAT(first_name, ' ', last_name) AS name, 
-                   position, role, email, 
-                   CASE WHEN pin_code IS NOT NULL THEN '••••••' ELSE 'N/A' END AS pin_code 
-            FROM users";
+                   position, role, email, password, pin_code FROM users 
+            LIMIT $limit OFFSET $offset";
+    
     $result = $conn->query($sql);
     
     $users = [];
     if ($result->num_rows > 0) {
         while($row = $result->fetch_assoc()) {
+            // Return the hashed password and pin as-is
+            $row['password'] = $row['password'] ? $row['password'] : 'N/A';
+            $row['pin_code'] = $row['pin_code'] ? $row['pin_code'] : 'N/A';
             $users[] = $row;
         }
     }
-    return $users;
+    
+    return [
+        'users' => $users,
+        'pagination' => [
+            'current_page' => $page,
+            'total_pages' => $totalPages,
+            'total_users' => $totalUsers,
+            'limit' => $limit
+        ]
+    ];
 }
 
 function createUser($conn, $isSuperAdmin) {
@@ -74,6 +107,15 @@ function createUser($conn, $isSuperAdmin) {
         return;
     }
     
+    // Check Super Admin limit if creating a Super Admin
+    if ($role === 'Super Admin') {
+        $superAdminCount = $conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'Super Admin'")->fetch_assoc()['count'];
+        if ($superAdminCount >= 2) {
+            echo json_encode(['status' => 'error', 'message' => 'Maximum of 2 Super Admin accounts allowed']);
+            return;
+        }
+    }
+    
     // Check admin limit if creating an admin (excluding Super Admin)
     if ($role === 'Admin') {
         $adminCount = $conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'Admin'")->fetch_assoc()['count'];
@@ -88,7 +130,7 @@ function createUser($conn, $isSuperAdmin) {
     $last_name = $conn->real_escape_string($_POST['last_name']);
     $position = $conn->real_escape_string($_POST['position']);
     $email = $conn->real_escape_string($_POST['email']);
-    $password = password_hash($_POST['password'], PASSWORD_DEFAULT);
+    $password = $conn->real_escape_string($_POST['password']);
     $pin_code = isset($_POST['pin_code']) ? $conn->real_escape_string($_POST['pin_code']) : null;
 
     // Check if employee no or email already exists
@@ -133,6 +175,21 @@ function updateUser($conn, $isSuperAdmin) {
         return;
     }
     
+    // Check Super Admin limit if changing to Super Admin
+    if ($role === 'Super Admin') {
+        // Get current role of the user being updated
+        $currentRole = $conn->query("SELECT role FROM users WHERE id = $id")->fetch_assoc()['role'];
+        
+        // Only check limit if changing from non-Super Admin to Super Admin
+        if ($currentRole !== 'Super Admin') {
+            $superAdminCount = $conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'Super Admin'")->fetch_assoc()['count'];
+            if ($superAdminCount >= 2) {
+                echo json_encode(['status' => 'error', 'message' => 'Maximum of 2 Super Admin accounts allowed']);
+                return;
+            }
+        }
+    }
+    
     // Check admin limit if changing to admin (excluding Super Admin)
     if ($role === 'Admin') {
         // Get current role of the user being updated
@@ -169,12 +226,13 @@ function updateUser($conn, $isSuperAdmin) {
 
     // Add password if provided
     if (!empty($_POST['new_password'])) {
-        if (!verifyCurrentPassword($conn, $id, $_POST['current_password'])) {
+        $password = $conn->real_escape_string($_POST['new_password']);
+        if ($_POST['current_password'] !== $conn->query("SELECT password FROM users WHERE id = $id")->fetch_assoc()['password']) {
             echo json_encode(['status' => 'error', 'message' => 'Current password is incorrect']);
             return;
         }
         
-        $password = password_hash($_POST['new_password'], PASSWORD_DEFAULT);
+        $password = $conn->real_escape_string($_POST['password']);
         $query .= ", password=?";
         $params[] = $password;
         $types .= "s";
@@ -336,8 +394,17 @@ function updateDesignation($conn, $id, $isSuperAdmin) {
     }
 }
 
+// Update the updatePassword function to skip current password verification for Super Admin
+// Update the updatePassword function to skip current password verification for Super Admin
 function updatePassword($conn, $id) {
-    $required = ['current_password', 'new_password', 'confirm_password'];
+    $isSuperAdmin = isSuperAdmin($conn);
+    $required = ['new_password', 'confirm_password'];
+    
+    // Only require current password if not Super Admin
+    if (!$isSuperAdmin) {
+        $required[] = 'current_password';
+    }
+    
     foreach ($required as $field) {
         if (empty($_POST[$field])) {
             echo json_encode(['status' => 'error', 'message' => "$field is required"]);
@@ -350,12 +417,13 @@ function updatePassword($conn, $id) {
         return;
     }
 
-    if (!verifyCurrentPassword($conn, $id, $_POST['current_password'])) {
+    // Skip current password verification for Super Admin
+    if (!$isSuperAdmin && !verifyCurrentPassword($conn, $id, $_POST['current_password'])) {
         echo json_encode(['status' => 'error', 'message' => 'Current password is incorrect']);
         return;
     }
 
-    $password = password_hash($_POST['new_password'], PASSWORD_DEFAULT);
+    $password = $conn->real_escape_string($_POST['new_password']);
     
     $stmt = $conn->prepare("UPDATE users SET password=? WHERE id=?");
     $stmt->bind_param("si", $password, $id);
@@ -368,8 +436,16 @@ function updatePassword($conn, $id) {
     $stmt->close();
 }
 
+// Update the updatePinCode function similarly
 function updatePinCode($conn, $id) {
-    $required = ['current_pin', 'new_pin', 'confirm_pin'];
+    $isSuperAdmin = isSuperAdmin($conn);
+    $required = ['new_pin', 'confirm_pin'];
+    
+    // Only require current pin if not Super Admin
+    if (!$isSuperAdmin) {
+        $required[] = 'current_pin';
+    }
+    
     foreach ($required as $field) {
         if (empty($_POST[$field])) {
             echo json_encode(['status' => 'error', 'message' => "$field is required"]);
@@ -382,7 +458,8 @@ function updatePinCode($conn, $id) {
         return;
     }
 
-    if (!verifyCurrentPin($conn, $id, $_POST['current_pin'])) {
+    // Skip current pin verification for Super Admin
+    if (!$isSuperAdmin && !verifyCurrentPin($conn, $id, $_POST['current_pin'])) {
         echo json_encode(['status' => 'error', 'message' => 'Current PIN is incorrect']);
         return;
     }
@@ -400,16 +477,18 @@ function updatePinCode($conn, $id) {
     $stmt->close();
 }
 
-function verifyCurrentPassword($conn, $id, $password) {
-    $stmt = $conn->prepare("SELECT password FROM users WHERE id = ?");
-    $stmt->bind_param("i", $id);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    $user = $result->fetch_assoc();
-    $stmt->close();
-    
-    return password_verify($password, $user['password']);
-}
+// Simplify verifyCurrentPassword function:
+    function verifyCurrentPassword($conn, $id, $password) {
+        $stmt = $conn->prepare("SELECT password FROM users WHERE id = ?");
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        $user = $result->fetch_assoc();
+        $stmt->close();
+        
+        // Use password_verify if passwords are hashed
+        return password_verify($password, $user['password']);
+    }
 
 function verifyCurrentPin($conn, $id, $pin) {
     $stmt = $conn->prepare("SELECT pin_code FROM users WHERE id = ?");
@@ -443,6 +522,16 @@ function deleteUser($conn, $isSuperAdmin) {
     if (isset($_SESSION['user_id']) && $id == $_SESSION['user_id']) {
         echo json_encode(['status' => 'error', 'message' => 'You cannot delete your own account']);
         return;
+    }
+
+    // Check if this is the last Super Admin
+    $targetUser = $conn->query("SELECT role FROM users WHERE id = $id")->fetch_assoc();
+    if ($targetUser['role'] === 'Super Admin') {
+        $superAdminCount = $conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'Super Admin'")->fetch_assoc()['count'];
+        if ($superAdminCount <= 1) {
+            echo json_encode(['status' => 'error', 'message' => 'Cannot delete the last Super Admin account']);
+            return;
+        }
     }
 
     $stmt = $conn->prepare("DELETE FROM users WHERE id=?");

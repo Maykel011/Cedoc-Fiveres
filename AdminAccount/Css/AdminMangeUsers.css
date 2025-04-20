@@ -1,5 +1,6 @@
 /* Table Border Radius */
 table {
+    font-family: 'Akrobat', sans-serif;
     border-collapse: separate;
     border-spacing: 0;
     width: 100%;
@@ -26,19 +27,21 @@ tbody tr:last-child td:last-child {
     border-bottom-right-radius: 10px;
 }
 
-/* Rest of your existing CSS */
 @font-face {
     font-family: 'Akrobat';
     src: url('AkrobatB.otf') format('opentype');
     font-weight: normal;
     font-style: normal;
+    /* font-family: 'Akrobat', sans-serif; */
 }
+
 
 @font-face {
     font-family: 'SerpentineBold';
     src: url('Serpentinebold.otf') format('opentype');
     font-weight: bold;
     font-style: normal;
+    /* font-family: 'SerpentineBold', sans-serif; */
 }
 
 body,html {
@@ -311,6 +314,7 @@ body,html {
 }
 
 .create-folder-btn {
+    font-family: 'Akrobat', sans-serif;
     background: linear-gradient(135deg, #ff4b5c, #ff6b81);
     color: white;
     padding: 10px 15px;
@@ -461,6 +465,7 @@ td button:hover {
 }
 
 #searchInput {
+    font-family: 'Akrobat', sans-serif;
     border: none;
     padding: 8px;
     width: 250px;
@@ -985,5 +990,93 @@ th {
 .password-cell.visible,
 .pincode-cell.visible {
     font-family: monospace;
+}
+
+.name-cell-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.user-name {
+    font-family: 'Akrobat', sans-serif;
+}
+
+.super-admin-badge {
+    background-color: #ae1212;
+    color: white;
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    display: inline-block;
+    width: fit-content;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+/* If you want to keep the special row styling for Super Admins */
+.super-admin-row {
+    background-color: rgba(74, 107, 175, 0.05);
+}
+
+/* Pagination Controls */
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin-top: 20px;
+    padding: 10px;
+}
+
+.pagination-btn {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    background-color: #f8f9fa;
+    color: #333;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+
+.pagination-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-ellipsis {
+    padding: 5px 10px;
+}
+
+.pagination-info {
+    margin-left: 15px;
+    font-size: 0.9em;
+    color: #6c757d;
+}
+
+/* Admin badge styles */
+.admin-badge {
+    background-color: #ae1212;
+    color: white;
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    display: inline-block;
+    width: fit-content;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 

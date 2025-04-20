@@ -48,11 +48,24 @@ if (isset($_GET['get_users'])) {
     exit;
 }
 
+// Update the getUsers function in ManageUserBE.php
 function getUsers($conn) {
     $isSuperAdmin = isSuperAdmin($conn);
     
+    // Get pagination parameters
+    $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+    $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
+    $offset = ($page - 1) * $limit;
+    
+    // Get total count
+    $countQuery = $conn->query("SELECT COUNT(*) as total FROM users");
+    $totalUsers = $countQuery->fetch_assoc()['total'];
+    $totalPages = ceil($totalUsers / $limit);
+    
+    // Get paginated users
     $sql = "SELECT id, employee_no, CONCAT(first_name, ' ', last_name) AS name, 
-                   position, role, email, password, pin_code FROM users";
+                   position, role, email, password, pin_code FROM users 
+            LIMIT $limit OFFSET $offset";
     
     $result = $conn->query($sql);
     
@@ -65,7 +78,16 @@ function getUsers($conn) {
             $users[] = $row;
         }
     }
-    return $users;
+    
+    return [
+        'users' => $users,
+        'pagination' => [
+            'current_page' => $page,
+            'total_pages' => $totalPages,
+            'total_users' => $totalUsers,
+            'limit' => $limit
+        ]
+    ];
 }
 
 function createUser($conn, $isSuperAdmin) {
@@ -83,6 +105,15 @@ function createUser($conn, $isSuperAdmin) {
     if ($role === 'Super Admin' && !$isSuperAdmin) {
         echo json_encode(['status' => 'error', 'message' => 'Only Super Admin can create Super Admin accounts']);
         return;
+    }
+    
+    // Check Super Admin limit if creating a Super Admin
+    if ($role === 'Super Admin') {
+        $superAdminCount = $conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'Super Admin'")->fetch_assoc()['count'];
+        if ($superAdminCount >= 2) {
+            echo json_encode(['status' => 'error', 'message' => 'Maximum of 2 Super Admin accounts allowed']);
+            return;
+        }
     }
     
     // Check admin limit if creating an admin (excluding Super Admin)
@@ -142,6 +173,21 @@ function updateUser($conn, $isSuperAdmin) {
     if ($role === 'Super Admin' && !$isSuperAdmin) {
         echo json_encode(['status' => 'error', 'message' => 'Only Super Admin can assign Super Admin role']);
         return;
+    }
+    
+    // Check Super Admin limit if changing to Super Admin
+    if ($role === 'Super Admin') {
+        // Get current role of the user being updated
+        $currentRole = $conn->query("SELECT role FROM users WHERE id = $id")->fetch_assoc()['role'];
+        
+        // Only check limit if changing from non-Super Admin to Super Admin
+        if ($currentRole !== 'Super Admin') {
+            $superAdminCount = $conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'Super Admin'")->fetch_assoc()['count'];
+            if ($superAdminCount >= 2) {
+                echo json_encode(['status' => 'error', 'message' => 'Maximum of 2 Super Admin accounts allowed']);
+                return;
+            }
+        }
     }
     
     // Check admin limit if changing to admin (excluding Super Admin)
@@ -476,6 +522,16 @@ function deleteUser($conn, $isSuperAdmin) {
     if (isset($_SESSION['user_id']) && $id == $_SESSION['user_id']) {
         echo json_encode(['status' => 'error', 'message' => 'You cannot delete your own account']);
         return;
+    }
+
+    // Check if this is the last Super Admin
+    $targetUser = $conn->query("SELECT role FROM users WHERE id = $id")->fetch_assoc();
+    if ($targetUser['role'] === 'Super Admin') {
+        $superAdminCount = $conn->query("SELECT COUNT(*) as count FROM users WHERE role = 'Super Admin'")->fetch_assoc()['count'];
+        if ($superAdminCount <= 1) {
+            echo json_encode(['status' => 'error', 'message' => 'Cannot delete the last Super Admin account']);
+            return;
+        }
     }
 
     $stmt = $conn->prepare("DELETE FROM users WHERE id=?");

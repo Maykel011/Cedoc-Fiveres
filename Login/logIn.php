@@ -17,7 +17,7 @@ if(isset($_SESSION['user_id'])) {
 // Handle login form submission
 if($_SERVER['REQUEST_METHOD'] == 'POST') {
     $employee_no = $conn->real_escape_string($_POST['employee_no']);
-    $password = $_POST['password']; // Don't escape password as it will be hashed
+    $password = $_POST['password'];
 
     // Query to check user credentials
     $sql = "SELECT * FROM users WHERE employee_no = '$employee_no'";
@@ -39,8 +39,8 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 $error = "Account locked. Please try again in $minutes minutes.";
             }
         } else {
-            // Verify password
-            if(password_verify($password, $user['password'])) {
+            // Verify password (plain text only)
+            if($password === $user['password']) {
                 // Reset failed attempts on successful login
                 $resetSql = "UPDATE users SET failed_attempts = 0, locked_until = NULL WHERE id = " . $user['id'];
                 $conn->query($resetSql);

@@ -2,7 +2,7 @@
 include '../connection/Connection.php';
 include '../AdminBackEnd/ManageUserBE.php';
 
-session_start();
+
 
 // Corrected check (using 'role' instead of 'user_role')
 if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Super Admin')) {
@@ -18,10 +18,12 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
 
 <head>
     <meta charset="UTF-8">
+    <meta name="is-super-admin" content="true">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES</title>
-    <link rel="stylesheet" href="../../Css/manageusers.css">
+    <link rel="stylesheet" href="../../Css/AdminMangeUsers.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
 </head>
 
 <body>
@@ -59,7 +61,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                 <i class="fas fa-sign-out-alt"></i>
             </div>
             <h3>Confirm Logout</h3>
-            <p>Are you sure you want to logout from your admin account?</p>
+            <p>Are you sure you want to logout from your account?</p>
             <div class="logout-modal-buttons">
                 <button id="logoutCancel" class="logout-modal-btn logout-modal-cancel">Cancel</button>
                 <button id="logoutConfirm" class="logout-modal-btn logout-modal-confirm">Logout</button>
@@ -70,7 +72,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
     <aside class="sidebar">
         <ul>
             <li class="dashboard">
-                <a href="adminDashboard.php"><img src="../../Assets/Icon/Analysis.png" alt="Dashboard Icon" class="sidebar-icon"> Admin Dashboard</a>
+                <a href="SuperAdminDashboard.php"><img src="../../Assets/Icon/Analysis.png" alt="Dashboard Icon" class="sidebar-icon">Dashboard</a>
             </li>
             <li class="media-files">
                 <a href="media-files.php"><img src="../../Assets/Icon/file.png" alt="Media Files Icon" class="sidebar-icon"> Media Files</a>
@@ -103,24 +105,26 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                 </div>
 
             <table>
-                <thead>
-                    <tr>
-                        <th>Employee No.</th>
-                        <th>Name</th>
-                        <th>Position</th>
-                        <th>Role</th>
-                        <th>Email</th>
-                        <th>Password</th>
-                        <th>Pin-code</th>
-                        <th>Action</th>
-                    </tr>
-                </thead>
+            <thead>
+    <tr>
+        <th>Employee No.</th>
+        <th>Name</th>
+        <th>Position</th>
+        <th>Role</th>
+        <th>Email</th>
+        <th>Password</th>
+        <th>Pin-code</th>
+        <th>Action</th>
+    </tr>
+</thead>
                 <tbody id="manage-user">
                     <!-- Users will be loaded here dynamically -->
                 </tbody>
             </table>
         </div>
+        <div id="paginationControls" class="pagination-controls"></div>
     </div>
+    
 
 
     <!-- Create User Modal -->
@@ -258,12 +262,12 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                         <div class="form-group">
                             <label for="edit_role">Role</label>
                             <select id="edit_role" name="role" required>
-    <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin'): ?>
-        <option value="Super Admin">Super Admin</option>
-    <?php endif; ?>
-    <option value="Admin">Admin</option>
-    <option value="User">User</option>
-</select>
+                                <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin'): ?>
+                                    <option value="Super Admin">Super Admin</option>
+                                <?php endif; ?>
+                                <option value="Admin">Admin</option>
+                                <option value="User">User</option>
+                            </select>
                             <small id="editAdminLimitMessage" style="color: red; display: none;">Maximum of 5 admin users reached</small>
                         </div>
                         <button type="button" class="btn save-container" data-container="designation">Save Designation</button>
@@ -316,7 +320,9 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                 </div>
             </form>
         </div>
+        
     </div>
+
 
     <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="modal">
@@ -355,7 +361,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
         </div>
     </div>
 
-    <script src="../../js/Management-Users.js"></script>
+    <script src="../../js/AdminMangeUsers.js"></script>
 </body>
 
 </html>
