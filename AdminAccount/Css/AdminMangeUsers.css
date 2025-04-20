@@ -1080,3 +1080,19 @@ th {
     letter-spacing: 0.5px;
 }
 
+/* Add to your CSS file */
+#deletePinCode {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+#pinVerificationSection {
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}

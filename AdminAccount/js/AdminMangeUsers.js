@@ -1103,9 +1103,34 @@ document.addEventListener("DOMContentLoaded", function() {
     function confirmDelete() {
         if (!currentUserId) return;
         
+        const deletePinCodeInput = document.getElementById('deletePinCode');
+        const pinError = document.getElementById('pinError');
+        const pinCode = deletePinCodeInput.value;
+        
+        // Strict validation - don't proceed if PIN is empty
+        if (!pinCode) {
+            pinError.textContent = 'PIN code is required to delete a user';
+            pinError.style.display = 'block';
+            return;
+        }
+        
+        // Validate PIN format
+        if (pinCode.length !== 6 || !/^\d+$/.test(pinCode)) {
+            pinError.textContent = 'PIN code must be 6 digits';
+            pinError.style.display = 'block';
+            return;
+        }
+        
+        // Verify PIN code via AJAX
         const formData = new FormData();
-        formData.append('action', 'delete_user');
-        formData.append('id', currentUserId);
+        formData.append('action', 'verify_pin');
+        formData.append('pin_code', pinCode);
+        
+        // Show loading state
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        const originalText = confirmBtn.innerHTML;
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
         
         fetch('../AdminBackEnd/ManageUserBE.php', {
             method: 'POST',
@@ -1113,22 +1138,45 @@ document.addEventListener("DOMContentLoaded", function() {
         })
         .then(response => response.json())
         .then(data => {
+            if (data.status !== 'success') {
+                throw new Error(data.message || 'Invalid PIN code');
+            }
+            
+            // Only proceed with deletion if PIN verification succeeded
+            const deleteFormData = new FormData();
+            deleteFormData.append('action', 'delete_user');
+            deleteFormData.append('id', currentUserId);
+            deleteFormData.append('verified_pin', pinCode); // Send verified PIN again for server-side validation
+            
+            return fetch('../AdminBackEnd/ManageUserBE.php', {
+                method: 'POST',
+                body: deleteFormData
+            });
+        })
+        .then(response => response.json())
+        .then(data => {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = originalText;
+            
             if (data.status === 'success') {
                 showSuccessModal(
                     'deleteSuccessModal', 
                     'deleteSuccessMessage', 
                     'User deleted successfully'
                 );
+                const deleteModal = document.getElementById('deleteModal');
+                if (deleteModal) deleteModal.style.display = 'none';
                 loadUsers(currentPage);
             } else {
-                showErrorModal(data.message || 'An error occurred');
+                throw new Error(data.message || 'An error occurred during deletion');
             }
-            if (deleteModal) deleteModal.style.display = 'none';
         })
         .catch(error => {
-            console.error('Error deleting user:', error);
-            showErrorModal('Error deleting user');
-            if (deleteModal) deleteModal.style.display = 'none';
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = originalText;
+            pinError.textContent = error.message;
+            pinError.style.display = 'block';
+            console.error('Error:', error);
         });
     }
 

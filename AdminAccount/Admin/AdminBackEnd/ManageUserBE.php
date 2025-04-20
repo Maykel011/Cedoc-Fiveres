@@ -37,16 +37,56 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'delete_user':
                 deleteUser($conn, $isSuperAdmin);
                 break;
+            case 'verify_pin':
+                    verifyPinCode($conn);
+                    break;
         }
     }
     exit;
 }
+
+function verifyPinCode($conn) {
+    if (!isset($_SESSION['user_id'])) {
+        echo json_encode(['status' => 'error', 'message' => 'Not authenticated']);
+        return;
+    }
+
+    if (empty($_POST['pin_code'])) {
+        echo json_encode(['status' => 'error', 'message' => 'PIN code is required']);
+        return;
+    }
+
+    $userId = $_SESSION['user_id'];
+    $pinCode = $conn->real_escape_string($_POST['pin_code']);
+
+    $stmt = $conn->prepare("SELECT pin_code FROM users WHERE id = ?");
+    $stmt->bind_param("i", $userId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows === 0) {
+        echo json_encode(['status' => 'error', 'message' => 'User not found']);
+        return;
+    }
+
+    $user = $result->fetch_assoc();
+    $stmt->close();
+
+    if ($user['pin_code'] === $pinCode) {
+        echo json_encode(['status' => 'success', 'message' => 'PIN verified']);
+    } else {
+        echo json_encode(['status' => 'error', 'message' => 'Incorrect PIN code']);
+    }
+}
+
 
 // Get all users for display
 if (isset($_GET['get_users'])) {
     echo json_encode(getUsers($conn));
     exit;
 }
+
+
 
 // Update the getUsers function in ManageUserBE.php
 function getUsers($conn) {
@@ -517,9 +557,41 @@ function deleteUser($conn, $isSuperAdmin) {
         return;
     }
 
+    // Require PIN verification for all deletions
+    if (empty($_POST['verified_pin'])) {
+        echo json_encode(['status' => 'error', 'message' => 'PIN verification is required']);
+        return;
+    }
+
     $id = (int)$_POST['id'];
+    $pinCode = $conn->real_escape_string($_POST['verified_pin']);
     
-    // Check if trying to delete a Super Admin
+    // Verify the PIN code against the current user's PIN
+    if (!isset($_SESSION['user_id'])) {
+        echo json_encode(['status' => 'error', 'message' => 'Not authenticated']);
+        return;
+    }
+    
+    $currentUserId = $_SESSION['user_id'];
+    $stmt = $conn->prepare("SELECT pin_code FROM users WHERE id = ?");
+    $stmt->bind_param("i", $currentUserId);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    if ($result->num_rows === 0) {
+        echo json_encode(['status' => 'error', 'message' => 'Current user not found']);
+        return;
+    }
+    
+    $user = $result->fetch_assoc();
+    $stmt->close();
+    
+    if ($user['pin_code'] !== $pinCode) {
+        echo json_encode(['status' => 'error', 'message' => 'Invalid PIN code']);
+        return;
+    }
+    
+    // Rest of your existing checks...
     if (!$isSuperAdmin) {
         $targetUser = $conn->query("SELECT role FROM users WHERE id = $id")->fetch_assoc();
         if ($targetUser['role'] === 'Super Admin') {
