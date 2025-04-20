@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function() {
     // First declare all variables at the top
     const userContainer = document.getElementById("userContainer");
@@ -450,19 +451,79 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    function loadUsers(page = 1) {
-        currentPage = page;
-        fetch(`../AdminBackEnd/ManageUserBE.php?get_users=1&page=${page}&limit=${limit}`)
-            .then(response => response.json())
-            .then(data => {
-                allUsers = data.users;
-                totalPages = data.pagination.total_pages;
-                renderUsers(data.users);
-                updatePaginationControls(data.pagination);
-                setupPasswordVisibilityToggles();
-            })
-            .catch(error => console.error('Error loading users:', error));
-    }
+  // Update the loadUsers function to include role filter
+function loadUsers(page = 1) {
+    currentPage = page;
+    const roleFilter = document.getElementById('roleFilter').value;
+    
+    fetch(`../AdminBackEnd/ManageUserBE.php?get_users=1&page=${page}&limit=${limit}${roleFilter ? '&role=' + encodeURIComponent(roleFilter) : ''}`)
+        .then(response => response.json())
+        .then(data => {
+            allUsers = data.users;
+            totalPages = data.pagination.total_pages;
+            
+            // Sort users: Super Admin first, then Admin, then Users
+            allUsers.sort((a, b) => {
+                if (a.role === 'Super Admin') return -1;
+                if (b.role === 'Super Admin') return 1;
+                if (a.role === 'Admin') return -1;
+                if (b.role === 'Admin') return 1;
+                return 0;
+            });
+            
+            renderUsers(allUsers);
+            updatePaginationControls(data.pagination);
+            setupPasswordVisibilityToggles();
+        })
+        .catch(error => console.error('Error loading users:', error));
+}
+
+// Add event listener for role filter
+document.getElementById('roleFilter').addEventListener('change', function() {
+    loadUsers(1); // Reset to first page when filter changes
+});
+
+// Update searchUsers function for automatic search
+let searchTimeout;
+function searchUsers() {
+    clearTimeout(searchTimeout);
+    
+    searchTimeout = setTimeout(() => {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const roleFilter = document.getElementById('roleFilter').value.toLowerCase();
+        
+        if (!searchTerm && !roleFilter) {
+            loadUsers(currentPage);
+            return;
+        }
+        
+        const filteredUsers = allUsers.filter(user => {
+            const matchesSearch = !searchTerm || 
+                user.employee_no.toLowerCase().includes(searchTerm) ||
+                user.name.toLowerCase().includes(searchTerm) ||
+                user.position.toLowerCase().includes(searchTerm) ||
+                user.role.toLowerCase().includes(searchTerm) ||
+                user.email.toLowerCase().includes(searchTerm);
+            
+            const matchesRole = !roleFilter || user.role.toLowerCase() === roleFilter;
+            
+            return matchesSearch && matchesRole;
+        });
+        
+        renderUsers(filteredUsers);
+        
+        // Hide pagination when searching
+        const paginationContainer = document.getElementById('paginationControls');
+        if (paginationContainer) {
+            paginationContainer.style.display = filteredUsers.length > 0 ? 'none' : 'flex';
+        }
+    }, 300); // 300ms delay after typing stops
+}
+
+// Update event listeners for search
+searchInput.addEventListener('input', searchUsers);
+searchBtn.addEventListener('click', searchUsers);
+
 
     function updatePaginationControls(pagination) {
         const paginationContainer = document.getElementById('paginationControls');
@@ -574,7 +635,16 @@ document.addEventListener("DOMContentLoaded", function() {
             return;
         }
         
-        users.forEach(user => {
+        // Sort users: Super Admin first, then Admin, then Users
+        const sortedUsers = [...users].sort((a, b) => {
+            if (a.role === 'Super Admin') return -1;
+            if (b.role === 'Super Admin') return 1;
+            if (a.role === 'Admin') return -1;
+            if (b.role === 'Admin') return 1;
+            return 0;
+        });
+        
+        sortedUsers.forEach(user => {
             const row = document.createElement('tr');
             
             // Add special class for Super Admin
@@ -586,6 +656,7 @@ document.addEventListener("DOMContentLoaded", function() {
                 <div class="name-cell-wrapper">
                     <div class="user-name">${user.name}</div>
                     ${user.role === 'Super Admin' ? '<div class="super-admin-badge">Super Admin</div>' : ''}
+                    ${user.role === 'Admin' ? '<div class="admin-badge">Admin</div>' : ''}
                 </div>
             `;
             
@@ -595,16 +666,18 @@ document.addEventListener("DOMContentLoaded", function() {
                 <td>${user.position}</td>
                 <td>${user.role}</td>
                 <td>${user.email}</td>
-                <td class="password-cell">••••••••</td>
-                <td class="pincode-cell">••••••</td>
+                ${isSuperAdmin ? `<td class="password-cell">••••••••</td>` : '<td>••••••••</td>'}
+                ${isSuperAdmin ? `<td class="pincode-cell">••••••</td>` : '<td>••••••</td>'}
                 <td></td>
             `;
             
             // Store original values in data attributes
-            const passwordCell = row.querySelector('.password-cell');
-            const pinCell = row.querySelector('.pincode-cell');
-            passwordCell.dataset.originalValue = user.password || 'N/A';
-            pinCell.dataset.originalValue = user.pin_code || 'N/A';
+            if (isSuperAdmin) {
+                const passwordCell = row.querySelector('.password-cell');
+                const pinCell = row.querySelector('.pincode-cell');
+                passwordCell.dataset.originalValue = user.password || 'N/A';
+                pinCell.dataset.originalValue = user.pin_code || 'N/A';
+            }
             
             const actionCell = row.querySelector('td:last-child');
             actionCell.appendChild(createActionButtons(user.id, user.role));
@@ -1096,9 +1169,34 @@ document.addEventListener("DOMContentLoaded", function() {
     function confirmDelete() {
         if (!currentUserId) return;
         
+        const deletePinCodeInput = document.getElementById('deletePinCode');
+        const pinError = document.getElementById('pinError');
+        const pinCode = deletePinCodeInput.value;
+        
+        // Strict validation - don't proceed if PIN is empty
+        if (!pinCode) {
+            pinError.textContent = 'PIN code is required to delete a user';
+            pinError.style.display = 'block';
+            return;
+        }
+        
+        // Validate PIN format
+        if (pinCode.length !== 6 || !/^\d+$/.test(pinCode)) {
+            pinError.textContent = 'PIN code must be 6 digits';
+            pinError.style.display = 'block';
+            return;
+        }
+        
+        // Verify PIN code via AJAX
         const formData = new FormData();
-        formData.append('action', 'delete_user');
-        formData.append('id', currentUserId);
+        formData.append('action', 'verify_pin');
+        formData.append('pin_code', pinCode);
+        
+        // Show loading state
+        const confirmBtn = document.getElementById('confirmDeleteBtn');
+        const originalText = confirmBtn.innerHTML;
+        confirmBtn.disabled = true;
+        confirmBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Verifying...';
         
         fetch('../AdminBackEnd/ManageUserBE.php', {
             method: 'POST',
@@ -1106,22 +1204,45 @@ document.addEventListener("DOMContentLoaded", function() {
         })
         .then(response => response.json())
         .then(data => {
+            if (data.status !== 'success') {
+                throw new Error(data.message || 'Invalid PIN code');
+            }
+            
+            // Only proceed with deletion if PIN verification succeeded
+            const deleteFormData = new FormData();
+            deleteFormData.append('action', 'delete_user');
+            deleteFormData.append('id', currentUserId);
+            deleteFormData.append('verified_pin', pinCode); // Send verified PIN again for server-side validation
+            
+            return fetch('../AdminBackEnd/ManageUserBE.php', {
+                method: 'POST',
+                body: deleteFormData
+            });
+        })
+        .then(response => response.json())
+        .then(data => {
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = originalText;
+            
             if (data.status === 'success') {
                 showSuccessModal(
                     'deleteSuccessModal', 
                     'deleteSuccessMessage', 
                     'User deleted successfully'
                 );
+                const deleteModal = document.getElementById('deleteModal');
+                if (deleteModal) deleteModal.style.display = 'none';
                 loadUsers(currentPage);
             } else {
-                showErrorModal(data.message || 'An error occurred');
+                throw new Error(data.message || 'An error occurred during deletion');
             }
-            if (deleteModal) deleteModal.style.display = 'none';
         })
         .catch(error => {
-            console.error('Error deleting user:', error);
-            showErrorModal('Error deleting user');
-            if (deleteModal) deleteModal.style.display = 'none';
+            confirmBtn.disabled = false;
+            confirmBtn.innerHTML = originalText;
+            pinError.textContent = error.message;
+            pinError.style.display = 'block';
+            console.error('Error:', error);
         });
     }
 

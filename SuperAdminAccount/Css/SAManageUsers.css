@@ -1,31 +1,4 @@
-/* Table Border Radius */
-table {
-    font-family: 'Akrobat', sans-serif;
-    border-collapse: separate;
-    border-spacing: 0;
-    width: 100%;
-    background: white;
-    border-radius: 10px;
-    overflow: hidden;
-    table-layout: auto; /* Changed from fixed to auto for better content fitting */
-    box-shadow: 0 0 0 1px #ddd; /* This creates the border */
-}
 
-/* Round corners for the first and last cells in the first row */
-thead tr:first-child th:first-child {
-    border-top-left-radius: 10px;
-}
-thead tr:first-child th:last-child {
-    border-top-right-radius: 10px;
-}
-
-/* Round corners for the first and last cells in the last row */
-tbody tr:last-child td:first-child {
-    border-bottom-left-radius: 10px;
-}
-tbody tr:last-child td:last-child {
-    border-bottom-right-radius: 10px;
-}
 
 @font-face {
     font-family: 'Akrobat';
@@ -279,23 +252,62 @@ body,html {
     background: #f9f9f9;
     border-radius: 10px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-    overflow-x: auto;
-    overflow-y: auto;
+    overflow: hidden; /* Changed from auto to hidden */
     max-width: 100%;
-    max-height: 79vh;
+    display: flex;
+    flex-direction: column;
+}
+
+/* Table wrapper for scrolling */
+.table-container table {
+    width: 100%;
+    margin-bottom: 0;
     display: block;
+    overflow-y: auto;
+    max-height: calc(79vh - 150px); /* Adjust based on your header height */
 }
 
-@media (max-height: 600px) {
-    .table-container {
-        max-height: 50vh;
-    }
+/* Make thead and tbody display block for proper scrolling */
+.table-container thead, .table-container tbody tr {
+    display: table;
+    width: 100%;
+    table-layout: fixed;
 }
 
-@media (max-height: 400px) {
-    .table-container {
-        max-height: 40vh;
-    }
+/* Sticky thead */
+.table-container thead {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: #003366;
+    color: white;
+}
+
+/* Keep the rest of your existing styles */
+table {
+    font-family: 'Akrobat', sans-serif;
+    border-collapse: separate;
+    border-spacing: 0;
+    background: white;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0 0 1px #ddd;
+}
+
+/* Round corners for the first and last cells in the first row */
+thead tr:first-child th:first-child {
+    border-top-left-radius: 10px;
+}
+thead tr:first-child th:last-child {
+    border-top-right-radius: 10px;
+}
+
+/* Round corners for the first and last cells in the last row */
+tbody tr:last-child td:first-child {
+    border-bottom-left-radius: 10px;
+}
+tbody tr:last-child td:last-child {
+    border-bottom-right-radius: 10px;
 }
 
 /* Align top controls */
@@ -372,6 +384,52 @@ td button {
 
 td button:hover {
     opacity: 0.8;
+}
+
+/* Pagination Controls */
+.pagination-controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 5px;
+    margin-top: 20px;
+    padding: 10px;
+}
+
+.pagination-btn {
+    padding: 5px 10px;
+    border: 1px solid #ddd;
+    background-color: #f8f9fa;
+    color: #333;
+    cursor: pointer;
+    border-radius: 4px;
+    transition: all 0.3s;
+}
+
+.pagination-btn:hover:not(:disabled) {
+    background-color: #e9ecef;
+    border-color: #dee2e6;
+}
+
+.pagination-btn.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.pagination-btn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+}
+
+.pagination-ellipsis {
+    padding: 5px 10px;
+}
+
+.pagination-info {
+    margin-left: 15px;
+    font-size: 0.9em;
+    color: #6c757d;
 }
 
 /* Custom Logout Modal Styles */
@@ -462,6 +520,40 @@ td button:hover {
     border-radius: 5px;
     padding: 5px;
     box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+/* Search and filter container */
+.search-filter-container {
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    flex-grow: 1;
+}
+
+/* Filter container */
+.filter-container {
+    position: relative;
+}
+
+.role-filter {
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: white;
+    font-family: 'Akrobat', sans-serif;
+    font-size: 14px;
+    cursor: pointer;
+    min-width: 150px;
+}
+
+.role-filter:hover {
+    border-color: #ccc;
+}
+
+/* Ensure pagination is always visible */
+.pagination-controls {
+    display: flex !important;
+    visibility: visible !important;
+    opacity: 1 !important;
 }
 
 #searchInput {
@@ -992,6 +1084,26 @@ th {
     font-family: monospace;
 }
 
+
+
+
+/* Add to your CSS file */
+#deletePinCode {
+    width: 100%;
+    padding: 8px;
+    margin-top: 5px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+}
+
+#pinVerificationSection {
+    margin: 15px 0;
+    padding: 10px;
+    background-color: #f8f9fa;
+    border-radius: 4px;
+}
+
 .name-cell-wrapper {
     display: flex;
     flex-direction: column;
@@ -1020,48 +1132,17 @@ th {
     background-color: rgba(74, 107, 175, 0.05);
 }
 
-/* Pagination Controls */
-.pagination-controls {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    gap: 5px;
-    margin-top: 20px;
-    padding: 10px;
-}
-
-.pagination-btn {
-    padding: 5px 10px;
-    border: 1px solid #ddd;
-    background-color: #f8f9fa;
-    color: #333;
-    cursor: pointer;
-    border-radius: 4px;
-    transition: all 0.3s;
-}
-
-.pagination-btn:hover:not(:disabled) {
-    background-color: #e9ecef;
-    border-color: #dee2e6;
-}
-
-.pagination-btn.active {
-    background-color: #007bff;
+/* Add this to your CSS */
+.admin-badge {
+    background-color: #3498db;
     color: white;
-    border-color: #007bff;
+    border-radius: 12px;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    font-weight: bold;
+    display: inline-block;
+    width: fit-content;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
 }
 
-.pagination-btn:disabled {
-    opacity: 0.5;
-    cursor: not-allowed;
-}
-
-.pagination-ellipsis {
-    padding: 5px 10px;
-}
-
-.pagination-info {
-    margin-left: 15px;
-    font-size: 0.9em;
-    color: #6c757d;
-}

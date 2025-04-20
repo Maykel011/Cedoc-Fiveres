@@ -94,15 +94,26 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
             <h1 class="main-title">Manage Users</h1>
             <br>
             <div class="top-controls">
-                    <div class="search-container">
-                        <input type="text" id="searchInput" placeholder="Search users...">
-                        <button id="searchBtn"><i class="fas fa-search"></i></button>
-                    </div>
+    <div class="search-filter-container">
+        <div class="search-container">
+            <input type="text" id="searchInput" placeholder="Search users...">
+            <button id="searchBtn"><i class="fas fa-search"></i></button>
+        </div>
+        
+        <div class="filter-container">
+            <select id="roleFilter" class="role-filter">
+                <option value="">All Roles</option>
+                <option value="Super Admin">Super Admin</option>
+                <option value="Admin">Admin</option>
+                <option value="User">User</option>
+            </select>
+        </div>
+    </div>
 
-                    <div class="folder-container">
-                        <button class="create-folder-btn" id="createUserBtn">Create Users</button>
-                    </div>
-                </div>
+    <div class="folder-container">
+        <button class="create-folder-btn" id="createUserBtn">Create Users</button>
+    </div>
+</div>
 
             <table>
             <thead>
@@ -122,9 +133,10 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                 <tbody id="manage-user">
                     <!-- Users will be loaded here dynamically -->
                 </tbody>
+                
             </table>
+            <div id="paginationControls" class="pagination-controls"></div>
         </div>
-        <div id="paginationControls" class="pagination-controls"></div>
     </div>
     
 
@@ -328,16 +340,25 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
 
     <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="modal">
-        <div class="custom-modal-content">
-            <span class="close"></span>
-            <h2>Confirm Deletion</h2>
-            <p>Are you sure you want to delete this user? This action cannot be undone.</p>
-            <div class="form-actions">
-                <button type="button" id="cancelDeleteBtn" class="btn cancel">Cancel</button>
-                <button type="button" id="confirmDeleteBtn" class="btn delete">Delete</button>
-            </div>
+    <div class="custom-modal-content">
+        <span class="close"></span>
+        <h2>Confirm Deletion</h2>
+        <p>Are you sure you want to delete this user? This action cannot be undone.</p>
+        
+        <!-- PIN verification section -->
+        <div id="pinVerificationSection" style="margin-top: 20px;">
+            <label for="deletePinCode">Enter your PIN code to confirm:</label>
+            <input type="password" id="deletePinCode" name="deletePinCode" maxlength="6" pattern="\d{6}" 
+                   title="6-digit pin code" placeholder="Enter 6-digit PIN" required>
+            <p id="pinError" style="color: red; display: none;">Incorrect PIN code</p>
+        </div>
+        
+        <div class="form-actions">
+            <button type="button" id="cancelDeleteBtn" class="btn cancel">Cancel</button>
+            <button type="button" id="confirmDeleteBtn" class="btn delete">Delete</button>
         </div>
     </div>
+</div>
 
     <!-- Edit Success Modal -->
     <div id="editSuccessModal" class="editsuccess-modal">
@@ -363,7 +384,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
         </div>
     </div>
 
-    <script src="../../js/SAmanagements.js"></script>
+    <script src="../../js/SAmanageuser.js"></script>
 </body>
 
 </html>
