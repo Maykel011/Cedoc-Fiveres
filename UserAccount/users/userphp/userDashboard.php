@@ -2,11 +2,12 @@
 session_start();
 
 // Corrected check (using 'role' instead of 'user_role')
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'Admin' vs 'admin'
+if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Super Admin' && $_SESSION['role'] !== 'User')) {
     // Redirect to login page (not logout!)
     header("Location: ../../../login/login.php");
     exit();
 }
+
 
 ?>
 
@@ -66,7 +67,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
 <aside class="sidebar">
     <ul>
         <li class="dashboard">
-            <a href="adminDashboard.php"><img src="../../Assets/Icon/Analysis.png" alt="Dashboard Icon" class="sidebar-icon"> Admin Dashboard</a>
+            <a href="userDashboard.php"><img src="../../Assets/Icon/Analysis.png" alt="Dashboard Icon" class="sidebar-icon">Dashboard</a>
         </li>
         <li class="media-files">
             <a href="media-files.php"><img src="../../Assets/Icon/file.png" alt="Media Files Icon" class="sidebar-icon"> Media Files</a>
@@ -77,14 +78,11 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
         <li class="vehicle-runs">
             <a href="vehicle-runs.php"><img src="../../assets/icon/vruns.png" alt="Vehicle Runs Icon" class="sidebar-icon"> Vehicle Runs</a>
         </li>
-        <li class="manage-users">
-            <a href="manage-users.php"><img src="../../Assets/Icon/user-management.png" alt="Manage Users Icon" class="sidebar-icon"> Manage Users</a>
-        </li>
     </ul>
 </aside>
 
 <div class="main-content">
-    <h1 class="main-title">Admin Dashboard</h1>
+    <h1 class="main-title">Dashboard</h1>
 </div>
 <script src="../../js/admindb.js"></script>
 </body>

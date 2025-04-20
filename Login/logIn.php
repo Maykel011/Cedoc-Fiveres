@@ -9,7 +9,7 @@ if(isset($_SESSION['user_id'])) {
     } elseif($_SESSION['role'] == 'Admin') {
         header("Location: ../AdminAccount/Admin/Adminphp/adminDashboard.php");
     } else {
-        header("Location: ../UserAccount/Users/Userphp/UserDashboard.php");
+        header("Location: ../UserAccount/users/userphp/userDashboard.php");
     }
     exit();
 }
@@ -60,7 +60,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 } elseif($user['role'] == 'Admin') {
                     header("Location: ../AdminAccount/Admin/Adminphp/adminDashboard.php");
                 } else {
-                    header("Location: ../UserAccount/Users/Userphp/UserDashboard.php");
+                    header("Location: ../UserAccount/users/userphp/userDashboard.php");
                 }
                 exit();
             } else {
