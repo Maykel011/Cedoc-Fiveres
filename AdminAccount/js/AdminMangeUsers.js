@@ -671,7 +671,7 @@ document.addEventListener("DOMContentLoaded", function() {
                         this.innerHTML = '<i class="fas fa-key"></i>';
                         this.title = 'Show Credentials';
                     }
-                }, 5000);
+                }, 1000);
             }
         });
         
