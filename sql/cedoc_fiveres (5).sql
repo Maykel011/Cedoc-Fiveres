@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Apr 10, 2025 at 03:31 AM
+-- Generation Time: Apr 21, 2025 at 03:55 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -49,14 +49,7 @@ CREATE TABLE `applicants` (
   `application_date` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `status` enum('Pending','Under Review','Accepted','Rejected') DEFAULT 'Pending',
   `notes` text
-) ;
-
---
--- Dumping data for table `applicants`
---
-
-INSERT INTO `applicants` (`id`, `full_name`, `program_course`, `school_university`, `other_school`, `address`, `contact_number`, `email`, `ojt_hours`, `roles`, `resume_path`, `moa_path`, `recom_path`, `q1`, `q2`, `q3`, `q4`, `q5`, `application_date`, `status`, `notes`) VALUES
-(1, 'Brixter Luquing', 'BSIT', 'JRU', NULL, 'Mandaluyong City', '09384534477', 'biksterlooking@gmail.com', 486, 'Full Stack', 'uploads/1743755005_Term_End_Self-assessment_and_Evaluation.docx', 'uploads/1743755005_SONG-CHORDS_ARRANGEMENT-for-March-30-2025__1_.pdf', 'uploads/1743755005_WAR_Montes_March3_March7.docx.pdf', '1232134 r1ff1tg', 'fg2edwf', 'sdfsdfgsdf', 'sdfs', 'zxczxcvWEFWE', '2025-04-04 08:23:25', 'Pending', NULL);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 -- --------------------------------------------------------
 
@@ -74,17 +67,14 @@ CREATE TABLE `files` (
   `air_quality` float DEFAULT NULL,
   `date_uploaded` timestamp NULL DEFAULT CURRENT_TIMESTAMP,
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `files`
 --
 
 INSERT INTO `files` (`id`, `file_name`, `file_type`, `folder_name`, `temperature`, `water_level`, `air_quality`, `date_uploaded`, `date_modified`) VALUES
-(206, 'WAR_Montes_March3_March7.docx.pdf', 'application/pdf', 'sample', NULL, NULL, NULL, '2025-04-03 04:05:39', '2025-04-03 04:05:39'),
-(207, 'news (1).mp4', 'video/mp4', 'sample', NULL, NULL, NULL, '2025-04-03 07:17:42', '2025-04-03 07:17:42'),
-(208, 'BSIT_MCO_Montes_John Michael.xlsx', 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet', 'sample', NULL, NULL, NULL, '2025-04-03 07:18:42', '2025-04-03 07:18:42'),
-(209, 'TESE_MONTES JOHN MICHAEL.jpg', 'image/jpeg', 'sample', NULL, NULL, NULL, '2025-04-03 07:37:48', '2025-04-03 07:37:48');
+(213, 'medical case.png', 'image/png', 'sample', NULL, NULL, NULL, '2025-04-21 01:55:05', '2025-04-21 01:55:05');
 
 -- --------------------------------------------------------
 
@@ -97,14 +87,14 @@ CREATE TABLE `media_folders` (
   `folder_name` varchar(255) NOT NULL,
   `num_contents` int NOT NULL DEFAULT '0',
   `date_modified` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-);
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Dumping data for table `media_folders`
 --
 
 INSERT INTO `media_folders` (`id`, `folder_name`, `num_contents`, `date_modified`) VALUES
-(63, 'sample', 4, '2025-04-03 07:37:48');
+(79, 'sample', 1, '2025-04-21 01:55:05');
 
 -- --------------------------------------------------------
 
@@ -117,8 +107,8 @@ CREATE TABLE `users` (
   `employee_no` varchar(20) NOT NULL,
   `first_name` varchar(50) NOT NULL,
   `last_name` varchar(50) NOT NULL,
-  `position` enum('Head','Supervisor','Employee') NOT NULL,
-  `role` enum('Admin','User','Super admin') NOT NULL DEFAULT 'User',
+  `position` varchar(50) NOT NULL,
+  `role` enum('Admin','User','Super Admin') NOT NULL DEFAULT 'User',
   `email` varchar(100) NOT NULL,
   `password` varchar(255) NOT NULL,
   `pin_code` varchar(6) DEFAULT NULL,
@@ -126,20 +116,17 @@ CREATE TABLE `users` (
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
   `failed_attempts` int NOT NULL DEFAULT '0',
   `locked_until` datetime DEFAULT NULL
-<<<<<<< HEAD
-) ;
-=======
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
->>>>>>> ee2dfdeff4ac59a62955ecff7a6f996bf544064e
 
 --
 -- Dumping data for table `users`
 --
 
 INSERT INTO `users` (`id`, `employee_no`, `first_name`, `last_name`, `position`, `role`, `email`, `password`, `pin_code`, `created_at`, `updated_at`, `failed_attempts`, `locked_until`) VALUES
-(8, 'MZ-5062', 'Arthur Nathan', 'Alcantara', 'Supervisor', 'Admin', 'nathantwotoy@gmail.com', '$2y$10$gyLSpDU.f8lgLefC7L6t.e36.jMaGxeSmIO6M4XRYkE2a6WknrHdi', '111222', '2025-04-02 07:50:28', '2025-04-08 06:24:09', 5, '2025-04-08 06:44:09'),
-(10, 'MZ-5063', 'brixter', 'luquing', 'Supervisor', 'Admin', 'biksterlooking@gmail.com', '$2y$10$DVDKTjp/aHI636sp.xwI2O6QqkxJVbCD/zCIYc3GYYnbAVF8sGVfC', '123456', '2025-04-08 05:22:49', '2025-04-08 06:02:13', 4, '2025-04-08 06:32:13'),
-(11, 'MZ-5064', 'brixter1', 'luquing1', 'Supervisor', 'Admin', 'biksterlooking1@gmail.com', '$2y$10$HJMO81X8vH5L0ZxzaMUJ2ePeHULB.l77dMPd0PzDoq/71qJo79.WG', '123456', '2025-04-08 06:01:16', '2025-04-10 03:31:01', 0, NULL);
+(8, 'MZ-5062', 'Arthur Nathan', 'Alcantara', 'Head', 'Admin', 'nathantwotoy@gmail.com', '123', '111222', '2025-04-02 07:50:28', '2025-04-20 07:19:51', 0, NULL),
+(10, 'MZ-5063', 'brixter', 'luquing', 'Supervisor', 'Admin', 'biksterlooking@gmail.com', 'Brixter123', '123456', '2025-04-08 05:22:49', '2025-04-21 02:16:14', 0, NULL),
+(16, 'SA001', 'John Michael', 'Montes', 'System Admin', 'Super Admin', 'montes.johnmichael@yahoo.com', '12345', '123456', '2025-04-17 07:46:01', '2025-04-21 00:59:52', 0, NULL),
+(21, 'JRU-102', 'Kian', 'Visaya', 'Employee', 'User', 'Visaya@gmail.com', '123', '', '2025-04-20 11:58:29', '2025-04-20 11:58:29', 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -149,24 +136,18 @@ INSERT INTO `users` (`id`, `employee_no`, `first_name`, `last_name`, `position`,
 
 CREATE TABLE `vehicle_runs` (
   `id` int NOT NULL,
-  `vehicle_team` varchar(255) NOT NULL,
-  `case_type` varchar(255) NOT NULL,
-  `transport_officer` varchar(255) NOT NULL,
-  `emergency_responders` varchar(255) NOT NULL,
+  `vehicle_team` enum('Alpha','Bravo','Charlie','Delta') NOT NULL,
+  `case_type` enum('Fire Case','Medical Case','Medical Standby','Trauma Case','Patient Transportation') NOT NULL,
+  `transport_officer` varchar(255) DEFAULT NULL,
+  `emergency_responders` text NOT NULL,
   `location` text NOT NULL,
   `dispatch_time` datetime NOT NULL,
   `back_to_base_time` datetime NOT NULL,
-  `case_image` varchar(255) NOT NULL
-);
-
---
--- Dumping data for table `vehicle_runs`
---
-
-INSERT INTO `vehicle_runs` (`id`, `vehicle_team`, `case_type`, `transport_officer`, `emergency_responders`, `location`, `dispatch_time`, `back_to_base_time`, `case_image`) VALUES
-(1, 'Alpha', 'Medical Case', 'Danielito Bernardo', 'George Villanueva', 'San Juan Elementary School', '2025-03-11 12:18:00', '2025-03-11 13:20:00', 'uploads/Air quality.png'),
-(2, 'Alpha', 'Medical Case', 'Michael Montes', 'David Odvina', 'FilOil', '2025-03-20 15:00:00', '2025-03-22 15:00:00', 'uploads/preview.png'),
-(3, 'Charlie', 'Medical Standby', 'Brixter Luquing', 'Kian Visaya', 'san juan pinaglabanan', '2025-03-20 16:10:00', '2025-03-20 18:00:00', 'uploads/Screenshot 2025-04-03 205923.png');
+  `case_image` varchar(255) DEFAULT NULL,
+  `created_by` int NOT NULL,
+  `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
 
 --
 -- Indexes for dumped tables
@@ -214,31 +195,31 @@ ALTER TABLE `vehicle_runs`
 -- AUTO_INCREMENT for table `applicants`
 --
 ALTER TABLE `applicants`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=2;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `files`
 --
 ALTER TABLE `files`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=210;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=214;
 
 --
 -- AUTO_INCREMENT for table `media_folders`
 --
 ALTER TABLE `media_folders`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=66;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
 
 --
 -- AUTO_INCREMENT for table `users`
 --
 ALTER TABLE `users`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=12;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=28;
 
 --
 -- AUTO_INCREMENT for table `vehicle_runs`
 --
 ALTER TABLE `vehicle_runs`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=4;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
