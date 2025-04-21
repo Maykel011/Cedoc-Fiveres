@@ -176,7 +176,7 @@ $vehicleRuns = getVehicleRunsData();
                             $imageHtml = 'No image';
                             if (!empty($run['case_image'])) {
                                 $filename = basename($run['case_image']);
-                                $imageHtml = '<a href="../../' . htmlspecialchars($run['case_image']) . '" target="_blank" class="image-preview-link" data-filename="' . htmlspecialchars($filename) . '">View Image</a>';
+                                $imageHtml = '<a href="../../../' . htmlspecialchars($run['case_image']) . '" target="_blank" class="image-preview-link" data-filename="' . htmlspecialchars($filename) . '">View Image</a>';
                             }
                             $transportOfficer = !empty($run['transport_officer']) ? htmlspecialchars($run['transport_officer']) : 'N/A';
                             ?>
