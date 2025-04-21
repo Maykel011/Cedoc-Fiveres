@@ -381,6 +381,32 @@ $vehicleRuns = getVehicleRunsData();
         </div>
     </div>
 
+<!-- Modern Image Removal Confirmation Modal -->
+<div id="removeImageConfirmationModal" class="modern-modal">
+    <div class="modal-overlay" onclick="hideImageRemoveModal()"></div>
+    <div class="modal-content">
+        <button class="modal-close-btn" onclick="hideImageRemoveModal()">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="modal-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        
+        <h3 class="modal-title">Confirm Image Removal</h3>
+        
+        <p class="modal-message">Are you sure you want to permanently remove this case image?</p>
+        
+        <div class="modal-actions">
+            <button id="cancelImageRemove" class="modal-btn secondary-btn">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button id="confirmImageRemove" class="modal-btn danger-btn">
+                <i class="fas fa-trash-alt"></i> Remove
+            </button>
+        </div>
+    </div>
+</div>
 
 <!-- Single Delete Modal -->
 <div id="deleteModal" class="deletecustom-modal">
@@ -431,7 +457,7 @@ $vehicleRuns = getVehicleRunsData();
         <h2 id="deleteSuccessMessage">Deleted Successfully</h2>
     </div>
 </div>
-    <script src="../../js/AdminVHLRun.js"></script>
+    <script src="../../js/AdminVeHiLRuns.js"></script>
 </body>
 
 </html>

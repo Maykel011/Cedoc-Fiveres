@@ -20,7 +20,7 @@ $vehicleRuns = getVehicleRunsData();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES</title>
-    <link rel="stylesheet" href="../../Css/AdminVHLruns.css">
+    <link rel="stylesheet" href="../../Css/SAdminVHLruns.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
@@ -176,7 +176,7 @@ $vehicleRuns = getVehicleRunsData();
                             $imageHtml = 'No image';
                             if (!empty($run['case_image'])) {
                                 $filename = basename($run['case_image']);
-                                $imageHtml = '<a href="../../' . htmlspecialchars($run['case_image']) . '" target="_blank" class="image-preview-link" data-filename="' . htmlspecialchars($filename) . '">View Image</a>';
+                                $imageHtml = '<a href="../../../' . htmlspecialchars($run['case_image']) . '" target="_blank" class="image-preview-link" data-filename="' . htmlspecialchars($filename) . '">View Image</a>';
                             }
                             $transportOfficer = !empty($run['transport_officer']) ? htmlspecialchars($run['transport_officer']) : 'N/A';
                             ?>
@@ -431,7 +431,34 @@ $vehicleRuns = getVehicleRunsData();
         <h2 id="deleteSuccessMessage">Deleted Successfully</h2>
     </div>
 </div>
-    <script src="../../js/AdminVHLRun.js"></script>
+    <script src="../../js/SAdminVHLRun.js"></script>
 </body>
+
+<!-- Modern Image Removal Confirmation Modal -->
+<div id="removeImageConfirmationModal" class="modern-modal">
+    <div class="modal-overlay" onclick="hideImageRemoveModal()"></div>
+    <div class="modal-content">
+        <button class="modal-close-btn" onclick="hideImageRemoveModal()">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="modal-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        
+        <h3 class="modal-title">Confirm Image Removal</h3>
+        
+        <p class="modal-message">Are you sure you want to permanently remove this case image?</p>
+        
+        <div class="modal-actions">
+            <button id="cancelImageRemove" class="modal-btn secondary-btn">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button id="confirmImageRemove" class="modal-btn danger-btn">
+                <i class="fas fa-trash-alt"></i> Remove
+            </button>
+        </div>
+    </div>
+</div>
 
 </html>

@@ -142,7 +142,7 @@ function handleFileUpload() {
         return null;
     }
 
-    $uploadDir = '../../assets/uploads/case_images/';
+    $uploadDir = '../../../VehicleCaseUploads/';
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0755, true);
     }
@@ -163,7 +163,7 @@ function handleFileUpload() {
         throw new Exception('Failed to upload image');
     }
 
-    return 'assets/uploads/case_images/' . $fileName;
+    return 'VehicleCaseUploads/' . $fileName;
 }
 
 /**
@@ -239,8 +239,8 @@ function handleUpdate() {
     $caseImagePath = $existingData['case_image'];
     if (isset($_FILES['caseImage']) && $_FILES['caseImage']['error'] === UPLOAD_ERR_OK) {
         // Delete old image if exists
-        if ($caseImagePath && file_exists('../../' . $caseImagePath)) {
-            unlink('../../' . $caseImagePath);
+        if ($caseImagePath && file_exists('../../../' . $caseImagePath)) {
+            unlink('../../../' . $caseImagePath);
         }
         $caseImagePath = handleFileUpload();
     }
@@ -332,8 +332,8 @@ function handleDelete() {
     $result = $stmt->get_result();
     
     while ($row = $result->fetch_assoc()) {
-        if ($row['case_image'] && file_exists('../../' . $row['case_image'])) {
-            unlink('../../' . $row['case_image']);
+        if ($row['case_image'] && file_exists('../../../' . $row['case_image'])) {
+            unlink('../../../' . $row['case_image']);
         }
     }
 
@@ -368,8 +368,8 @@ function handleRemoveImage() {
     $existingData = getCaseById($caseId);
 
     // Delete the image file if exists
-    if ($existingData['case_image'] && file_exists('../../' . $existingData['case_image'])) {
-        if (!unlink('../../' . $existingData['case_image'])) {
+    if ($existingData['case_image'] && file_exists('../../../' . $existingData['case_image'])) {
+        if (!unlink('../../../' . $existingData['case_image'])) {
             throw new Exception('Failed to delete image file');
         }
     }

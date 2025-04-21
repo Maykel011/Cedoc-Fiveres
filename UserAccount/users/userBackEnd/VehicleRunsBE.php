@@ -37,9 +37,6 @@ function handleRequest() {
             case 'update':
                 handleUpdate();
                 break;
-            case 'delete':
-                handleDelete();
-                break;
             case 'removeImage':
                 handleRemoveImage();
                 break;
@@ -142,7 +139,7 @@ function handleFileUpload() {
         return null;
     }
 
-    $uploadDir = '../../assets/uploads/case_images/';
+    $uploadDir = '../../../VehicleCaseUploads/';
     if (!is_dir($uploadDir)) {
         mkdir($uploadDir, 0755, true);
     }
@@ -163,7 +160,7 @@ function handleFileUpload() {
         throw new Exception('Failed to upload image');
     }
 
-    return 'assets/uploads/case_images/' . $fileName;
+    return 'VehicleCaseUploads/' . $fileName;
 }
 
 /**
@@ -239,8 +236,8 @@ function handleUpdate() {
     $caseImagePath = $existingData['case_image'];
     if (isset($_FILES['caseImage']) && $_FILES['caseImage']['error'] === UPLOAD_ERR_OK) {
         // Delete old image if exists
-        if ($caseImagePath && file_exists('../../' . $caseImagePath)) {
-            unlink('../../' . $caseImagePath);
+        if ($caseImagePath && file_exists('../../../' . $caseImagePath)) {
+            unlink('../../../' . $caseImagePath);
         }
         $caseImagePath = handleFileUpload();
     }
@@ -282,78 +279,6 @@ function handleUpdate() {
 }
 
 /**
- * Handle case deletion
- */
-function handleDelete() {
-    global $conn;
-
-    $input = json_decode(file_get_contents('php://input'), true);
-    
-    // Check if PIN code is provided and valid
-    if (empty($input['pinCode'])) {
-        throw new Exception('PIN code is required for deletion');
-    }
-
-    // Get the user's stored PIN code
-    $userId = $_SESSION['user_id'];
-    $userStmt = $conn->prepare("SELECT pin_code FROM users WHERE id = ?");
-    $userStmt->bind_param("i", $userId);
-    $userStmt->execute();
-    $userResult = $userStmt->get_result();
-    
-    if ($userResult->num_rows === 0) {
-        throw new Exception('User not found');
-    }
-    
-    $userData = $userResult->fetch_assoc();
-    $storedPin = $userData['pin_code'];
-    
-    // Verify PIN code
-    if (empty($storedPin)) {
-        throw new Exception('No PIN code set for this user');
-    }
-    
-    if ($input['pinCode'] !== $storedPin) {
-        throw new Exception('Invalid PIN code');
-    }
-
-    if (empty($input['ids'])) {
-        throw new Exception('No cases selected for deletion');
-    }
-
-    $ids = array_map('intval', $input['ids']);
-    $placeholders = implode(',', array_fill(0, count($ids), '?'));
-    $types = str_repeat('i', count($ids));
-
-    // First get image paths to delete files
-    $stmt = $conn->prepare("SELECT case_image FROM vehicle_runs WHERE id IN ($placeholders) AND case_image IS NOT NULL");
-    $stmt->bind_param($types, ...$ids);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    while ($row = $result->fetch_assoc()) {
-        if ($row['case_image'] && file_exists('../../' . $row['case_image'])) {
-            unlink('../../' . $row['case_image']);
-        }
-    }
-
-    // Delete records
-    $stmt = $conn->prepare("DELETE FROM vehicle_runs WHERE id IN ($placeholders)");
-    $stmt->bind_param($types, ...$ids);
-    
-    if (!$stmt->execute()) {
-        throw new Exception('Database error: ' . $stmt->error);
-    }
-
-    echo json_encode([
-        'success' => true, 
-        'message' => 'Cases deleted successfully', 
-        'deletedCount' => $stmt->affected_rows
-    ]);
-    $stmt->close();
-}
-
-/**
  * Handle image removal
  */
 function handleRemoveImage() {
@@ -368,8 +293,8 @@ function handleRemoveImage() {
     $existingData = getCaseById($caseId);
 
     // Delete the image file if exists
-    if ($existingData['case_image'] && file_exists('../../' . $existingData['case_image'])) {
-        if (!unlink('../../' . $existingData['case_image'])) {
+    if ($existingData['case_image'] && file_exists('../../../' . $existingData['case_image'])) {
+        if (!unlink('../../../' . $existingData['case_image'])) {
             throw new Exception('Failed to delete image file');
         }
     }

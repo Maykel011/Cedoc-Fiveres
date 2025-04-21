@@ -21,7 +21,7 @@ $vehicleRuns = getVehicleRunsData();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES</title>
-    <link rel="stylesheet" href="../../Css/AdminVHLruns.css">
+    <link rel="stylesheet" href="../../Css/UsersVHLruns.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
@@ -111,14 +111,11 @@ $vehicleRuns = getVehicleRunsData();
                             </div>
                         </div>
                     </div>
-                    <div class="upload-case-content">
-                        <button id="uploadCase" class="action-btn upload-btn">
-                            <i class="fas fa-upload"></i> Upload Case
-                        </button>
-                    </div>
+                   
                 </div>
+                
 
-                <!-- Second Line: Vehicle Team | Case Type | Clear Filter | (Delete Selected on right) -->
+                <!-- Second Line: Vehicle Team | Case Type | Clear Filter -->
                 <div class="second-line-controls">
                     <div class="left-controls">
                         <div class="filter-container">
@@ -144,9 +141,9 @@ $vehicleRuns = getVehicleRunsData();
                             <i class="fas fa-times x-icon"></i> Clear Filters
                         </button>
                     </div>
-                    <div class="delete-selected-content">
-                        <button id="deleteSelected" class="action-btn delete-btn">
-                            <i class="fas fa-trash-alt"></i> Delete Selected
+                    <div class="upload-case-content">
+                        <button id="uploadCase" class="action-btn upload-btn">
+                            <i class="fas fa-upload"></i> Upload Case
                         </button>
                     </div>
                 </div>
@@ -154,7 +151,6 @@ $vehicleRuns = getVehicleRunsData();
             <table>
                 <thead>
                     <tr>
-                        <th><input type="checkbox" id="selectAll"> Select all</th>
                         <th>Vehicle Team</th>
                         <th>Case Type</th>
                         <th>Transport Officer</th>
@@ -175,12 +171,11 @@ $vehicleRuns = getVehicleRunsData();
                             $imageHtml = 'No image';
                             if (!empty($run['case_image'])) {
                                 $filename = basename($run['case_image']);
-                                $imageHtml = '<a href="../../' . htmlspecialchars($run['case_image']) . '" target="_blank" class="image-preview-link" data-filename="' . htmlspecialchars($filename) . '">View Image</a>';
+                                $imageHtml = '<a href="../../../' . htmlspecialchars($run['case_image']) . '" target="_blank" class="image-preview-link" data-filename="' . htmlspecialchars($filename) . '">View Image</a>';
                             }
                             $transportOfficer = !empty($run['transport_officer']) ? htmlspecialchars($run['transport_officer']) : 'N/A';
                             ?>
                             <tr>
-                                <td><input type="checkbox" value="<?= htmlspecialchars($run['id']) ?>"></td>
                                 <td><?= htmlspecialchars($run['vehicle_team']) ?></td>
                                 <td><?= htmlspecialchars($run['case_type']) ?></td>
                                 <td><?= $transportOfficer ?></td>
@@ -189,15 +184,16 @@ $vehicleRuns = getVehicleRunsData();
                                 <td><?= $dispatchTime ?></td>
                                 <td><?= $backToBaseTime ?></td>
                                 <td><?= $imageHtml ?></td>
-                                <td class="action-buttons">
-                                    <button class="edit-btn" data-id="<?= htmlspecialchars($run['id']) ?>"><i class="fas fa-edit"></i> Edit</button>
-                                    <button class="delete-btn" data-id="<?= htmlspecialchars($run['id']) ?>"><i class="fas fa-trash"></i> Delete</button>
-                                </td>
+                                <td>
+    <button class="edit-btn" data-id="<?= htmlspecialchars($run['id']) ?>">
+        <i class="fas fa-edit"></i> Edit
+    </button>
+</td>
                             </tr>
                         <?php endforeach; ?>
                     <?php else: ?>
                         <tr>
-                            <td colspan="10" class="no-data">No vehicle runs found</td>
+                            <td colspan="9" class="no-data">No vehicle runs found</td>
                         </tr>
                     <?php endif; ?>
                 </tbody>
@@ -206,6 +202,17 @@ $vehicleRuns = getVehicleRunsData();
     </div>
     </div>
     
+
+<div id="confirmDeleteImageModal" class="modal">
+    <div class="modal-content">
+        <p>Are you sure you want to remove this image?</p>
+        <div class="modal-actions">
+            <button id="confirmImageDelete" class="btn btn-danger">Delete</button>
+            <button id="cancelImageDelete" class="btn btn-secondary">Cancel</button>
+        </div>
+    </div>
+</div>
+
 
     <!-- Upload Case Modal -->
     <div id="uploadCaseModal" class="upload-modal-content">
@@ -288,12 +295,6 @@ $vehicleRuns = getVehicleRunsData();
             </div>
         </div>
     </div>
-    <button onclick="openEditModal(<?= $file['id'] ?>, '<?= htmlspecialchars($file['file_name']) ?>', <?= $file['temperature'] ?? 'null' ?>, <?= $file['water_level'] ?? 'null' ?>, <?= $file['air_quality'] ?? 'null' ?>)">
-                    <i class="fas fa-edit"></i> Edit
-                </button>
-                <button onclick="openDeleteModal(<?= $file['id'] ?>, '<?= $file['file_name'] ?>')">
-                    <i class="fas fa-trash"></i> Delete
-                </button>
 
     <!-- Edit Case Modal -->
     <div id="editCaseModal" class="upload-modal-content">
@@ -380,40 +381,6 @@ $vehicleRuns = getVehicleRunsData();
         </div>
     </div>
 
-
-<!-- Single Delete Modal -->
-<div id="deleteModal" class="deletecustom-modal">
-    <div class="delete-modal-content">
-        <span class="close" onclick="closeModal('deleteModal')"></span>
-        <h2>Delete Confirmation</h2>
-        <p id="deleteFileName"></p>
-        <p>Are you sure you want to delete this?</p>
-        <div id="pinCodeSection" style="margin: 15px 0;">
-            <label for="deletePinCode">Enter PIN Code:</label>
-            <input type="password" id="deletePinCode" placeholder="6-digit PIN" maxlength="6" style="width: 90%;padding: 8px;margin-top: 5px; border-radius: 5px;">
-            <p id="deletePinError" style="color: red; display: none;"></p>
-        </div>
-        <button id="deleteFileBtn">Delete</button>
-        <button onclick="closeModal('deleteModal')">Cancel</button>
-    </div>
-</div>
-
-<!-- Multiple Delete Confirmation Modal -->
-<div id="multipleDeleteModal" class="deletecustom-modal" style="display:none;">
-    <div class="delete-modal-content">
-        <span class="close" onclick="closeModal('multipleDeleteModal')"></span>
-        <h2>Delete Confirmation</h2>
-        <p id="multipleDeleteMessage"></p>
-        <div id="multipleDeletePinSection" style="margin: 15px 0;">
-            <label for="multipleDeletePinCode">Enter PIN Code:</label>
-            <input type="password" id="multipleDeletePinCode" placeholder="6-digit PIN" maxlength="6" style="width: 90%;padding: 8px;margin-top: 5px; border-radius: 5px;">
-            <p id="multipleDeletePinError" style="color: red; display: none;"></p>
-        </div>
-        <button id="confirmMultipleDelete" class="btn-danger">Delete</button>
-        <button onclick="closeModal('multipleDeleteModal')" class="btn-cancel">Cancel</button>
-    </div>
-</div>
-
 <!-- Upload Success Modal -->
 <div id="uploadSuccessModal" class="deletesuccess-modal" style="display: none;">
     <div class="success-modal-content">
@@ -422,15 +389,7 @@ $vehicleRuns = getVehicleRunsData();
     </div>
 </div>
 
-
-<!-- Success Modal -->
-<div id="deleteSuccessModal" class="deletesuccess-modal" style="display: none;">
-    <div class="success-modal-content">
-        <span class="successclose" onclick="closeModal('deleteSuccessModal')"></span>
-        <h2 id="deleteSuccessMessage">Deleted Successfully</h2>
-    </div>
-</div>
-    <script src="../../js/AdminVHLRun.js"></script>
+    <script src="../../js/UsersVHLRuns.js"></script>
 </body>
 
 </html>

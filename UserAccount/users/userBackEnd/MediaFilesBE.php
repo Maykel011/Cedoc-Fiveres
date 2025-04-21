@@ -66,8 +66,8 @@ elseif ($action === "rename") {
         $stmt->close();
 
         // Rename the physical folder
-        $oldPath = "../../uploads/" . $oldName;
-        $newPath = "../../uploads/" . $newName;
+        $oldPath = "../../../Mediaupload/" . $oldName;
+        $newPath = "../../../Mediaupload/" . $newName;
 
         if (file_exists($oldPath)) {
             if (!rename($oldPath, $newPath)) {
@@ -127,7 +127,7 @@ elseif ($action === "rename") {
                 $conn->commit();
 
                 // Remove folder from filesystem
-                $folderPath = "../../uploads/" . $folderName;
+                $folderPath = "../../../Mediaupload/" . $folderName;
                 deleteFolder($folderPath);
 
                 echo json_encode(["status" => "success", "message" => "Folder and its contents deleted successfully"]);
@@ -163,7 +163,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_FILES['file'])) {
     $fileName = $_FILES['file']['name'];
     $fileTmp = $_FILES['file']['tmp_name'];
     $fileType = $_FILES['file']['type'];
-    $uploadDir = "../../uploads/" . $folderName . "/";
+    $uploadDir = "../../../Mediaupload/" . $folderName . "/";
 
     if (!file_exists($uploadDir)) {
         mkdir($uploadDir, 0777, true);

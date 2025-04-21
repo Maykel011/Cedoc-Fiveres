@@ -16,7 +16,7 @@ function verifyAdminPin($conn, $pinCode) {
 $folderName = isset($_POST['folder_name']) ? trim($_POST['folder_name']) : (isset($_GET['folder']) ? trim($_GET['folder']) : '');
 $folderName = $folderName !== null ? $folderName : '';
 
-$uploadDir = "../../uploads/" . $folderName . "/";
+$uploadDir = "../../../Mediaupload/" . $folderName . "/";
 
 // Handle file upload
 if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_FILES['file'])) {
@@ -100,8 +100,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST" && isset($_POST['editFile'])) {
     }
 
     // Set paths
-    $current_path = "../../uploads/$folder_name/$current_file_name";
-    $new_path = "../../uploads/$folder_name/$new_file_name";
+    $current_path = "../../../Mediaupload/$folder_name/$current_file_name";
+    $new_path = "../../../Mediaupload/$folder_name/$new_file_name";
 
     if (!file_exists($current_path)) {
         die("Original file not found on server");
@@ -184,7 +184,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"])) {
                 $conn->commit();
 
                 // Delete file from filesystem
-                $filePath = "../../uploads/$folderName/$fileName";
+                $filePath = "../../../Mediaupload/$folderName/$fileName";
                 if (file_exists($filePath)) {
                     unlink($filePath);
                 }
@@ -241,7 +241,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"])) {
 
             // Delete from filesystem
             foreach ($filesToDelete as $file) {
-                $filePath = "../../uploads/" . $file['folder_name'] . "/" . $file['file_name'];
+                $filePath = "../../../Mediaupload/" . $file['folder_name'] . "/" . $file['file_name'];
                 if (file_exists($filePath)) {
                     unlink($filePath);
                 }
@@ -288,14 +288,14 @@ if ($_SERVER["REQUEST_METHOD"] === "POST" && isset($_POST["action"])) {
 
             // Delete files from filesystem
             foreach ($files as $file) {
-                $filePath = "../../uploads/$folderName/$file";
+                $filePath = "../../../Mediaupload/$folderName/$file";
                 if (file_exists($filePath)) {
                     unlink($filePath);
                 }
             }
 
             // Delete folder itself
-            $folderPath = "../../uploads/$folderName";
+            $folderPath = "../../../Mediaupload/$folderName";
             if (is_dir($folderPath)) {
                 array_map('unlink', glob("$folderPath/*.*"));
                 rmdir($folderPath);
