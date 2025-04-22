@@ -305,38 +305,38 @@ document.addEventListener("DOMContentLoaded", function() {
                             }
                             break;
 
-                        case 'pincode':
-                            const currentPin = formData.get('current_pin');
-                            const newPin = formData.get('new_pin');
-                            const confirmPin = formData.get('confirm_pin');
-                            
-                            if (newPin || confirmPin) {
-                                if (newPin !== confirmPin) {
-                                    showErrorModal('New PIN and confirmation do not match');
-                                    isValid = false;
-                                } else if (newPin && (newPin.length !== 6 || !/^\d+$/.test(newPin))) {
-                                    showErrorModal('PIN code must be exactly 6 digits');
-                                    isValid = false;
-                                }
-                                
-                                if (!currentPin) {
-                                    showErrorModal('Current PIN is required to change PIN');
-                                    isValid = false;
-                                } else if (!newPin) {
-                                    showErrorModal('New PIN is required');
-                                    isValid = false;
-                                } else if (!confirmPin) {
-                                    showErrorModal('Please confirm your new PIN');
-                                    isValid = false;
-                                } else {
-                                    containerData.append('current_pin', currentPin);
-                                    containerData.append('new_pin', newPin);
-                                    containerData.append('confirm_pin', confirmPin);
-                                }
-                            } else {
-                                isValid = true;
-                            }
-                            break;
+                           // Add this to your save-container click handler for pincode
+                                // Add this to your save-container click handler for pincode
+                                case 'pincode':
+                                    const currentPin = formData.get('current_pin');
+                                    const newPin = formData.get('new_pin');
+                                    const confirmPin = formData.get('confirm_pin');
+                                    
+                                    if (newPin || confirmPin) {
+                                        if (newPin !== confirmPin) {
+                                            showErrorModal('New PIN and confirmation do not match');
+                                            isValid = false;
+                                        } else if (newPin && (newPin.length !== 6 || !/^\d+$/.test(newPin))) {
+                                            showErrorModal('PIN code must be exactly 6 digits');
+                                            isValid = false;
+                                        }
+                                        
+                                        if (!currentPin) {
+                                            showErrorModal('Current PIN is required to change PIN');
+                                            isValid = false;
+                                        } else if (!newPin) {
+                                            showErrorModal('New PIN is required');
+                                            isValid = false;
+                                        } else if (!confirmPin) {
+                                            showErrorModal('Please confirm your new PIN');
+                                            isValid = false;
+                                        } else {
+                                            containerData.append('current_pin', currentPin);
+                                            containerData.append('new_pin', newPin);
+                                            containerData.append('confirm_pin', confirmPin);
+                                        }
+                                    }
+                                    break;
                     }
 
                     if (!isValid) return;
@@ -626,7 +626,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const passwordCell = row.querySelector('.password-cell');
             const pinCell = row.querySelector('.pincode-cell');
             passwordCell.dataset.originalValue = user.password || 'N/A';
-            pinCell.dataset.originalValue = user.pincode || 'N/A';
+            pinCell.dataset.originalValue = user.pin_code || 'N/A';
             
             const actionCell = row.querySelector('td:last-child');
             actionCell.appendChild(createActionButtons(user.id, user.role));
@@ -801,6 +801,7 @@ document.addEventListener("DOMContentLoaded", function() {
         if (createUserModal) createUserModal.style.display = 'block';
     }
 
+    // Modify the editUser function to handle Admin and User roles differently
     function editUser(userId) {
         const user = allUsers.find(u => u.id == userId);
         if (!user) return;
@@ -809,19 +810,15 @@ document.addEventListener("DOMContentLoaded", function() {
         let firstName = '';
         let lastName = '';
         
-        // Check if the name contains a comma (last, first format)
         if (user.name.includes(',')) {
             const nameParts = user.name.split(',').map(part => part.trim());
             lastName = nameParts[0];
             firstName = nameParts[1] || '';
-        } 
-        // Otherwise split by spaces
-        else {
+        } else {
             const nameParts = user.name.split(' ');
-            // Assume last part is last name, everything else is first name
             if (nameParts.length > 1) {
-                lastName = nameParts.pop(); // Remove last element and assign to lastName
-                firstName = nameParts.join(' '); // Join remaining parts as firstName
+                lastName = nameParts.pop();
+                firstName = nameParts.join(' ');
             } else {
                 firstName = nameParts[0] || '';
                 lastName = '';
@@ -841,6 +838,8 @@ document.addEventListener("DOMContentLoaded", function() {
         const roleSelect = document.getElementById('edit_role');
         const roleDisplay = document.getElementById('edit_role_display');
         const otherPositionInput = document.getElementById('edit_other_position');
+        const saveDesignationBtn = document.getElementById('saveDesignationBtn');
+        const updateUserBtn = editUserForm.querySelector('.btn.save'); // Get the Update User button
         
         // Handle Admin user case
         if (user.role === 'Admin') {
@@ -854,6 +853,16 @@ document.addEventListener("DOMContentLoaded", function() {
             positionDisplay.value = user.position;
             roleDisplay.value = user.role;
             
+            // Hide the Save Designation button for Admin users
+            if (saveDesignationBtn) {
+                saveDesignationBtn.style.display = 'none';
+            }
+            
+            // Hide the Update User button for Admin users
+            if (updateUserBtn) {
+                updateUserBtn.style.display = 'none';
+            }
+            
             // Disable other inputs if needed
             if (otherPositionInput) {
                 otherPositionInput.disabled = true;
@@ -865,6 +874,16 @@ document.addEventListener("DOMContentLoaded", function() {
             roleSelect.style.display = 'block';
             positionDisplay.style.display = 'none';
             roleDisplay.style.display = 'none';
+            
+            // Show the Save Designation button for non-Admin users
+            if (saveDesignationBtn) {
+                saveDesignationBtn.style.display = 'block';
+            }
+            
+            // Show the Update User button for non-Admin users
+            if (updateUserBtn) {
+                updateUserBtn.style.display = 'block';
+            }
             
             // Handle position field
             if (user.position !== 'Employee' && user.position !== 'Other') {
@@ -883,12 +902,17 @@ document.addEventListener("DOMContentLoaded", function() {
                 }
             }
             
-            // Set role options (only User available)
-            roleSelect.innerHTML = '';
-            const userOption = document.createElement('option');
-            userOption.value = 'User';
-            userOption.textContent = 'User';
-            roleSelect.appendChild(userOption);
+            // For User role accounts, make Role field read-only
+            if (user.role === 'User') {
+                roleSelect.disabled = true;
+                // Remove any existing Admin option if present
+                const adminOption = roleSelect.querySelector('option[value="Admin"]');
+                if (adminOption) {
+                    adminOption.remove();
+                }
+            } else {
+                roleSelect.disabled = false;
+            }
             
             // Set the current role
             roleSelect.value = user.role;
@@ -995,6 +1019,16 @@ document.addEventListener("DOMContentLoaded", function() {
         const newPin = formData.get('new_pin');
         const confirmPin = formData.get('confirm_pin');
         
+        // Get the user being edited
+        const user = allUsers.find(u => u.id == userId);
+        if (!user) return;
+        
+        // Prevent form submission for Admin accounts
+        if (user.role === 'Admin') {
+            showErrorModal('Cannot update Admin accounts directly. Use individual sections to update profile, password, or PIN.');
+            return;
+        }
+        
         // Combine first and last name with a space
         formData.set('name', `${firstName} ${lastName}`.trim());
         
@@ -1006,10 +1040,6 @@ document.addEventListener("DOMContentLoaded", function() {
             }
             formData.set('position', otherPosition);
         }
-        
-        // Get the user being edited
-        const user = allUsers.find(u => u.id == userId);
-        if (!user) return;
         
         // Check admin limit if changing to admin
         if (role === 'Admin' && user.role !== 'Admin') {
@@ -1058,12 +1088,27 @@ document.addEventListener("DOMContentLoaded", function() {
             formData.delete('current_pin');
         }
         
+        // Show loading state on the submit button
+        const submitBtn = editUserForm.querySelector('.btn.save');
+        const originalBtnText = submitBtn.innerHTML;
+        submitBtn.disabled = true;
+        submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Updating...';
+        
         fetch('../AdminBackEnd/ManageUserBE.php', {
             method: 'POST',
             body: formData
         })
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.json();
+        })
         .then(data => {
+            // Restore button state
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+            
             if (data.status === 'success') {
                 showSuccessModal(
                     'editSuccessModal', 
@@ -1077,6 +1122,10 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         })
         .catch(error => {
+            // Restore button state
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalBtnText;
+            
             console.error('Error:', error);
             showErrorModal('An error occurred while updating user');
         });
@@ -1345,7 +1394,6 @@ function validatePinFields() {
 
     return true;
 }
-
 // Function to close modals
 function closeModal(modalId) {
     const modal = document.getElementById(modalId);

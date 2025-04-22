@@ -139,8 +139,9 @@ function getUsers($conn) {
     $users = [];
     if ($result->num_rows > 0) {
         while($row = $result->fetch_assoc()) {
-            $row['password'] = $row['password'] ? $row['password'] : 'N/A';
-            $row['pin_code'] = $row['pin_code'] ? $row['pin_code'] : 'N/A';
+            // Only show N/A if pin_code is NULL or empty string
+             $row['password'] = $row['password'] ? $row['password'] : 'N/A';
+             $row['pin_code'] = isset($row['pin_code']) && $row['pin_code'] !== '' ? $row['pin_code'] : 'N/A';
             $users[] = $row;
         }
     }
@@ -165,7 +166,13 @@ function createUser($conn, $isAdmin) {
         }
     }
 
-    $role = $conn->real_escape_string($_POST['role']);
+    // Validate and escape role
+    $allowed_roles = ['Admin', 'User'];
+    $role = isset($_POST['role']) ? $conn->real_escape_string($_POST['role']) : '';
+    if (!in_array($role, $allowed_roles)) {
+        echo json_encode(['status' => 'error', 'message' => 'Invalid role specified']);
+        return;
+    }
     
     // Only Admin can create Admin accounts
     if ($role === 'Admin' && !$isAdmin) {
@@ -188,7 +195,7 @@ function createUser($conn, $isAdmin) {
     $position = $conn->real_escape_string($_POST['position']);
     $email = $conn->real_escape_string($_POST['email']);
     $password = $conn->real_escape_string($_POST['password']);
-    $pin_code = isset($_POST['pin_code']) ? $conn->real_escape_string($_POST['pin_code']) : null;
+    $pin_code = isset($_POST['pin_code']) && $_POST['pin_code'] !== '' ? $conn->real_escape_string($_POST['pin_code']) : null;
 
     // Check if employee no or email already exists
     $check = $conn->query("SELECT id FROM users WHERE employee_no = '$employee_no' OR email = '$email'");
@@ -215,7 +222,14 @@ function updateUser($conn, $isAdmin) {
     }
 
     $id = (int)$_POST['id'];
-    $role = $conn->real_escape_string($_POST['role']);
+    
+    // Validate and escape role
+    $allowed_roles = ['Admin', 'User'];
+    $role = isset($_POST['role']) ? $conn->real_escape_string($_POST['role']) : '';
+    if (!in_array($role, $allowed_roles)) {
+        echo json_encode(['status' => 'error', 'message' => 'Invalid role specified']);
+        return;
+    }
     
     // Only Admin can modify Admin accounts
     if (!$isAdmin) {
@@ -252,7 +266,7 @@ function updateUser($conn, $isAdmin) {
     $last_name = $conn->real_escape_string($_POST['last_name']);
     $position = $conn->real_escape_string($_POST['position']);
     $email = $conn->real_escape_string($_POST['email']);
-    $pin_code = isset($_POST['pin_code']) ? $conn->real_escape_string($_POST['pin_code']) : null;
+    $pin_code = isset($_POST['pin_code']) && $_POST['pin_code'] !== '' ? $conn->real_escape_string($_POST['pin_code']) : null;
 
     // Check if employee no or email already exists for another user
     $check = $conn->query("SELECT id FROM users WHERE (employee_no = '$employee_no' OR email = '$email') AND id != $id");
@@ -309,30 +323,31 @@ function updateUser($conn, $isAdmin) {
 }
 
 function updateUserPartial($conn, $isAdmin) {
-    if (empty($_POST['id']) || empty($_POST['container_type'])) {
-        echo json_encode(['status' => 'error', 'message' => 'Missing required fields']);
+    if (empty($_POST['id'])) {
+        echo json_encode(['status' => 'error', 'message' => 'User ID is required']);
         return;
     }
 
     $id = (int)$_POST['id'];
-    $containerType = $conn->real_escape_string($_POST['container_type']);
-
-    // Verify user exists
-    $userCheck = $conn->query("SELECT id, role FROM users WHERE id = $id");
+    
+    // Get the user's current role
+    $userCheck = $conn->query("SELECT role FROM users WHERE id = $id");
     if ($userCheck->num_rows === 0) {
         echo json_encode(['status' => 'error', 'message' => 'User not found']);
         return;
     }
     
     $user = $userCheck->fetch_assoc();
+    $currentRole = $user['role'];
     
-    // Check if trying to modify an Admin
-    if (!$isAdmin && $user['role'] === 'Admin') {
-        echo json_encode(['status' => 'error', 'message' => 'Only Admin can modify Admin accounts']);
+    // If the user is an Admin and we're trying to update designation, prevent it
+    if ($currentRole === 'Admin' && $_POST['container_type'] === 'designation') {
+        echo json_encode(['status' => 'error', 'message' => 'Cannot update designation for Admin accounts']);
         return;
     }
-
-    switch ($containerType) {
+    
+    // Handle updates based on container_type
+    switch ($_POST['container_type']) {
         case 'profile':
             updateProfile($conn, $id);
             break;
@@ -348,8 +363,6 @@ function updateUserPartial($conn, $isAdmin) {
         default:
             echo json_encode(['status' => 'error', 'message' => 'Invalid container type']);
     }
-    
-    return;
 }
 
 function updateProfile($conn, $id) {
@@ -394,7 +407,14 @@ function updateDesignation($conn, $id, $isAdmin) {
     }
 
     $position = $conn->real_escape_string($_POST['position']);
-    $role = $conn->real_escape_string($_POST['role']);
+    
+    // Validate and escape role
+    $allowed_roles = ['Admin', 'User'];
+    $role = isset($_POST['role']) ? $conn->real_escape_string($_POST['role']) : '';
+    if (!in_array($role, $allowed_roles)) {
+        echo json_encode(['status' => 'error', 'message' => 'Invalid role specified']);
+        return;
+    }
     
     // Only Admin can assign Admin role
     if ($role === 'Admin' && !$isAdmin) {
@@ -437,14 +457,8 @@ function updateDesignation($conn, $id, $isAdmin) {
 }
 
 function updatePassword($conn, $id) {
-    $isAdmin = isAdmin($conn);
-    $required = ['new_password', 'confirm_password'];
-    
-    // Only require current password if not Admin
-    if (!$isAdmin) {
-        $required[] = 'current_password';
-    }
-    
+    $required = ['current_password', 'new_password', 'confirm_password'];
+
     foreach ($required as $field) {
         if (empty($_POST[$field])) {
             echo json_encode(['status' => 'error', 'message' => "$field is required"]);
@@ -457,17 +471,30 @@ function updatePassword($conn, $id) {
         return;
     }
 
-    // Skip current password verification for Admin
-    if (!$isAdmin && !verifyCurrentPassword($conn, $id, $_POST['current_password'])) {
+    $currentPassword = $_POST['current_password'];
+    $stmt = $conn->prepare("SELECT password FROM users WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows === 0) {
+        echo json_encode(['status' => 'error', 'message' => 'User not found']);
+        return;
+    }
+
+    $user = $result->fetch_assoc();
+    $stmt->close();
+
+    if ($currentPassword !== $user['password']) {
         echo json_encode(['status' => 'error', 'message' => 'Current password is incorrect']);
         return;
     }
 
     $password = $conn->real_escape_string($_POST['new_password']);
-    
+
     $stmt = $conn->prepare("UPDATE users SET password=? WHERE id=?");
     $stmt->bind_param("si", $password, $id);
-    
+
     if ($stmt->execute()) {
         echo json_encode(['status' => 'success', 'message' => 'Password updated successfully']);
     } else {
@@ -476,15 +503,10 @@ function updatePassword($conn, $id) {
     $stmt->close();
 }
 
+
 function updatePinCode($conn, $id) {
-    $isAdmin = isAdmin($conn);
-    $required = ['new_pin', 'confirm_pin'];
-    
-    // Only require current pin if not Admin
-    if (!$isAdmin) {
-        $required[] = 'current_pin';
-    }
-    
+    $required = ['current_pin', 'new_pin', 'confirm_pin'];
+
     foreach ($required as $field) {
         if (empty($_POST[$field])) {
             echo json_encode(['status' => 'error', 'message' => "$field is required"]);
@@ -497,17 +519,40 @@ function updatePinCode($conn, $id) {
         return;
     }
 
-    // Skip current pin verification for Admin
-    if (!$isAdmin && !verifyCurrentPin($conn, $id, $_POST['current_pin'])) {
+    if (strlen($_POST['new_pin']) !== 6 || !ctype_digit($_POST['new_pin'])) {
+        echo json_encode(['status' => 'error', 'message' => 'PIN code must be exactly 6 digits']);
+        return;
+    }
+
+    $currentPin = $_POST['current_pin'];
+    $stmt = $conn->prepare("SELECT pin_code FROM users WHERE id = ?");
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+
+    if ($result->num_rows === 0) {
+        echo json_encode(['status' => 'error', 'message' => 'User not found']);
+        return;
+    }
+
+    $user = $result->fetch_assoc();
+    $stmt->close();
+
+    if ($currentPin !== $user['pin_code']) {
         echo json_encode(['status' => 'error', 'message' => 'Current PIN is incorrect']);
         return;
     }
 
     $pin_code = $conn->real_escape_string($_POST['new_pin']);
-    
+
     $stmt = $conn->prepare("UPDATE users SET pin_code=? WHERE id=?");
+    if (!$stmt) {
+        echo json_encode(['status' => 'error', 'message' => 'Database error: ' . $conn->error]);
+        return;
+    }
+
     $stmt->bind_param("si", $pin_code, $id);
-    
+
     if ($stmt->execute()) {
         echo json_encode(['status' => 'success', 'message' => 'PIN code updated successfully']);
     } else {
@@ -518,26 +563,46 @@ function updatePinCode($conn, $id) {
 
 function verifyCurrentPassword($conn, $id, $password) {
     $stmt = $conn->prepare("SELECT password FROM users WHERE id = ?");
+    if (!$stmt) return false;
+
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $result = $stmt->get_result();
+    
+    if ($result->num_rows === 0) {
+        $stmt->close();
+        return false; // User not found
+    }
+
     $user = $result->fetch_assoc();
     $stmt->close();
-    
-    // Use password_verify if passwords are hashed
-    return password_verify($password, $user['password']);
+
+    // Use password_verify() if passwords are hashed
+    // return password_verify($password, $user['password']);
+
+    return $password === $user['password']; // Plain text comparison (not secure!)
 }
+
 
 function verifyCurrentPin($conn, $id, $pin) {
     $stmt = $conn->prepare("SELECT pin_code FROM users WHERE id = ?");
+    if (!$stmt) return false;
+
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $result = $stmt->get_result();
+
+    if ($result->num_rows === 0) {
+        $stmt->close();
+        return false; // User not found
+    }
+
     $user = $result->fetch_assoc();
     $stmt->close();
-    
-    return ($pin === $user['pin_code']);
+
+    return $pin === $user['pin_code']; // Plain text comparison
 }
+
 
 function deleteUser($conn, $isAdmin) {
     if (empty($_POST['id'])) {
