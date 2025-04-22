@@ -5,7 +5,7 @@ include '../AdminBackEnd/ManageUserBE.php';
 
 
 // Corrected check (using 'role' instead of 'user_role')
-if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Super Admin')) {
+if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Super Admin' && $_SESSION['role'] !== 'User')) {
     // Redirect to login page (not logout!)
     header("Location: ../../../login/login.php");
     exit();
@@ -94,15 +94,16 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
             <h1 class="main-title">Manage Users</h1>
             <br>
             <div class="top-controls">
-                    <div class="search-container">
-                        <input type="text" id="searchInput" placeholder="Search users...">
-                        <button id="searchBtn"><i class="fas fa-search"></i></button>
-                    </div>
+    <div class="search-container">
+        <input type="text" id="searchInput" placeholder="Search users...">
+        <button id="searchBtn"><i class="fas fa-search"></i></button>
+    </div>
 
-                    <div class="folder-container">
-                        <button class="create-folder-btn" id="createUserBtn">Create Users</button>
-                    </div>
-                </div>
+    <div class="folder-container">
+        <button class="create-folder-btn" id="createUserBtn">Create Users</button>
+    </div>
+</div>
+
             <table>
             <thead>
     <tr>
@@ -111,7 +112,9 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
         <th>Position</th>
         <th>Role</th>
         <th>Email</th>
-        <th>Password</th>
+        <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin'): ?>
+            <th>Password</th>
+        <?php endif; ?>
         <th>Pin-code</th>
         <th>Action</th>
     </tr>
@@ -119,10 +122,10 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                 <tbody id="manage-user">
                     <!-- Users will be loaded here dynamically -->
                 </tbody>
+                
             </table>
             <div id="paginationControls" class="pagination-controls"></div>
         </div>
-        
     </div>
     
 
@@ -161,19 +164,25 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                         <div class="form-group">
                             <label for="create_position">Position</label>
                             <select id="create_position" name="position" required>
-                            <option value="" selected disabled>Choose position...</option>
-                            <option value="Employee">Employee</option>
-                            <option value="Other">Other</option>
-                        </select>
+                                <option value="" selected disabled>Choose position...</option>
+                                <option value="Head">Head</option>
+                                <option value="Supervisor">Supervisor</option>
+                                <option value="Employee">Employee</option>
+                                <option value="Other">Other</option>
+                            </select>
                             <input type="text" id="create_other_position" name="other_position" style="display: none; margin-top: 5px; width: 73%;" placeholder="Please specify position">
                         </div>
-
                         <div class="form-group">
                             <label for="create_role">Role</label>
                             <select id="create_role" name="role" required>
-                            <option value="" selected disabled>Choose role...</option>
-                            <option value="User">User</option>
-                        </select>
+    <option value="" selected disabled>Choose role...</option>
+    <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin'): ?>
+        <option value="Super Admin">Super Admin</option>
+    <?php endif; ?>
+    <option value="Admin">Admin</option>
+    <option value="User">User</option>
+</select>
+                            <small id="createAdminLimitMessage" style="color: red; display: none;">Maximum of 5 admin users reached</small>
                         </div>
                     </div>
 
@@ -243,22 +252,28 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
 
                         </div>
 
+                         <div class="form-group">
+                            <label for="edit_position">Position</label>
+                            <select id="edit_position" name="position" required>
+                                <option value="Head">Head</option>
+                                <option value="Supervisor">Supervisor</option>
+                                <option value="Employee">Employee</option>
+                                <option value="Other">Other</option>
+                            </select>
+                            <input type="text" id="edit_other_position" name="other_position" style="display: none; margin-top: 5px; width: 73%;" placeholder="Please specify position">
+                        </div>
                         <div class="form-group">
-                        <label for="edit_position">Position</label>
-                        <select id="edit_position" name="position" required>
-                            <option value="Employee">Employee</option>
-                            <option value="Other">Other</option>
-                        </select>
-                        <input type="text" id="edit_other_position" name="other_position" style="display: none; margin-top: 5px; width: 73%;" placeholder="Please specify position">
-                    </div>
-
-                    <div class="form-group">
-                        <label for="edit_role">Role</label>
-                        <select id="edit_role" name="role" required>
-                            <option value="User">User</option>
-                        </select>
-                    </div>              
-                    <button type="button" class="btn save-container" data-container="designation">Save Designation</button>
+                            <label for="edit_role">Role</label>
+                            <select id="edit_role" name="role" required>
+                                <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin'): ?>
+                                    <option value="Super Admin">Super Admin</option>
+                                <?php endif; ?>
+                                <option value="Admin">Admin</option>
+                                <option value="User">User</option>
+                            </select>
+                            <small id="editAdminLimitMessage" style="color: red; display: none;">Maximum of 5 admin users reached</small>
+                        </div>
+                        <button type="button" class="btn save-container" data-container="designation">Save Designation</button>
                     </div>
 
                     <div class="password-container">
@@ -308,8 +323,11 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                 </div>
             </form>
         </div>
+        
     </div>
 
+
+    <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="modal">
     <div class="custom-modal-content">
         <span class="close"></span>
@@ -354,7 +372,6 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
             <h2 id="errorMessage">Error occurred</h2>
         </div>
     </div>
-
     <script src="../../js/AdminMangeUsers.js"></script>
 </body>
 

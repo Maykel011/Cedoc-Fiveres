@@ -1,3 +1,4 @@
+
 document.addEventListener("DOMContentLoaded", function() {
     // First declare all variables at the top
     const userContainer = document.getElementById("userContainer");
@@ -435,57 +436,12 @@ document.addEventListener("DOMContentLoaded", function() {
         }
         
         // Search functionality
-      // Search functionality - automatic with debounce
-let searchTimeout;
-if (searchInput) {
-    searchInput.addEventListener('input', function() {
-        // Clear previous timeout
-        clearTimeout(searchTimeout);
-        
-        // Set new timeout with debounce (300ms delay)
-        searchTimeout = setTimeout(() => {
-            const searchTerm = searchInput.value.trim().toLowerCase();
-            
-            if (!searchTerm) {
-                loadUsers(currentPage);
-                // Show pagination again when search is cleared
-                const paginationContainer = document.getElementById('paginationControls');
-                if (paginationContainer) {
-                    paginationContainer.style.display = 'flex';
-                }
-                return;
-            }
-            
-            const filteredUsers = allUsers.filter(user => 
-                (user.employee_no && user.employee_no.toLowerCase().includes(searchTerm)) ||
-                (user.name && user.name.toLowerCase().includes(searchTerm)) ||
-                (user.position && user.position.toLowerCase().includes(searchTerm)) ||
-                (user.role && user.role.toLowerCase().includes(searchTerm)) ||
-                (user.email && user.email.toLowerCase().includes(searchTerm))
-            );
-            
-            renderUsers(filteredUsers);
-            
-            // Hide pagination when searching
-            const paginationContainer = document.getElementById('paginationControls');
-            if (paginationContainer) {
-                paginationContainer.style.display = 'none';
-            }
-        }, 300); // 300ms debounce delay
-    });
-    
-    // Clear search when clicking the 'x' that appears in some browsers
-    searchInput.addEventListener('search', function() {
-        if (this.value === '') {
-            loadUsers(currentPage);
-            // Show pagination again when search is cleared
-            const paginationContainer = document.getElementById('paginationControls');
-            if (paginationContainer) {
-                paginationContainer.style.display = 'flex';
-            }
+        if (searchBtn && searchInput) {
+            searchBtn.addEventListener('click', searchUsers);
+            searchInput.addEventListener('keyup', function(e) {
+                if (e.key === 'Enter') searchUsers();
+            });
         }
-    });
-}
         
         // Close modals when clicking outside
         window.addEventListener('click', function(event) {
@@ -495,19 +451,66 @@ if (searchInput) {
         });
     }
 
-    function loadUsers(page = 1) {
-        currentPage = page;
-        fetch(`../AdminBackEnd/ManageUserBE.php?get_users=1&page=${page}&limit=${limit}`)
-            .then(response => response.json())
-            .then(data => {
-                allUsers = data.users;
-                totalPages = data.pagination.total_pages;
-                renderUsers(data.users);
-                updatePaginationControls(data.pagination);
-                setupPasswordVisibilityToggles();
-            })
-            .catch(error => console.error('Error loading users:', error));
-    }
+  // Update the loadUsers function to include role filter
+  function loadUsers(page = 1) {
+    currentPage = page;
+    
+    fetch(`../AdminBackEnd/ManageUserBE.php?get_users=1&page=${page}&limit=${limit}`)
+        .then(response => response.json())
+        .then(data => {
+            allUsers = data.users;
+            totalPages = data.pagination.total_pages;
+            
+            // Sort users: Admin first, then Super Admin, then Users
+            allUsers.sort((a, b) => {
+                if (a.role === 'Admin') return -1;
+                if (b.role === 'Admin') return 1;
+                if (a.role === 'Super Admin') return -1;
+                if (b.role === 'Super Admin') return 1;
+                return 0;
+            });
+            
+            renderUsers(allUsers);
+            updatePaginationControls(data.pagination);
+            setupPasswordVisibilityToggles();
+        })
+        .catch(error => console.error('Error loading users:', error));
+}
+
+// Update searchUsers function for automatic search
+function searchUsers() {
+    clearTimeout(searchTimeout);
+    
+    searchTimeout = setTimeout(() => {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        
+        if (!searchTerm) {
+            loadUsers(currentPage);
+            return;
+        }
+        
+        const filteredUsers = allUsers.filter(user => 
+            user.employee_no.toLowerCase().includes(searchTerm) ||
+            user.name.toLowerCase().includes(searchTerm) ||
+            user.position.toLowerCase().includes(searchTerm) ||
+            user.role.toLowerCase().includes(searchTerm) ||
+            user.email.toLowerCase().includes(searchTerm)
+        );
+        
+        renderUsers(filteredUsers);
+        
+        // Hide pagination when searching
+        const paginationContainer = document.getElementById('paginationControls');
+        if (paginationContainer) {
+            paginationContainer.style.display = filteredUsers.length > 0 ? 'none' : 'flex';
+        }
+    }, 300);
+}
+
+// Update event listeners for search
+searchInput.addEventListener('input', searchUsers);
+searchBtn.addEventListener('click', searchUsers);
+
 
     function updatePaginationControls(pagination) {
         const paginationContainer = document.getElementById('paginationControls');
@@ -619,59 +622,58 @@ if (searchInput) {
             return;
         }
         
-        // Sort users - admins first, then others
+        // Sort users: Admin first, then Super Admin, then Users
         const sortedUsers = [...users].sort((a, b) => {
-            if (a.role === 'Admin' || a.role === 'Super Admin') return -1;
-            if (b.role === 'Admin' || b.role === 'Super Admin') return 1;
+            if (a.role === 'Admin') return -1;
+            if (b.role === 'Admin') return 1;
+            if (a.role === 'Super Admin') return -1;
+            if (b.role === 'Super Admin') return 1;
             return 0;
         });
         
         sortedUsers.forEach(user => {
             const row = document.createElement('tr');
-    
-            // Add special class for Super Admin
-            const rowClass = user.role === 'Super Admin' ? 'super-admin-row' : '';
+            
+            // Add special class for Super Admin and Admin
+            const rowClass = user.role === 'Super Admin' ? 'super-admin-row' : 
+                            user.role === 'Admin' ? 'admin-row' : '';
             row.className = rowClass;
-    
-            // Generate badge HTML
-            let badgeHTML = '';
-            if (user.role === 'Super Admin') {
-                badgeHTML = `<div class="super-admin-badge">Super Admin</div>`;
-            } else if (user.role === 'Admin') {
-                badgeHTML = `<div class="admin-badge">Admin</div>`;
-            }
-    
+            
             // Create name cell with badge below
             const nameCellContent = `
                 <div class="name-cell-wrapper">
                     <div class="user-name">${user.name}</div>
-                    ${badgeHTML}
+                    ${user.role === 'Super Admin' ? '<div class="super-admin-badge">Super Admin</div>' : ''}
+                    ${user.role === 'Admin' ? '<div class="admin-badge">Admin</div>' : ''}
                 </div>
             `;
-    
+            
             row.innerHTML = `
                 <td>${user.employee_no}</td>
                 <td>${nameCellContent}</td>
                 <td>${user.position}</td>
                 <td>${user.role}</td>
                 <td>${user.email}</td>
-                <td class="password-cell">••••••••</td>
-                <td class="pincode-cell">••••••</td>
+                ${isSuperAdmin ? `<td class="password-cell">••••••••</td>` : '<td>••••••••</td>'}
+                ${isSuperAdmin ? `<td class="pincode-cell">••••••</td>` : '<td>••••••</td>'}
                 <td></td>
             `;
-    
-            const passwordCell = row.querySelector('.password-cell');
-            const pinCell = row.querySelector('.pincode-cell');
-            passwordCell.dataset.originalValue = user.password || 'N/A';
-            pinCell.dataset.originalValue = user.pin_code || 'N/A';
-    
+            
+            // Store original values in data attributes
+            if (isSuperAdmin) {
+                const passwordCell = row.querySelector('.password-cell');
+                const pinCell = row.querySelector('.pincode-cell');
+                passwordCell.dataset.originalValue = user.password || 'N/A';
+                pinCell.dataset.originalValue = user.pincode || 'N/A';
+            }
+            
             const actionCell = row.querySelector('td:last-child');
             actionCell.appendChild(createActionButtons(user.id, user.role));
-    
+            
             tbody.appendChild(row);
         });
     }
-    
+
     function createActionButtons(userId, userRole) {
         // Create container for both buttons
         const container = document.createElement('div');
@@ -716,7 +718,7 @@ if (searchInput) {
                         this.innerHTML = '<i class="fas fa-key"></i>';
                         this.title = 'Show Credentials';
                     }
-                }, 1000);
+                }, 5000);
             }
         });
         
@@ -813,11 +815,13 @@ if (searchInput) {
         checkAdminLimit('create');
         if (createUserForm) createUserForm.reset();
         
-        // Set role options - only show User role
+        // Set role options based on current user's role
         const roleSelect = document.getElementById('create_role');
         if (roleSelect) {
+            // Clear existing options
             roleSelect.innerHTML = '';
             
+            // Add default option
             const defaultOption = document.createElement('option');
             defaultOption.value = '';
             defaultOption.textContent = 'Choose role...';
@@ -825,33 +829,24 @@ if (searchInput) {
             defaultOption.disabled = true;
             roleSelect.appendChild(defaultOption);
             
+            // Add Super Admin option only if current user is Super Admin
+            if (isSuperAdmin) {
+                const superAdminOption = document.createElement('option');
+                superAdminOption.value = 'Super Admin';
+                superAdminOption.textContent = 'Super Admin';
+                roleSelect.appendChild(superAdminOption);
+            }
+            
+            // Add regular Admin and User options
+            const adminOption = document.createElement('option');
+            adminOption.value = 'Admin';
+            adminOption.textContent = 'Admin';
+            roleSelect.appendChild(adminOption);
+            
             const userOption = document.createElement('option');
             userOption.value = 'User';
             userOption.textContent = 'User';
             roleSelect.appendChild(userOption);
-        }
-        
-        // Set position options - only Employee and Other
-        const positionSelect = document.getElementById('create_position');
-        if (positionSelect) {
-            positionSelect.innerHTML = '';
-            
-            const defaultPosOption = document.createElement('option');
-            defaultPosOption.value = '';
-            defaultPosOption.textContent = 'Choose position...';
-            defaultPosOption.selected = true;
-            defaultPosOption.disabled = true;
-            positionSelect.appendChild(defaultPosOption);
-            
-            const employeeOption = document.createElement('option');
-            employeeOption.value = 'Employee';
-            employeeOption.textContent = 'Employee';
-            positionSelect.appendChild(employeeOption);
-            
-            const otherOption = document.createElement('option');
-            otherOption.value = 'Other';
-            otherOption.textContent = 'Other';
-            positionSelect.appendChild(otherOption);
         }
         
         if (createOtherPositionInput) {
@@ -870,18 +865,41 @@ if (searchInput) {
         let firstName = '';
         let lastName = '';
         
+        // Check if the name contains a comma (last, first format)
         if (user.name.includes(',')) {
             const nameParts = user.name.split(',').map(part => part.trim());
             lastName = nameParts[0];
             firstName = nameParts[1] || '';
-        } else {
+        } 
+        // Otherwise split by spaces
+        else {
             const nameParts = user.name.split(' ');
+            // Assume last part is last name, everything else is first name
             if (nameParts.length > 1) {
-                lastName = nameParts.pop();
-                firstName = nameParts.join(' ');
+                lastName = nameParts.pop(); // Remove last element and assign to lastName
+                firstName = nameParts.join(' '); // Join remaining parts as firstName
             } else {
                 firstName = nameParts[0] || '';
                 lastName = '';
+            }
+            const isSuperAdmin = document.querySelector('meta[name="is-super-admin"]')?.content === 'true';
+    
+            if (isSuperAdmin) {
+                // Remove current password/pincode fields
+                document.getElementById('current_password').closest('.form-group').style.display = 'none';
+                document.getElementById('current_pin').closest('.form-group').style.display = 'none';
+                
+                // Update labels
+                document.querySelector('label[for="new_password"]').textContent = 'New Password (force update)';
+                document.querySelector('label[for="new_pin"]').textContent = 'New 6-Digit PIN (force update)';
+            } else {
+                // Show current password/pincode fields for non-Super Admin
+                document.getElementById('current_password').closest('.form-group').style.display = 'block';
+                document.getElementById('current_pin').closest('.form-group').style.display = 'block';
+                
+                // Restore original labels
+                document.querySelector('label[for="new_password"]').textContent = 'New Password';
+                document.querySelector('label[for="new_pin"]').textContent = 'New 6-Digit PIN';
             }
         }
         
@@ -892,71 +910,62 @@ if (searchInput) {
         document.getElementById('edit_last_name').value = lastName;
         document.getElementById('edit_email').value = user.email;
         
-        // Handle position field based on user role
-        const positionSelect = document.getElementById('edit_position');
-        const otherPositionInput = document.getElementById('edit_other_position');
-        
-        if (user.role === 'Admin' || user.role === 'Super Admin') {
-            // For admin users, make position and role read-only
-            positionSelect.disabled = true;
-            positionSelect.innerHTML = `<option value="${user.position}" selected>${user.position}</option>`;
-            
-            const roleSelect = document.getElementById('edit_role');
-            roleSelect.disabled = true;
-            roleSelect.innerHTML = `<option value="${user.role}" selected>${user.role}</option>`;
+        // Handle position field
+        if (user.position !== 'Head' && user.position !== 'Supervisor' && user.position !== 'Employee' && user.position !== 'Other') {
+            document.getElementById('edit_position').value = 'Other';
+            if (editOtherPositionInput) {
+                editOtherPositionInput.value = user.position;
+                editOtherPositionInput.style.display = 'block';
+                editOtherPositionInput.required = true;
+            }
         } else {
-            // For regular users, only show Employee and Other options
-            positionSelect.disabled = false;
-            positionSelect.innerHTML = '';
+            document.getElementById('edit_position').value = user.position;
+            if (editOtherPositionInput) {
+                editOtherPositionInput.style.display = 'none';
+                editOtherPositionInput.required = false;
+                editOtherPositionInput.value = '';
+            }
+        }
+        
+        // Set role options based on current user's role
+        const roleSelect = document.getElementById('edit_role');
+        if (roleSelect) {
+            // Clear existing options
+            roleSelect.innerHTML = '';
             
-            const employeeOption = document.createElement('option');
-            employeeOption.value = 'Employee';
-            employeeOption.textContent = 'Employee';
-            positionSelect.appendChild(employeeOption);
-            
-            const otherOption = document.createElement('option');
-            otherOption.value = 'Other';
-            otherOption.textContent = 'Other';
-            positionSelect.appendChild(otherOption);
-            
-            // Set current position
-            if (user.position !== 'Employee' && user.position !== 'Other') {
-                positionSelect.value = 'Other';
-                otherPositionInput.value = user.position;
-                otherPositionInput.style.display = 'block';
-                otherPositionInput.required = true;
-            } else {
-                positionSelect.value = user.position;
-                otherPositionInput.style.display = 'none';
-                otherPositionInput.required = false;
-                otherPositionInput.value = '';
+            // Add Super Admin option only if current user is Super Admin
+            if (isSuperAdmin) {
+                const superAdminOption = document.createElement('option');
+                superAdminOption.value = 'Super Admin';
+                superAdminOption.textContent = 'Super Admin';
+                roleSelect.appendChild(superAdminOption);
             }
             
-            // Set role options - only show User role
-            const roleSelect = document.getElementById('edit_role');
-            roleSelect.innerHTML = '';
+            // Add regular Admin and User options
+            const adminOption = document.createElement('option');
+            adminOption.value = 'Admin';
+            adminOption.textContent = 'Admin';
+            roleSelect.appendChild(adminOption);
+            
             const userOption = document.createElement('option');
             userOption.value = 'User';
             userOption.textContent = 'User';
             roleSelect.appendChild(userOption);
+            
+            // Set the current role
             roleSelect.value = user.role;
         }
         
-        // Clear password and pin fields
-        document.getElementById('current_password').value = '';
-        document.getElementById('new_password').value = '';
-        document.getElementById('confirm_password').value = '';
-        document.getElementById('current_pin').value = '';
-        document.getElementById('new_pin').value = '';
-        document.getElementById('confirm_pin').value = '';
+            // Clear password and pin fields
+    document.getElementById('current_password').value = '';
+    document.getElementById('new_password').value = '';
+    document.getElementById('confirm_password').value = '';
+    document.getElementById('current_pin').value = '';
+    document.getElementById('new_pin').value = '';
+    document.getElementById('confirm_pin').value = '';
         
-        // Always show current password/pin fields for non-Super Admins
-        document.getElementById('current_password').closest('.form-group').style.display = 'block';
-        document.getElementById('current_pin').closest('.form-group').style.display = 'block';
-        
-        // Update labels
-        document.querySelector('label[for="new_password"]').textContent = 'New Password';
-        document.querySelector('label[for="new_pin"]').textContent = 'New 6-Digit PIN';
+        // Check admin limit
+        checkAdminLimit('edit', user.role);
         
         if (editUserModal) editUserModal.style.display = 'block';
     }

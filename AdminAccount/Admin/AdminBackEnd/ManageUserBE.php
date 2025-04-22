@@ -2,6 +2,7 @@
 include '../connection/Connection.php';
 session_start();
 
+
 // Check if current user is Super Admin
 function isSuperAdmin($conn) {
     if (!isset($_SESSION['user_id'])) {
@@ -37,7 +38,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             case 'delete_user':
                 deleteUser($conn, $isSuperAdmin);
                 break;
-            case 'verify_pin':
+                case 'verify_pin':
                     verifyPinCode($conn);
                     break;
         }
@@ -79,50 +80,58 @@ function verifyPinCode($conn) {
     }
 }
 
-
 // Get all users for display
 if (isset($_GET['get_users'])) {
     echo json_encode(getUsers($conn));
     exit;
 }
 
-
-
 // Update the getUsers function in ManageUserBE.php
 function getUsers($conn) {
     $isSuperAdmin = isSuperAdmin($conn);
     $currentUserId = isset($_SESSION['user_id']) ? $_SESSION['user_id'] : null;
+    $currentUserRole = isset($_SESSION['role']) ? $_SESSION['role'] : null;
     
     // Get pagination parameters
     $page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
     $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 10;
     $offset = ($page - 1) * $limit;
     
-    // Base query with conditions
-    $whereClause = "";
+    // Build base query with role visibility rules
+    $baseQuery = "SELECT id, employee_no, CONCAT(first_name, ' ', last_name) AS name, 
+                 position, role, email, password, pin_code FROM users";
+    
+    // Add WHERE clause based on user role
+    $whereClause = '';
     if (!$isSuperAdmin) {
-        // For non-Super Admins, show only their own account and user accounts
-        $whereClause = "WHERE (id = $currentUserId) OR role = 'User'";
+        if ($currentUserRole === 'Admin') {
+            // Hide Super Admin accounts and other Co-Admin accounts except their own
+            $whereClause = " WHERE (role != 'Super Admin' AND (role != 'Admin' OR id = $currentUserId))";
+        } else {
+            // For regular users, only show their own account
+            $whereClause = " WHERE id = $currentUserId";
+        }
     }
     
-    // Get total count with the same conditions
-    $countQuery = $conn->query("SELECT COUNT(*) as total FROM users $whereClause");
+    // Get total count with filters applied
+    $countQuery = $conn->query("SELECT COUNT(*) as total FROM users" . $whereClause);
     $totalUsers = $countQuery->fetch_assoc()['total'];
     $totalPages = ceil($totalUsers / $limit);
     
-    // Get paginated users with the same conditions
-    $sql = "SELECT id, employee_no, CONCAT(first_name, ' ', last_name) AS name, 
-                   position, role, email, password, pin_code FROM users 
-            $whereClause
-            ORDER BY role DESC, name ASC
-            LIMIT $limit OFFSET $offset";
+    // Get paginated users with filters applied
+    $sql = $baseQuery . $whereClause . " ORDER BY 
+           CASE 
+               WHEN role = 'Admin' THEN 1 
+               WHEN role = 'Super Admin' THEN 0 
+               ELSE 2 
+           END, name ASC 
+           LIMIT $limit OFFSET $offset";
     
     $result = $conn->query($sql);
     
     $users = [];
     if ($result->num_rows > 0) {
         while($row = $result->fetch_assoc()) {
-            // Return the hashed password and pin as-is
             $row['password'] = $row['password'] ? $row['password'] : 'N/A';
             $row['pin_code'] = $row['pin_code'] ? $row['pin_code'] : 'N/A';
             $users[] = $row;
