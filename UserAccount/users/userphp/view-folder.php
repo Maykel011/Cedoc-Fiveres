@@ -68,7 +68,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
 <aside class="sidebar">
     <ul>
         <li class="dashboard">
-            <a href="SuperAdminDashboard.php"><img src="../../Assets/Icon/Analysis.png" alt="Dashboard Icon" class="sidebar-icon"> Admin Dashboard</a>
+            <a href="userDashboard.php"><img src="../../Assets/Icon/Analysis.png" alt="Dashboard Icon" class="sidebar-icon">Dashboard</a>
         </li>
         <li class="media-files">
             <a href="media-files.php"><img src="../../Assets/Icon/file.png" alt="Media Files Icon" class="sidebar-icon"> Media Files</a>
@@ -78,9 +78,6 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
         </li>
         <li class="vehicle-runs">
             <a href="vehicle-runs.php"><img src="../../assets/icon/vruns.png" alt="Vehicle Runs Icon" class="sidebar-icon"> Vehicle Runs</a>
-        </li>
-        <li class="manage-users">
-            <a href="manage-users.php"><img src="../../Assets/Icon/user-management.png" alt="Manage Users Icon" class="sidebar-icon"> Manage Users</a>
         </li>
     </ul>
 </aside>

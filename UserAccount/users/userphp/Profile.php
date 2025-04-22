@@ -16,7 +16,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES - Update Profile</title>
-    <link rel="stylesheet" href="../../Css/profile.css">
+    <link rel="stylesheet" href="../../Css/profiles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script>
         function handleSubmit(event) {
@@ -123,26 +123,8 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
         </form>
     </div>
 
-    <!-- Update PIN CODE Container -->
-    <div class="delete-pincode-container">
-        <h2>Update PIN code</h2>
-        <p>Please enter your current 6-digit PIN code before setting a new one.</p>
-        <form onsubmit="handleSubmit(event)">
-        <label for="confirm-pincode">Current 6-Digit PIN</label>
-            <input type="password" id="confirm-pincode" placeholder="Enter current PIN" required maxlength="6">
-
-            <label for="new-pincode">New 6-Digit PIN</label>
-            <input type="password" id="new-pincode" placeholder="Enter new PIN" required maxlength="6">
-
-            <label for="confirm-new-pincode">Confirm New 6-Digit PIN</label>
-            <input type="password" id="confirm-new-pincode" placeholder="Confirm new PIN" required maxlength="6">
-
-            
-            <button type="submit" class="custom-save-button">Save</button>
-        </form>
-    </div>
 </div>
-    </div>
+
 <script src="../../js/profiles.js"></script>
 </body>
 </html>
