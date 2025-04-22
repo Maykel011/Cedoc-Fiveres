@@ -110,6 +110,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                         <th>Position</th>
                         <th>Role</th>
                         <th>Email</th>
+                        <th>Password</th>
                         <th>Pin-code</th>
                         <th>Action</th>
                     </tr>
@@ -156,21 +157,20 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                         <div class="form-group">
                             <label for="create_position">Position</label>
                             <select id="create_position" name="position" required>
-                                <option value="" selected disabled>Choose position...</option>
-                                <option value="Head">Head</option>
-                                <option value="Supervisor">Supervisor</option>
-                                <option value="Employee">Employee</option>
-                                <option value="Other">Other</option>
-                            </select>
+                            <option value="" selected disabled>Choose position...</option>
+                            <option value="Employee">Employee</option>
+                            <option value="Other">Other</option>
                             <input type="text" id="create_other_position" name="other_position" style="display: none; margin-top: 5px; width: 73%;" placeholder="Please specify position">
+                        </select>
+                          
                         </div>
+
                         <div class="form-group">
                             <label for="create_role">Role</label>
                             <select id="create_role" name="role" required>
-                                <option value="" selected disabled>Choose role...</option>
-                                <option value="Admin">Admin</option>
-                                <option value="User">User</option>
-                            </select>
+                            <option value="" selected disabled>Choose role...</option>
+                            <option value="User">User</option>
+                        </select>
                             <small id="createAdminLimitMessage" style="color: red; display: none;">Maximum of 5 admin users reached</small>
                         </div>
                     </div>
@@ -238,22 +238,21 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                             <h3>Designation</h3>
                         </div>
                         <div class="form-group">
-                            <label for="edit_position">Position</label>
-                            <select id="edit_position" name="position" required>
-                                <option value="Head">Head</option>
-                                <option value="Supervisor">Supervisor</option>
-                                <option value="Employee">Employee</option>
-                                <option value="Other">Other</option>
-                            </select>
+                        <label for="edit_position">Position</label>
+                        <select id="edit_position" name="position" required class="designation-select">
+                            <option value="Employee">Employee</option>
+                            <option value="Other">Other</option>
                             <input type="text" id="edit_other_position" name="other_position" style="display: none; margin-top: 5px; width: 73%;" placeholder="Please specify position">
-                        </div>
+                        </select>
+                        <input type="text" id="edit_position_display" class="designation-display" readonly style="display: none;">
+                    </div>
+
                         <div class="form-group">
                             <label for="edit_role">Role</label>
-                            <select id="edit_role" name="role" required>
-                                <option value="Admin">Admin</option>
+                            <select id="edit_role" name="role" required class="designation-select">
                                 <option value="User">User</option>
                             </select>
-                            <small id="editAdminLimitMessage" style="color: red; display: none;">Maximum of 5 admin users reached</small>
+                            <input type="text" id="edit_role_display" class="designation-display" readonly style="display: none;">
                         </div>
                         <button type="button" class="btn save-container" data-container="designation">Save Designation</button>
                     </div>

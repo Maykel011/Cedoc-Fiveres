@@ -419,13 +419,34 @@ document.addEventListener("DOMContentLoaded", function() {
             document.getElementById('confirmDeleteBtn')?.addEventListener('click', confirmDelete);
         }
         
-        // Search functionality
-        if (searchBtn && searchInput) {
-            searchBtn.addEventListener('click', searchUsers);
-            searchInput.addEventListener('keyup', function(e) {
-                if (e.key === 'Enter') searchUsers();
-            });
-        }
+        // Search functionality - replace the existing search event listeners
+    if (searchInput) {
+        let searchTimeout;
+        
+        // Real-time search with debounce
+        searchInput.addEventListener('input', function(e) {
+            clearTimeout(searchTimeout);
+            
+            // If input is empty, reset immediately
+            if (!this.value.trim()) {
+                loadUsers(currentPage);
+                return;
+            }
+            
+            // Otherwise wait 300ms after last keystroke
+            searchTimeout = setTimeout(() => {
+                searchUsers();
+            }, 300);
+        });
+        
+        // Also allow Enter key as a shortcut
+        searchInput.addEventListener('keyup', function(e) {
+            if (e.key === 'Enter') {
+                clearTimeout(searchTimeout);
+                searchUsers();
+            }
+        });
+    }
         
         // Close modals when clicking outside
         window.addEventListener('click', function(event) {
@@ -814,35 +835,56 @@ document.addEventListener("DOMContentLoaded", function() {
         document.getElementById('edit_last_name').value = lastName;
         document.getElementById('edit_email').value = user.email;
         
-        // Handle position field
-        if (user.position !== 'Head' && user.position !== 'Supervisor' && user.position !== 'Employee' && user.position !== 'Other') {
-            document.getElementById('edit_position').value = 'Other';
-            if (editOtherPositionInput) {
-                editOtherPositionInput.value = user.position;
-                editOtherPositionInput.style.display = 'block';
-                editOtherPositionInput.required = true;
-            }
-        } else {
-            document.getElementById('edit_position').value = user.position;
-            if (editOtherPositionInput) {
-                editOtherPositionInput.style.display = 'none';
-                editOtherPositionInput.required = false;
-                editOtherPositionInput.value = '';
-            }
-        }
-        
-        // Set role options
+        // Get DOM elements for position and role fields
+        const positionSelect = document.getElementById('edit_position');
+        const positionDisplay = document.getElementById('edit_position_display');
         const roleSelect = document.getElementById('edit_role');
-        if (roleSelect) {
-            // Clear existing options
+        const roleDisplay = document.getElementById('edit_role_display');
+        const otherPositionInput = document.getElementById('edit_other_position');
+        
+        // Handle Admin user case
+        if (user.role === 'Admin') {
+            // Hide selects and show read-only displays
+            positionSelect.style.display = 'none';
+            roleSelect.style.display = 'none';
+            positionDisplay.style.display = 'block';
+            roleDisplay.style.display = 'block';
+            
+            // Set display values
+            positionDisplay.value = user.position;
+            roleDisplay.value = user.role;
+            
+            // Disable other inputs if needed
+            if (otherPositionInput) {
+                otherPositionInput.disabled = true;
+            }
+        } 
+        else {
+            // For non-Admin users, show regular select inputs
+            positionSelect.style.display = 'block';
+            roleSelect.style.display = 'block';
+            positionDisplay.style.display = 'none';
+            roleDisplay.style.display = 'none';
+            
+            // Handle position field
+            if (user.position !== 'Employee' && user.position !== 'Other') {
+                positionSelect.value = 'Other';
+                if (otherPositionInput) {
+                    otherPositionInput.value = user.position;
+                    otherPositionInput.style.display = 'block';
+                    otherPositionInput.required = true;
+                }
+            } else {
+                positionSelect.value = user.position;
+                if (otherPositionInput) {
+                    otherPositionInput.style.display = 'none';
+                    otherPositionInput.required = false;
+                    otherPositionInput.value = '';
+                }
+            }
+            
+            // Set role options (only User available)
             roleSelect.innerHTML = '';
-            
-            // Add Admin and User options
-            const adminOption = document.createElement('option');
-            adminOption.value = 'Admin';
-            adminOption.textContent = 'Admin';
-            roleSelect.appendChild(adminOption);
-            
             const userOption = document.createElement('option');
             userOption.value = 'User';
             userOption.textContent = 'User';
@@ -865,6 +907,7 @@ document.addEventListener("DOMContentLoaded", function() {
         
         if (editUserModal) editUserModal.style.display = 'block';
     }
+
 
     function confirmDeleteUser(userId) {
         const user = allUsers.find(u => u.id == userId);
@@ -1119,29 +1162,41 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    function searchUsers() {
-        const searchTerm = searchInput.value.toLowerCase();
-        if (!searchTerm) {
-            loadUsers(currentPage);
-            return;
-        }
-        
-        const filteredUsers = allUsers.filter(user => 
-            user.employee_no.toLowerCase().includes(searchTerm) ||
-            user.name.toLowerCase().includes(searchTerm) ||
-            user.position.toLowerCase().includes(searchTerm) ||
-            user.role.toLowerCase().includes(searchTerm) ||
-            user.email.toLowerCase().includes(searchTerm)
-        );
-        
-        renderUsers(filteredUsers);
-        
-        // Hide pagination when searching
-        const paginationContainer = document.getElementById('paginationControls');
-        if (paginationContainer) {
-            paginationContainer.style.display = 'none';
-        }
+  // Replace the existing searchUsers function with this new version
+function searchUsers() {
+    const searchTerm = searchInput.value.trim().toLowerCase();
+    
+    // If search term is empty, reset to show all users with pagination
+    if (!searchTerm) {
+        loadUsers(currentPage);
+        return;
     }
+    
+    // Show loading indicator
+    const tbody = document.getElementById('manage-user');
+    if (tbody) {
+        tbody.innerHTML = '<tr><td colspan="8" class="loading">Searching...</td></tr>';
+    }
+    
+    // Fetch filtered results from server
+    fetch(`../AdminBackEnd/ManageUserBE.php?get_users=1&search=${encodeURIComponent(searchTerm)}`)
+        .then(response => response.json())
+        .then(data => {
+            renderUsers(data.users);
+            
+            // Hide pagination when searching
+            const paginationContainer = document.getElementById('paginationControls');
+            if (paginationContainer) {
+                paginationContainer.style.display = 'none';
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+            if (tbody) {
+                tbody.innerHTML = '<tr><td colspan="8" class="error">Error loading search results</td></tr>';
+            }
+        });
+}
 
     function checkAdminLimit(context = 'create', currentRole = null) {
         // Count Admin users

@@ -106,8 +106,19 @@ function getUsers($conn) {
         // For regular users, only show their own account
         $whereClause = " WHERE id = $currentUserId";
     } else {
-        // For Admins, show all accounts except other Admins (except their own)
-        $whereClause = " WHERE (role != 'Admin' OR id = $currentUserId)";
+        // For Admins, show all accounts except other Admins (except their own) and Super Admin
+        $whereClause = " WHERE (role != 'Admin' OR id = $currentUserId) AND role != 'Super Admin'";
+    }
+    
+    // Add search filter if provided
+    if (isset($_GET['search']) && !empty($_GET['search'])) {
+        $search = $conn->real_escape_string($_GET['search']);
+        $whereClause .= $whereClause ? " AND " : " WHERE ";
+        $whereClause .= "(employee_no LIKE '%$search%' OR 
+                         CONCAT(first_name, ' ', last_name) LIKE '%$search%' OR 
+                         position LIKE '%$search%' OR 
+                         role LIKE '%$search%' OR 
+                         email LIKE '%$search%')";
     }
     
     // Get total count with filters applied
