@@ -197,7 +197,8 @@ function setupDeleteHandlers() {
 
 // ========== FILE PREVIEW FUNCTIONALITY ==========
 function setupFilePreview() {
-    const BASE_UPLOADS_PATH = '../../uploads/';
+    // Change this constant at the top of your JavaScript
+const BASE_UPLOADS_PATH = '../../../Mediaupload/';
 
     document.querySelectorAll('.file-link').forEach(link => {
         link.addEventListener('click', function(e) {
