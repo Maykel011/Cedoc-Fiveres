@@ -121,21 +121,24 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
         </tr>
     </thead>
     <tbody>
-        <?php foreach ($files as $file): 
-            $filePath = "uploads/" . htmlspecialchars($folderName) . "/" . htmlspecialchars($file['file_name']);
-            $fileType = strtolower($file['file_type']);
-            $fileExists = file_exists("../../" . $filePath);
-        ?>
+    <?php foreach ($files as $file): 
+    // Correct path construction - matches where files are actually stored
+    $filePath = "../../../Mediaupload/" . htmlspecialchars($folderName) . "/" . htmlspecialchars($file['file_name']);
+    error_log("Checking file at path: " . realpath($filePath));
+    $fileType = strtolower($file['file_type']);
+    $fileExists = file_exists($filePath);
+    $fileExists = file_exists($filePath) && is_readable($filePath);
+?>
         <tr>
             <td><input type="checkbox" name="selected_files[]" value="<?= $file['id'] ?>"></td>
             <td>
                 <?php if ($fileExists): ?>
-                <a href="<?= $filePath ?>" 
-                   target="_blank" 
-                   class="file-link" 
-                   data-type="<?= htmlspecialchars($fileType) ?>"
-                   data-filename="<?= htmlspecialchars($file['file_name']) ?>"
-                   title="Click to view/download">
+                    <a href="<?= "../../../Mediaupload/" . htmlspecialchars($folderName) . "/" . htmlspecialchars($file['file_name']) ?>" 
+   target="_blank" 
+   class="file-link" 
+   data-type="<?= htmlspecialchars($fileType) ?>"
+   data-filename="<?= htmlspecialchars($file['file_name']) ?>"
+   title="Click to view/download">
                    <?php 
                     // Display icon based on file type
                     if (strpos($fileType, 'image/') === 0) {
@@ -323,6 +326,6 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
     </div>
 </div>
 
-<script src="../../js/Views.js"></script>
+<script src="../../js/ViewsF.js"></script>
 </body>
 </html>
