@@ -1,3 +1,69 @@
+document.addEventListener("DOMContentLoaded", function() {
+    const logoutLink = document.getElementById('logoutLink');
+    const logoutModal = document.getElementById('logoutModal');
+    const logoutCancel = document.getElementById('logoutCancel');
+    const logoutConfirm = document.getElementById('logoutConfirm');
+
+        // Close all modals/dropdowns
+        function closeAll() {
+            if (logoutModal) {
+                logoutModal.style.display = 'none';
+                document.body.style.overflow = '';
+            }
+        }
+ // Logout Modal Functionality
+ if (logoutLink) {
+    logoutLink.addEventListener('click', function(e) {
+        e.preventDefault();
+        closeAll();
+        if (logoutModal) {
+            logoutModal.style.display = 'flex';
+            document.body.style.overflow = 'hidden';
+        }
+    });
+}
+// Modal controls
+if (logoutCancel) {
+    logoutCancel.addEventListener('click', closeAll);
+}
+
+if (logoutConfirm) {
+    logoutConfirm.addEventListener('click', function() {
+        const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = '../../../login/logout.php';
+        
+        if (csrfToken) {
+            const csrfInput = document.createElement('input');
+            csrfInput.type = 'hidden';
+            csrfInput.name = 'csrf_token';
+            csrfInput.value = csrfToken;
+            form.appendChild(csrfInput);
+        }
+        
+        document.body.appendChild(form);
+        form.submit();
+    });
+}
+
+// Close modal when clicking outside
+if (logoutModal) {
+    logoutModal.addEventListener('click', function(e) {
+        if (e.target === logoutModal) {
+            closeAll();
+        }
+    });
+}
+
+// Close with ESC key
+document.addEventListener('keydown', function(e) {
+    if (e.key === 'Escape') {
+        closeAll();
+    }
+});
+});
+
 // Handle Profile Dropdown
 document.addEventListener("DOMContentLoaded", function () {
     const userContainer = document.getElementById("userContainer");

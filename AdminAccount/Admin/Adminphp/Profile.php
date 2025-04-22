@@ -16,7 +16,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES - Update Profile</title>
-    <link rel="stylesheet" href="../../Css/profile.css">
+    <link rel="stylesheet" href="../../Css/profiles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script>
         function handleSubmit(event) {
@@ -53,6 +53,21 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
         </div>
     </div>
 </header>
+
+<!-- Logout Modal -->
+<div id="logoutModal" class="logout-modal">
+    <div class="logout-modal-content">
+        <div class="logout-icon">
+            <i class="fas fa-sign-out-alt"></i>
+        </div>
+        <h3>Confirm Logout</h3>
+        <p>Are you sure you want to logout from your admin account?</p>
+        <div class="logout-modal-buttons">
+            <button id="logoutCancel" class="logout-modal-btn logout-modal-cancel">Cancel</button>
+            <button id="logoutConfirm" class="logout-modal-btn logout-modal-confirm">Logout</button>
+        </div>
+    </div>
+</div>
 
 <aside class="sidebar">
     <ul>

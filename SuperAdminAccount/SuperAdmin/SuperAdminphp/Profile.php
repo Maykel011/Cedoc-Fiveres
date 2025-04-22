@@ -61,6 +61,21 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
             <i class="fas fa-sign-out-alt"></i>
         </div>
         <h3>Confirm Logout</h3>
+        <p>Are you sure you want to logout from your admin account?</p>
+        <div class="logout-modal-buttons">
+            <button id="logoutCancel" class="logout-modal-btn logout-modal-cancel">Cancel</button>
+            <button id="logoutConfirm" class="logout-modal-btn logout-modal-confirm">Logout</button>
+        </div>
+    </div>
+</div>
+
+<!-- Logout Modal -->
+<div id="logoutModal" class="logout-modal">
+    <div class="logout-modal-content">
+        <div class="logout-icon">
+            <i class="fas fa-sign-out-alt"></i>
+        </div>
+        <h3>Confirm Logout</h3>
         <p>Are you sure you want to logout from your account?</p>
         <div class="logout-modal-buttons">
             <button id="logoutCancel" class="logout-modal-btn logout-modal-cancel">Cancel</button>

@@ -201,9 +201,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
     </div>
 </div>
 
-
-
-
-<script src="../../js/mediafiles123.js"></script>
+<script src="../../js/mediafiles1.js"></script>
 </body>
 </html>
