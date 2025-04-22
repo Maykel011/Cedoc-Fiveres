@@ -146,7 +146,7 @@ document.addEventListener("DOMContentLoaded", function () {
                 return;
             }
 
-            fetch("../AdminBackEnd/MediaFilesBE.php", {
+            fetch("../userBackEnd/MediaFilesBE.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: `action=create&folder_name=${encodeURIComponent(folderName)}`
@@ -216,7 +216,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
             errorMsg.style.display = "none";
 
-            fetch("../AdminBackEnd/MediaFilesBE.php", {
+            fetch("../userBackEnd/MediaFilesBE.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: `action=rename&folder_id=${this.currentFolderId}&new_name=${encodeURIComponent(newName)}`
@@ -245,7 +245,7 @@ document.addEventListener("DOMContentLoaded", function () {
             
             errorElement.style.display = "none";
             
-            fetch("../AdminBackEnd/MediaFilesBE.php", {
+            fetch("../userBackEnd/MediaFilesBE.php", {
                 method: "POST",
                 headers: { "Content-Type": "application/x-www-form-urlencoded" },
                 body: `action=delete&folder_id=${this.currentFolderId}&pin_code=${encodeURIComponent(pinCode)}`
