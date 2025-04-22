@@ -1,4 +1,3 @@
-
 document.addEventListener("DOMContentLoaded", function() {
     // First declare all variables at the top
     const userContainer = document.getElementById("userContainer");
@@ -13,9 +12,6 @@ document.addEventListener("DOMContentLoaded", function() {
     const createOtherPositionInput = document.getElementById('create_other_position');
     const editPositionSelect = document.getElementById('edit_position');
     const editOtherPositionInput = document.getElementById('edit_other_position');
-
-    // Check if current user is Super Admin
-    const isSuperAdmin = document.querySelector('meta[name="is-super-admin"]')?.content === 'true';
     
     // Pagination variables
     let currentPage = 1;
@@ -25,16 +21,12 @@ document.addEventListener("DOMContentLoaded", function() {
     let currentUserId = null;
 
     function setupPasswordVisibilityToggles() {
-        const isSuperAdmin = document.querySelector('meta[name="is-super-admin"]')?.content === 'true';
-        if (!isSuperAdmin) return;
-    
         document.querySelectorAll('.password-cell, .pincode-cell').forEach(cell => {
             const originalValue = cell.dataset.originalValue || cell.textContent.trim();
             cell.dataset.originalValue = originalValue; // Store original value in data attribute
             
             if (originalValue !== 'N/A') {
                 const toggle = document.createElement('span');
-              ;
                 
                 // Initially show masked value
                 cell.textContent = cell.classList.contains('password-cell') ? '••••••••' : '••••••';
@@ -283,76 +275,68 @@ document.addEventListener("DOMContentLoaded", function() {
                             }
                             break;
 
-                       // In the containerType === 'password' case:
-                            case 'password':
-                                const currentPassword = formData.get('current_password');
-                                const newPassword = formData.get('new_password');
-                                const confirmPassword = formData.get('confirm_password');
-                                
-                                if (newPassword || confirmPassword) {
-                                    if (newPassword !== confirmPassword) {
-                                        showErrorModal('New password and confirmation do not match');
-                                        isValid = false;
-                                    }
-                                    
-                                    // Only validate current password if not Super Admin
-                                    if (!isSuperAdmin && !currentPassword) {
-                                        showErrorModal('Current password is required to change password');
-                                        isValid = false;
-                                    } else if (!newPassword) {
-                                        showErrorModal('New password is required');
-                                        isValid = false;
-                                    } else if (!confirmPassword) {
-                                        showErrorModal('Please confirm your new password');
-                                        isValid = false;
-                                    } else {
-                                        if (!isSuperAdmin) {
-                                            containerData.append('current_password', currentPassword);
-                                        }
-                                        containerData.append('new_password', newPassword);
-                                        containerData.append('confirm_password', confirmPassword);
-                                    }
-                                } else {
-                                    isValid = true;
+                        case 'password':
+                            const currentPassword = formData.get('current_password');
+                            const newPassword = formData.get('new_password');
+                            const confirmPassword = formData.get('confirm_password');
+                            
+                            if (newPassword || confirmPassword) {
+                                if (newPassword !== confirmPassword) {
+                                    showErrorModal('New password and confirmation do not match');
+                                    isValid = false;
                                 }
-                                break;
+                                
+                                if (!currentPassword) {
+                                    showErrorModal('Current password is required to change password');
+                                    isValid = false;
+                                } else if (!newPassword) {
+                                    showErrorModal('New password is required');
+                                    isValid = false;
+                                } else if (!confirmPassword) {
+                                    showErrorModal('Please confirm your new password');
+                                    isValid = false;
+                                } else {
+                                    containerData.append('current_password', currentPassword);
+                                    containerData.append('new_password', newPassword);
+                                    containerData.append('confirm_password', confirmPassword);
+                                }
+                            } else {
+                                isValid = true;
+                            }
+                            break;
 
-                        // In the containerType === 'pincode' case:
-                            case 'pincode':
-                                const currentPin = formData.get('current_pin');
-                                const newPin = formData.get('new_pin');
-                                const confirmPin = formData.get('confirm_pin');
-                                
-                                if (newPin || confirmPin) {
-                                    if (newPin !== confirmPin) {
-                                        showErrorModal('New PIN and confirmation do not match');
-                                        isValid = false;
-                                    } else if (newPin && (newPin.length !== 6 || !/^\d+$/.test(newPin))) {
-                                        showErrorModal('PIN code must be exactly 6 digits');
-                                        isValid = false;
-                                    }
-                                    
-                                    // Only validate current PIN if not Super Admin
-                                    if (!isSuperAdmin && !currentPin) {
-                                        showErrorModal('Current PIN is required to change PIN');
-                                        isValid = false;
-                                    } else if (!newPin) {
-                                        showErrorModal('New PIN is required');
-                                        isValid = false;
-                                    } else if (!confirmPin) {
-                                        showErrorModal('Please confirm your new PIN');
-                                        isValid = false;
-                                    } else {
-                                        if (!isSuperAdmin) {
-                                            containerData.append('current_pin', currentPin);
-                                        }
-                                        containerData.append('new_pin', newPin);
-                                        containerData.append('confirm_pin', confirmPin);
-                                    }
-                                } else {
-                                    isValid = true;
+                        case 'pincode':
+                            const currentPin = formData.get('current_pin');
+                            const newPin = formData.get('new_pin');
+                            const confirmPin = formData.get('confirm_pin');
+                            
+                            if (newPin || confirmPin) {
+                                if (newPin !== confirmPin) {
+                                    showErrorModal('New PIN and confirmation do not match');
+                                    isValid = false;
+                                } else if (newPin && (newPin.length !== 6 || !/^\d+$/.test(newPin))) {
+                                    showErrorModal('PIN code must be exactly 6 digits');
+                                    isValid = false;
                                 }
-                                break;
+                                
+                                if (!currentPin) {
+                                    showErrorModal('Current PIN is required to change PIN');
+                                    isValid = false;
+                                } else if (!newPin) {
+                                    showErrorModal('New PIN is required');
+                                    isValid = false;
+                                } else if (!confirmPin) {
+                                    showErrorModal('Please confirm your new PIN');
+                                    isValid = false;
+                                } else {
+                                    containerData.append('current_pin', currentPin);
+                                    containerData.append('new_pin', newPin);
+                                    containerData.append('confirm_pin', confirmPin);
+                                }
+                            } else {
+                                isValid = true;
+                            }
+                            break;
                     }
 
                     if (!isValid) return;
@@ -451,66 +435,28 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-  // Update the loadUsers function to include role filter
-  function loadUsers(page = 1) {
-    currentPage = page;
-    
-    fetch(`../AdminBackEnd/ManageUserBE.php?get_users=1&page=${page}&limit=${limit}`)
-        .then(response => response.json())
-        .then(data => {
-            allUsers = data.users;
-            totalPages = data.pagination.total_pages;
-            
-            // Sort users: Admin first, then Super Admin, then Users
-            allUsers.sort((a, b) => {
-                if (a.role === 'Admin') return -1;
-                if (b.role === 'Admin') return 1;
-                if (a.role === 'Super Admin') return -1;
-                if (b.role === 'Super Admin') return 1;
-                return 0;
-            });
-            
-            renderUsers(allUsers);
-            updatePaginationControls(data.pagination);
-            setupPasswordVisibilityToggles();
-        })
-        .catch(error => console.error('Error loading users:', error));
-}
-
-// Update searchUsers function for automatic search
-function searchUsers() {
-    clearTimeout(searchTimeout);
-    
-    searchTimeout = setTimeout(() => {
-        const searchTerm = searchInput.value.toLowerCase().trim();
+    function loadUsers(page = 1) {
+        currentPage = page;
         
-        if (!searchTerm) {
-            loadUsers(currentPage);
-            return;
-        }
-        
-        const filteredUsers = allUsers.filter(user => 
-            user.employee_no.toLowerCase().includes(searchTerm) ||
-            user.name.toLowerCase().includes(searchTerm) ||
-            user.position.toLowerCase().includes(searchTerm) ||
-            user.role.toLowerCase().includes(searchTerm) ||
-            user.email.toLowerCase().includes(searchTerm)
-        );
-        
-        renderUsers(filteredUsers);
-        
-        // Hide pagination when searching
-        const paginationContainer = document.getElementById('paginationControls');
-        if (paginationContainer) {
-            paginationContainer.style.display = filteredUsers.length > 0 ? 'none' : 'flex';
-        }
-    }, 300);
-}
-
-// Update event listeners for search
-searchInput.addEventListener('input', searchUsers);
-searchBtn.addEventListener('click', searchUsers);
-
+        fetch(`../AdminBackEnd/ManageUserBE.php?get_users=1&page=${page}&limit=${limit}`)
+            .then(response => response.json())
+            .then(data => {
+                allUsers = data.users;
+                totalPages = data.pagination.total_pages;
+                
+                // Sort users: Admin first, then Users
+                allUsers.sort((a, b) => {
+                    if (a.role === 'Admin') return -1;
+                    if (b.role === 'Admin') return 1;
+                    return 0;
+                });
+                
+                renderUsers(allUsers);
+                updatePaginationControls(data.pagination);
+                setupPasswordVisibilityToggles();
+            })
+            .catch(error => console.error('Error loading users:', error));
+    }
 
     function updatePaginationControls(pagination) {
         const paginationContainer = document.getElementById('paginationControls');
@@ -622,28 +568,24 @@ searchBtn.addEventListener('click', searchUsers);
             return;
         }
         
-        // Sort users: Admin first, then Super Admin, then Users
+        // Sort users: Admin first, then Users
         const sortedUsers = [...users].sort((a, b) => {
             if (a.role === 'Admin') return -1;
             if (b.role === 'Admin') return 1;
-            if (a.role === 'Super Admin') return -1;
-            if (b.role === 'Super Admin') return 1;
             return 0;
         });
         
         sortedUsers.forEach(user => {
             const row = document.createElement('tr');
             
-            // Add special class for Super Admin and Admin
-            const rowClass = user.role === 'Super Admin' ? 'super-admin-row' : 
-                            user.role === 'Admin' ? 'admin-row' : '';
+            // Add special class for Admin
+            const rowClass = user.role === 'Admin' ? 'admin-row' : '';
             row.className = rowClass;
             
             // Create name cell with badge below
             const nameCellContent = `
                 <div class="name-cell-wrapper">
                     <div class="user-name">${user.name}</div>
-                    ${user.role === 'Super Admin' ? '<div class="super-admin-badge">Super Admin</div>' : ''}
                     ${user.role === 'Admin' ? '<div class="admin-badge">Admin</div>' : ''}
                 </div>
             `;
@@ -654,18 +596,16 @@ searchBtn.addEventListener('click', searchUsers);
                 <td>${user.position}</td>
                 <td>${user.role}</td>
                 <td>${user.email}</td>
-                ${isSuperAdmin ? `<td class="password-cell">••••••••</td>` : '<td>••••••••</td>'}
-                ${isSuperAdmin ? `<td class="pincode-cell">••••••</td>` : '<td>••••••</td>'}
+                <td class="password-cell">••••••••</td>
+                <td class="pincode-cell">••••••</td>
                 <td></td>
             `;
             
             // Store original values in data attributes
-            if (isSuperAdmin) {
-                const passwordCell = row.querySelector('.password-cell');
-                const pinCell = row.querySelector('.pincode-cell');
-                passwordCell.dataset.originalValue = user.password || 'N/A';
-                pinCell.dataset.originalValue = user.pincode || 'N/A';
-            }
+            const passwordCell = row.querySelector('.password-cell');
+            const pinCell = row.querySelector('.pincode-cell');
+            passwordCell.dataset.originalValue = user.password || 'N/A';
+            pinCell.dataset.originalValue = user.pincode || 'N/A';
             
             const actionCell = row.querySelector('td:last-child');
             actionCell.appendChild(createActionButtons(user.id, user.role));
@@ -756,13 +696,6 @@ searchBtn.addEventListener('click', searchUsers);
         deleteButton.innerHTML = '<i class="fas fa-trash"></i> Delete';
         deleteButton.dataset.id = userId;
         
-        // Disable delete for Super Admin unless current user is Super Admin
-        if (userRole === 'Super Admin' && !isSuperAdmin) {
-            deleteButton.disabled = true;
-            deleteButton.title = 'Only Super Admin can delete Super Admin accounts';
-            deleteButton.classList.add('disabled-action');
-        }
-        
         // Append buttons to dropdown
         dropdownMenu.appendChild(editButton);
         dropdownMenu.appendChild(deleteButton);
@@ -796,10 +729,8 @@ searchBtn.addEventListener('click', searchUsers);
         // Delete button functionality
         deleteButton.addEventListener('click', function(e) {
             e.stopPropagation();
-            if (!deleteButton.disabled) {
-                confirmDeleteUser(userId);
-                dropdownMenu.classList.remove('show');
-            }
+            confirmDeleteUser(userId);
+            dropdownMenu.classList.remove('show');
         });
         
         // Close dropdown when clicking elsewhere
@@ -815,7 +746,7 @@ searchBtn.addEventListener('click', searchUsers);
         checkAdminLimit('create');
         if (createUserForm) createUserForm.reset();
         
-        // Set role options based on current user's role
+        // Set role options
         const roleSelect = document.getElementById('create_role');
         if (roleSelect) {
             // Clear existing options
@@ -829,15 +760,7 @@ searchBtn.addEventListener('click', searchUsers);
             defaultOption.disabled = true;
             roleSelect.appendChild(defaultOption);
             
-            // Add Super Admin option only if current user is Super Admin
-            if (isSuperAdmin) {
-                const superAdminOption = document.createElement('option');
-                superAdminOption.value = 'Super Admin';
-                superAdminOption.textContent = 'Super Admin';
-                roleSelect.appendChild(superAdminOption);
-            }
-            
-            // Add regular Admin and User options
+            // Add Admin and User options
             const adminOption = document.createElement('option');
             adminOption.value = 'Admin';
             adminOption.textContent = 'Admin';
@@ -882,25 +805,6 @@ searchBtn.addEventListener('click', searchUsers);
                 firstName = nameParts[0] || '';
                 lastName = '';
             }
-            const isSuperAdmin = document.querySelector('meta[name="is-super-admin"]')?.content === 'true';
-    
-            if (isSuperAdmin) {
-                // Remove current password/pincode fields
-                document.getElementById('current_password').closest('.form-group').style.display = 'none';
-                document.getElementById('current_pin').closest('.form-group').style.display = 'none';
-                
-                // Update labels
-                document.querySelector('label[for="new_password"]').textContent = 'New Password (force update)';
-                document.querySelector('label[for="new_pin"]').textContent = 'New 6-Digit PIN (force update)';
-            } else {
-                // Show current password/pincode fields for non-Super Admin
-                document.getElementById('current_password').closest('.form-group').style.display = 'block';
-                document.getElementById('current_pin').closest('.form-group').style.display = 'block';
-                
-                // Restore original labels
-                document.querySelector('label[for="new_password"]').textContent = 'New Password';
-                document.querySelector('label[for="new_pin"]').textContent = 'New 6-Digit PIN';
-            }
         }
         
         // Fill the form
@@ -927,21 +831,13 @@ searchBtn.addEventListener('click', searchUsers);
             }
         }
         
-        // Set role options based on current user's role
+        // Set role options
         const roleSelect = document.getElementById('edit_role');
         if (roleSelect) {
             // Clear existing options
             roleSelect.innerHTML = '';
             
-            // Add Super Admin option only if current user is Super Admin
-            if (isSuperAdmin) {
-                const superAdminOption = document.createElement('option');
-                superAdminOption.value = 'Super Admin';
-                superAdminOption.textContent = 'Super Admin';
-                roleSelect.appendChild(superAdminOption);
-            }
-            
-            // Add regular Admin and User options
+            // Add Admin and User options
             const adminOption = document.createElement('option');
             adminOption.value = 'Admin';
             adminOption.textContent = 'Admin';
@@ -956,13 +852,13 @@ searchBtn.addEventListener('click', searchUsers);
             roleSelect.value = user.role;
         }
         
-            // Clear password and pin fields
-    document.getElementById('current_password').value = '';
-    document.getElementById('new_password').value = '';
-    document.getElementById('confirm_password').value = '';
-    document.getElementById('current_pin').value = '';
-    document.getElementById('new_pin').value = '';
-    document.getElementById('confirm_pin').value = '';
+        // Clear password and pin fields
+        document.getElementById('current_password').value = '';
+        document.getElementById('new_password').value = '';
+        document.getElementById('confirm_password').value = '';
+        document.getElementById('current_pin').value = '';
+        document.getElementById('new_pin').value = '';
+        document.getElementById('confirm_pin').value = '';
         
         // Check admin limit
         checkAdminLimit('edit', user.role);
@@ -973,15 +869,6 @@ searchBtn.addEventListener('click', searchUsers);
     function confirmDeleteUser(userId) {
         const user = allUsers.find(u => u.id == userId);
         if (!user) return;
-        
-        // Check if trying to delete the last Super Admin
-        if (user.role === 'Super Admin') {
-            const superAdminCount = allUsers.filter(u => u.role === 'Super Admin').length;
-            if (superAdminCount <= 1) {
-                showErrorModal('Cannot delete the last Super Admin account');
-                return;
-            }
-        }
         
         currentUserId = userId;
         if (deleteModal) deleteModal.style.display = 'block';
@@ -1081,7 +968,7 @@ searchBtn.addEventListener('click', searchUsers);
         const user = allUsers.find(u => u.id == userId);
         if (!user) return;
         
-        // Check admin limit if changing to admin (excluding Super Admin)
+        // Check admin limit if changing to admin
         if (role === 'Admin' && user.role !== 'Admin') {
             const adminCount = allUsers.filter(u => u.role === 'Admin').length;
             if (adminCount >= 5) {
@@ -1091,19 +978,17 @@ searchBtn.addEventListener('click', searchUsers);
         }
         
         // Password validation
-        // Password validation - skip current password check for Super Admin
-    if (newPassword || confirmPassword) {
-        if (newPassword !== confirmPassword) {
-            showErrorModal('New password and confirmation do not match');
-            return;
+        if (newPassword || confirmPassword) {
+            if (newPassword !== confirmPassword) {
+                showErrorModal('New password and confirmation do not match');
+                return;
+            }
+            
+            if (!formData.get('current_password')) {
+                showErrorModal('Current password is required');
+                return;
+            }
         }
-        
-        // Only validate current password if not Super Admin
-        if (!isSuperAdmin && !formData.get('current_password')) {
-            showErrorModal('Current password is required');
-            return;
-        }
-    }
         
         // PIN code validation
         if (newPin || confirmPin) {
@@ -1259,7 +1144,7 @@ searchBtn.addEventListener('click', searchUsers);
     }
 
     function checkAdminLimit(context = 'create', currentRole = null) {
-        // Count only Admin users (excluding Super Admin)
+        // Count Admin users
         const adminCount = allUsers.filter(user => user.role === 'Admin').length;
         const limitReached = adminCount >= 5;
         
@@ -1269,10 +1154,7 @@ searchBtn.addEventListener('click', searchUsers);
             const roleSelect = document.getElementById('create_role');
             
             if (limitReached && adminLimitMessage && saveBtn && roleSelect) {
-                // Don't change role if Super Admin is selected
-                if (roleSelect.value !== 'Super Admin') {
-                    roleSelect.value = 'User';
-                }
+                roleSelect.value = 'User';
                 adminLimitMessage.style.display = 'block';
                 saveBtn.disabled = (roleSelect.value === 'Admin');
             } else if (adminLimitMessage && saveBtn) {
@@ -1285,10 +1167,7 @@ searchBtn.addEventListener('click', searchUsers);
             const roleSelect = document.getElementById('edit_role');
             
             if (limitReached && currentRole !== 'Admin' && adminLimitMessage && saveBtn && roleSelect) {
-                // Don't change role if Super Admin is selected
-                if (roleSelect.value !== 'Super Admin') {
-                    roleSelect.value = currentRole;
-                }
+                roleSelect.value = currentRole;
                 adminLimitMessage.style.display = 'block';
                 saveBtn.disabled = (roleSelect.value === 'Admin');
             } else if (adminLimitMessage && saveBtn) {

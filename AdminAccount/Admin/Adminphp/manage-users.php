@@ -18,12 +18,10 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
 
 <head>
     <meta charset="UTF-8">
-    <meta name="is-super-admin" content="true">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES</title>
-    <link rel="stylesheet" href="../../Css/AdminManageUsers.css">
+    <link rel="stylesheet" href="../../Css/AdsManageUsers.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
-
 </head>
 
 <body>
@@ -72,7 +70,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
     <aside class="sidebar">
         <ul>
             <li class="dashboard">
-                <a href="SuperAdminDashboard.php"><img src="../../Assets/Icon/Analysis.png" alt="Dashboard Icon" class="sidebar-icon">Dashboard</a>
+                <a href="AdminDashboard.php"><img src="../../Assets/Icon/Analysis.png" alt="Dashboard Icon" class="sidebar-icon">Dashboard</a>
             </li>
             <li class="media-files">
                 <a href="media-files.php"><img src="../../Assets/Icon/file.png" alt="Media Files Icon" class="sidebar-icon"> Media Files</a>
@@ -94,42 +92,36 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
             <h1 class="main-title">Manage Users</h1>
             <br>
             <div class="top-controls">
-    <div class="search-container">
-        <input type="text" id="searchInput" placeholder="Search users...">
-        <button id="searchBtn"><i class="fas fa-search"></i></button>
-    </div>
+                <div class="search-container">
+                    <input type="text" id="searchInput" placeholder="Search users...">
+                    <button id="searchBtn"><i class="fas fa-search"></i></button>
+                </div>
 
-    <div class="folder-container">
-        <button class="create-folder-btn" id="createUserBtn">Create Users</button>
-    </div>
-</div>
+                <div class="folder-container">
+                    <button class="create-folder-btn" id="createUserBtn">Create Users</button>
+                </div>
+            </div>
 
             <table>
-            <thead>
-    <tr>
-        <th>Employee No.</th>
-        <th>Name</th>
-        <th>Position</th>
-        <th>Role</th>
-        <th>Email</th>
-        <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin'): ?>
-            <th>Password</th>
-        <?php endif; ?>
-        <th>Pin-code</th>
-        <th>Action</th>
-    </tr>
-</thead>
+                <thead>
+                    <tr>
+                        <th>Employee No.</th>
+                        <th>Name</th>
+                        <th>Position</th>
+                        <th>Role</th>
+                        <th>Email</th>
+                        <th>Pin-code</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
                 <tbody id="manage-user">
                     <!-- Users will be loaded here dynamically -->
                 </tbody>
-                
             </table>
             <div id="paginationControls" class="pagination-controls"></div>
         </div>
     </div>
     
-
-
     <!-- Create User Modal -->
     <div id="createUserModal" class="modal">
         <div class="modal-content">
@@ -175,13 +167,10 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                         <div class="form-group">
                             <label for="create_role">Role</label>
                             <select id="create_role" name="role" required>
-    <option value="" selected disabled>Choose role...</option>
-    <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin'): ?>
-        <option value="Super Admin">Super Admin</option>
-    <?php endif; ?>
-    <option value="Admin">Admin</option>
-    <option value="User">User</option>
-</select>
+                                <option value="" selected disabled>Choose role...</option>
+                                <option value="Admin">Admin</option>
+                                <option value="User">User</option>
+                            </select>
                             <small id="createAdminLimitMessage" style="color: red; display: none;">Maximum of 5 admin users reached</small>
                         </div>
                     </div>
@@ -211,7 +200,6 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
         </div>
     </div>
 
-
     <!-- Edit User Modal -->
     <div id="editUserModal" class="modal">
         <div class="modal-content">
@@ -225,7 +213,6 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                     <div class="profile-container">
                         <div class="container-header">
                             <h3>Profile Information</h3>
-
                         </div>
                         <div class="form-group">
                             <label for="edit_employee_no">Employee No.</label>
@@ -249,10 +236,8 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                     <div class="designation-container">
                         <div class="container-header">
                             <h3>Designation</h3>
-
                         </div>
-
-                         <div class="form-group">
+                        <div class="form-group">
                             <label for="edit_position">Position</label>
                             <select id="edit_position" name="position" required>
                                 <option value="Head">Head</option>
@@ -265,9 +250,6 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                         <div class="form-group">
                             <label for="edit_role">Role</label>
                             <select id="edit_role" name="role" required>
-                                <?php if(isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin'): ?>
-                                    <option value="Super Admin">Super Admin</option>
-                                <?php endif; ?>
                                 <option value="Admin">Admin</option>
                                 <option value="User">User</option>
                             </select>
@@ -279,7 +261,6 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                     <div class="password-container">
                         <div class="container-header">
                             <h3>Update Password</h3>
-
                         </div>
                         <div class="form-group">
                             <label for="current_password">Current Password</label>
@@ -299,7 +280,6 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                     <div class="pincode-container">
                         <div class="container-header">
                             <h3>Update PIN Code</h3>
-
                         </div>
                         <div class="form-group">
                             <label for="current_pin">Current 6-Digit PIN</label>
@@ -323,31 +303,29 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                 </div>
             </form>
         </div>
-        
     </div>
-
 
     <!-- Delete Confirmation Modal -->
     <div id="deleteModal" class="modal">
-    <div class="custom-modal-content">
-        <span class="close"></span>
-        <h2>Confirm Deletion</h2>
-        <p>Are you sure you want to delete this user? This action cannot be undone.</p>
-        
-        <!-- PIN verification section -->
-        <div id="pinVerificationSection" style="margin-top: 20px;">
-            <label for="deletePinCode">Enter your PIN code to confirm:</label>
-            <input type="password" id="deletePinCode" name="deletePinCode" maxlength="6" pattern="\d{6}" 
-                   title="6-digit pin code" placeholder="Enter 6-digit PIN" required>
-            <p id="pinError" style="color: red; display: none;">Incorrect PIN code</p>
-        </div>
-        
-        <div class="form-actions">
-            <button type="button" id="cancelDeleteBtn" class="btn cancel">Cancel</button>
-            <button type="button" id="confirmDeleteBtn" class="btn delete">Delete</button>
+        <div class="custom-modal-content">
+            <span class="close"></span>
+            <h2>Confirm Deletion</h2>
+            <p>Are you sure you want to delete this user? This action cannot be undone.</p>
+            
+            <!-- PIN verification section -->
+            <div id="pinVerificationSection" style="margin-top: 20px;">
+                <label for="deletePinCode">Enter your PIN code to confirm:</label>
+                <input type="password" id="deletePinCode" name="deletePinCode" maxlength="6" pattern="\d{6}" 
+                       title="6-digit pin code" placeholder="Enter 6-digit PIN" required>
+                <p id="pinError" style="color: red; display: none;">Incorrect PIN code</p>
+            </div>
+            
+            <div class="form-actions">
+                <button type="button" id="cancelDeleteBtn" class="btn cancel">Cancel</button>
+                <button type="button" id="confirmDeleteBtn" class="btn delete">Delete</button>
+            </div>
         </div>
     </div>
-</div>
 
     <!-- Edit Success Modal -->
     <div id="editSuccessModal" class="editsuccess-modal">
@@ -372,7 +350,6 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
             <h2 id="errorMessage">Error occurred</h2>
         </div>
     </div>
-    <script src="../../js/AdminMangeUsers.js"></script>
+    <script src="../../js/AdsManageUsers.js"></script>
 </body>
-
 </html>
