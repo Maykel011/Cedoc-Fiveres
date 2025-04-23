@@ -21,6 +21,19 @@ class InternResume {
         return $applicants;
     }
 
+    public function getApplicantData($id) {
+        $query = "SELECT * FROM applicants WHERE id = ?";
+        $stmt = $this->conn->prepare($query);
+        $stmt->bind_param("i", $id);
+        $stmt->execute();
+        $result = $stmt->get_result();
+        
+        if ($result->num_rows > 0) {
+            return $result->fetch_assoc();
+        }
+        return null;
+    }
+
     public function deleteApplicant($id) {
         $query = "DELETE FROM applicants WHERE id = ?";
         $stmt = $this->conn->prepare($query);
@@ -39,6 +52,24 @@ class InternResume {
 $internResume = new InternResume($conn);
 
 // Handle AJAX requests
+if ($_SERVER['REQUEST_METHOD'] === 'GET' && isset($_GET['action']) && $_GET['action'] === 'getApplicantData') {
+    $response = ['success' => false, 'message' => ''];
+    
+    if (isset($_GET['id'])) {
+        $applicant = $internResume->getApplicantData($_GET['id']);
+        if ($applicant) {
+            $response['success'] = true;
+            $response['applicant'] = $applicant;
+        } else {
+            $response['message'] = 'Applicant not found';
+        }
+    }
+    
+    header('Content-Type: application/json');
+    echo json_encode($response);
+    exit();
+}
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_GET['action'])) {
     $response = ['success' => false, 'message' => ''];
     

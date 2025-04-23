@@ -106,7 +106,6 @@ document.addEventListener("DOMContentLoaded", function() {
     // Modal elements
     const notesModal = document.getElementById("notesModal");
     const questionsModal = document.getElementById("questionsModal");
-    const documentsModal = document.getElementById("documentsModal");
     const deleteModal = document.getElementById("deleteModal");
     const editModal = document.getElementById("editModal");
     
@@ -128,7 +127,6 @@ document.addEventListener("DOMContentLoaded", function() {
         button.addEventListener("click", function() {
             notesModal.style.display = "none";
             questionsModal.style.display = "none";
-            documentsModal.style.display = "none";
             deleteModal.style.display = "none";
             editModal.style.display = "none";
         });
@@ -138,7 +136,6 @@ document.addEventListener("DOMContentLoaded", function() {
     window.addEventListener("click", function(event) {
         if (event.target === notesModal) notesModal.style.display = "none";
         if (event.target === questionsModal) questionsModal.style.display = "none";
-        if (event.target === documentsModal) documentsModal.style.display = "none";
         if (event.target === deleteModal) deleteModal.style.display = "none";
         if (event.target === editModal) editModal.style.display = "none";
     });
@@ -169,7 +166,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const newNotes = document.getElementById("newNotes").value;
         const newStatus = document.getElementById("statusSelect").value;
         
-        fetch('InternResumeBE.php?action=updateStatus', {
+        fetch('../AdminBackEnd/InternResumeBE.php?action=updateStatus', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -206,55 +203,26 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
-    // View Documents button functionality
+    // View Documents button functionality - Modified to use the enhanced preview
     Array.from(viewDocumentsBtns).forEach(button => {
         button.addEventListener("click", function() {
             currentApplicantId = this.getAttribute("data-id");
-            const resumePath = this.getAttribute("data-resume");
-            const moaPath = this.getAttribute("data-moa");
-            const recomPath = this.getAttribute("data-recom");
             
-            // Get viewer and download elements
-            const resumeViewer = document.getElementById("resumeViewer");
-            const moaViewer = document.getElementById("moaViewer");
-            const recomViewer = document.getElementById("recomViewer");
-            
-            const resumeDownload = document.getElementById("resumeDownload");
-            const moaDownload = document.getElementById("moaDownload");
-            const recomDownload = document.getElementById("recomDownload");
-            
-            // Handle resume document
-            if (resumePath) {
-                const fullResumePath = '../../../InternDocuments/' + resumePath;
-                openOfficePreview(fullResumePath, "Resume", getFileType(resumePath));
-                resumeDownload.href = fullResumePath;
-            } else {
-                resumeDownload.href = '#';
-                resumeDownload.style.display = 'none';
-            }
-            
-            // Handle MOA document
-            if (moaPath) {
-                const fullMoaPath = '../../../InternDocuments/' + moaPath;
-                openOfficePreview(fullMoaPath, "MOA", getFileType(moaPath));
-                moaDownload.href = fullMoaPath;
-            } else {
-                moaDownload.href = '#';
-                moaDownload.style.display = 'none';
-            }
-            
-            // Handle Recommendation document
-            if (recomPath) {
-                const fullRecomPath = '../../../InternDocuments/' + recomPath;
-                openOfficePreview(fullRecomPath, "Recommendation", getFileType(recomPath));
-                recomDownload.href = fullRecomPath;
-            } else {
-                recomDownload.href = '#';
-                recomDownload.style.display = 'none';
-            }
-            
-            // Show modal
-            documentsModal.style.display = "block";
+            // Fetch applicant data via AJAX
+            fetch(`../AdminBackEnd/InternResumeBE.php?action=getApplicantData&id=${currentApplicantId}`)
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        // Create a documents modal with tabs for each document type
+                        createDocumentsModal(data.applicant);
+                    } else {
+                        alert("Error loading applicant data: " + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert("An error occurred while loading applicant data.");
+                });
         });
     });
 
@@ -268,7 +236,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Confirm Delete
     document.getElementById("confirmDelete").addEventListener("click", function() {
-        fetch('InternResumeBE.php?action=delete', {
+        fetch('../AdminBackEnd/InternResumeBE.php?action=delete', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -317,7 +285,7 @@ document.addEventListener("DOMContentLoaded", function() {
         const newStatus = document.getElementById("editStatusSelect").value;
         const newNotes = document.getElementById("editNotes").value;
         
-        fetch('InternResumeBE.php?action=updateStatus', {
+        fetch('../AdminBackEnd/InternResumeBE.php?action=updateStatus', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -339,88 +307,266 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     });
 
+  // Enhanced Documents Modal Creation
+function createDocumentsModal(applicant) {
+    const modal = document.createElement('div');
+    modal.className = 'documents-modal';
+    modal.style.cssText = `
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0,0,0,0.9);
+        z-index: 1000;
+        display: flex;
+        flex-direction: column;
+    `;
+
+    const header = document.createElement('div');
+    header.style.cssText = `
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 15px;
+        background-color: #222;
+        color: white;
+    `;
+
+    const title = document.createElement('h2');
+    title.textContent = 'Applicant Documents';
+    title.style.cssText = 'margin: 0;';
+
+    const closeBtn = document.createElement('span');
+    closeBtn.innerHTML = '&times;';
+    closeBtn.style.cssText = `
+        font-size: 28px;
+        cursor: pointer;
+    `;
+    closeBtn.addEventListener('click', () => document.body.removeChild(modal));
+
+    header.appendChild(title);
+    header.appendChild(closeBtn);
+
+    const content = document.createElement('div');
+    content.style.cssText = `
+        display: flex;
+        flex: 1;
+        overflow: hidden;
+    `;
+
+    // Create sidebar for document navigation
+    const sidebar = document.createElement('div');
+    sidebar.style.cssText = `
+        width: 250px;
+        background-color: #333;
+        padding: 15px;
+        overflow-y: auto;
+        border-left: 1px solid #555;
+    `;
+
+    // Create main content area - now full width
+    const mainContent = document.createElement('div');
+    mainContent.style.cssText = `
+        flex: 1;
+        padding: 20px;
+        overflow-y: auto;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        width: 100%;
+    `;
+
+    // Document list items
+    const documents = [
+        { 
+            name: 'Resume', 
+            path: applicant.resume_path,
+            type: getFileType(applicant.resume_path)
+        },
+        { 
+            name: 'MOA', 
+            path: applicant.moa_path || null,
+            type: applicant.moa_path ? getFileType(applicant.moa_path) : null
+        },
+        { 
+            name: 'Recommendation Letter', 
+            path: applicant.recom_path || null,
+            type: applicant.recom_path ? getFileType(applicant.recom_path) : null,
+            downloadBtn: true
+        }
+    ];
+
+    // Create document list in sidebar
+    documents.forEach(doc => {
+        if (!doc.path) return;
+
+        const docContainer = document.createElement('div');
+        docContainer.style.cssText = `
+            margin-bottom: 15px;
+        `;
+
+        const docItem = document.createElement('div');
+        docItem.className = 'document-item';
+        docItem.textContent = doc.name;
+        docItem.style.cssText = `
+            padding: 10px;
+            margin-bottom: 5px;
+            background-color: #444;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        `;
+        docItem.addEventListener('click', () => {
+            // Highlight selected document
+            document.querySelectorAll('.document-item').forEach(item => {
+                item.style.backgroundColor = '#444';
+            });
+            docItem.style.backgroundColor = '#666';
+            
+            // Show the document in the main content area
+            showDocument(doc.path, doc.type, mainContent);
+        });
+
+        docContainer.appendChild(docItem);
+
+        // Add download button specifically for Recommendation Letter
+        if (doc.downloadBtn) {
+            const downloadBtn = document.createElement('a');
+            downloadBtn.href = '../../../' + doc.path;
+            downloadBtn.download = doc.name;
+            downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download';
+            downloadBtn.style.cssText = `
+                padding: 8px 15px;
+                background-color:rgb(17, 118, 144);
+                color: white;
+                border-radius: 4px;
+                text-decoration: none;
+                display: inline-flex;
+                align-items: center;
+                gap: 5px;
+                width: 88%;
+                justify-content: center;
+                margin-top: 5px;
+                transition: background-color 0.2s;
+            `;
+            
+            downloadBtn.addEventListener('mouseenter', () => {
+                downloadBtn.style.backgroundColor = '#3e8e41';
+            });
+            downloadBtn.addEventListener('mouseleave', () => {
+                downloadBtn.style.backgroundColor = '#4CAF50';
+            });
+            docContainer.appendChild(downloadBtn);
+        }
+
+        sidebar.appendChild(docContainer);
+    });
+
+    // Initial document display
+    if (applicant.resume_path) {
+        showDocument(applicant.resume_path, getFileType(applicant.resume_path), mainContent);
+        // Highlight the first item
+        if (sidebar.firstChild && sidebar.firstChild.firstChild) {
+            sidebar.firstChild.firstChild.style.backgroundColor = '#666';
+        }
+    } else {
+        mainContent.innerHTML = '<p style="color: white;">No documents available for this applicant.</p>';
+    }
+
+    content.appendChild(mainContent);
+    content.appendChild(sidebar);
+    
+    modal.appendChild(header);
+    modal.appendChild(content);
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
+
+    // Close modal when clicking outside or pressing ESC
+    const keyHandler = (e) => e.key === 'Escape' && document.body.removeChild(modal);
+    document.addEventListener('keydown', keyHandler);
+    modal.addEventListener('click', (e) => e.target === modal && document.body.removeChild(modal));
+}
+
+// Modified showDocument function
+function showDocument(filePath, fileType, container) {
+    container.innerHTML = ''; // Clear previous content
+    
+    const fullPath = '../../../' + filePath;
+    
+    // SIMPLE PDF VIEWER
+    if (fileType === 'pdf') {
+        // Create a simple iframe to display the PDF directly
+        const pdfViewer = document.createElement('iframe');
+        pdfViewer.src = fullPath;
+        pdfViewer.style.cssText = `
+            width: 100%;
+            height: 80vh;
+            border: none;
+            margin-top: 10px;
+            background-color: white;
+        `;
+        pdfViewer.setAttribute('type', 'application/pdf');
+        
+        // Fallback message for browsers that can't display PDFs
+        const fallback = document.createElement('div');
+        fallback.innerHTML = `
+            <p>Your browser doesn't support PDF preview. 
+               <a href="${fullPath}" target="_blank">Click here to download the PDF</a>.
+            </p>
+        `;
+        fallback.style.cssText = `
+            display: none;
+            padding: 20px;
+            background: #f8f8f8;
+            border-radius: 5px;
+            margin-top: 10px;
+            color: #333;
+        `;
+        
+        // Check if PDF is loaded successfully
+        pdfViewer.onerror = function() {
+            pdfViewer.style.display = 'none';
+            fallback.style.display = 'block';
+        };
+        
+        container.appendChild(pdfViewer);
+        container.appendChild(fallback);
+    } else {
+        // For Office files, show the simplified message
+        const officeMessage = document.createElement('div');
+        officeMessage.style.cssText = `
+            text-align: center;
+            color: white;
+            padding: 20px;
+            max-width: 600px;
+        `;
+        officeMessage.innerHTML = `
+            <h3>Office File Preview Not Available Locally</h3>
+            <p>For security reasons, Office files cannot be previewed directly when running on localhost.</p>
+            <p>Please download the file to view it, or deploy the application to your hosting server for full preview functionality.</p>
+        `;
+        container.appendChild(officeMessage);
+    }
+}
     // Enhanced Office Preview Functionality
-    function openOfficePreview(fileUrl, fileName, fileType) {
+    function openOfficePreview(fileUrl, fileName, fileType, container = null) {
         const isLocal = window.location.hostname === "localhost" || 
                        window.location.hostname === "127.0.0.1" ||
                        fileUrl.startsWith("file://");
         
-        const modal = document.createElement('div');
-        modal.className = 'file-preview-modal';
-        modal.style.cssText = `
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0,0,0,0.95);
-            z-index: 10000;
-            display: flex;
-            flex-direction: column;
-        `;
-
-        const header = document.createElement('div');
-        header.style.cssText = `
-            display: grid;
-            grid-template-columns: 1fr auto 1fr;
-            align-items: center;
-            padding: 15px;
-            background-color: #222;
-            color: white;
-        `;
-
-        const title = document.createElement('h3');
-        title.textContent = fileName;
-        title.style.cssText = `
-            margin: 0;
-            font-size: 18px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            grid-column: 1;
-            justify-self: start;
-        `;
-
-        const closeBtn = document.createElement('button');
-        closeBtn.innerHTML = 'Close';
-        closeBtn.style.cssText = `
-            background: none;
-            border: none;
-            color: white;
-            font-size: 16px;
-            cursor: pointer;
-            padding: 5px 10px;
-            grid-column: 3;
-            justify-self: end;
-        `;
-        closeBtn.addEventListener('click', () => document.body.removeChild(modal));
-
-        const downloadBtn = document.createElement('a');
-        downloadBtn.href = fileUrl;
-        downloadBtn.download = fileName;
-        downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download';
-        downloadBtn.style.cssText = `
-            padding: 5px 10px;
-            background-color: #4CAF50;
-            color: white;
-            border-radius: 4px;
-            text-decoration: none;
-            display: inline-flex;
-            align-items: center;
-            gap: 5px;
-            grid-column: 2;
-            justify-self: center;
-        `;
-
-        const content = document.createElement('div');
-        content.style.cssText = `
-            flex: 1;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            overflow: auto;
-        `;
+        const previewContainer = container || document.createElement('div');
+        if (!container) {
+            previewContainer.style.cssText = `
+                width: 100%;
+                height: 100%;
+                display: flex;
+                justify-content: center;
+                align-items: center;
+            `;
+        }
 
         if (isLocal) {
             const localMessage = document.createElement('div');
@@ -435,17 +581,8 @@ document.addEventListener("DOMContentLoaded", function() {
                 <p>For security reasons, Office files cannot be previewed directly when running on localhost.</p>
                 <p>Please download the file to view it, or deploy the application to your hosting server for full preview functionality.</p>
             `;
-            content.appendChild(localMessage);
+            previewContainer.appendChild(localMessage);
         } else {
-            // Create a container for the preview options
-            const previewContainer = document.createElement('div');
-            previewContainer.style.cssText = `
-                width: 100%;
-                height: 100%;
-                display: flex;
-                flex-direction: column;
-            `;
-
             // Create a tab system for different preview options
             const tabContainer = document.createElement('div');
             tabContainer.style.cssText = `
@@ -454,17 +591,46 @@ document.addEventListener("DOMContentLoaded", function() {
                 padding: 0 10px;
             `;
 
-            const viewerTabs = [
-                { name: 'Office Online', id: 'office-tab', active: true },
-                { name: 'Google Viewer', id: 'google-tab', active: false },
-                { name: 'PDF.js (for PDFs)', id: 'pdfjs-tab', active: false }
-            ];
-
             const tabContentContainer = document.createElement('div');
             tabContentContainer.style.cssText = `
                 flex: 1;
                 position: relative;
+                width: 100%;
+                height: 100%;
             `;
+
+            // Determine which tabs to show based on file type
+            const viewerTabs = [];
+            
+            // Always show Office Online tab if file is supported
+            if (fileType === 'pdf' || fileType === 'word' || fileType === 'excel' || fileType === 'powerpoint') {
+                viewerTabs.push({ name: 'Office Online', id: 'office-tab', active: true });
+            }
+            
+            // Show Google Viewer for PDFs
+            if (fileType === 'pdf') {
+                viewerTabs.push({ name: 'Google Viewer', id: 'google-tab', active: false });
+            }
+            
+            // Show PDF.js for PDFs
+            if (fileType === 'pdf') {
+                viewerTabs.push({ name: 'PDF.js', id: 'pdfjs-tab', active: false });
+            }
+
+            // If no tabs (unsupported file type), just show download option
+            if (viewerTabs.length === 0) {
+                const message = document.createElement('div');
+                message.style.cssText = `
+                    text-align: center;
+                    color: white;
+                    padding: 20px;
+                `;
+                message.innerHTML = `
+                    <p>This file type cannot be previewed. Please download the file to view it.</p>
+                `;
+                previewContainer.appendChild(message);
+                return;
+            }
 
             // Create tab buttons and content areas
             viewerTabs.forEach((tab, index) => {
@@ -499,13 +665,15 @@ document.addEventListener("DOMContentLoaded", function() {
                     tab.active = true;
                     
                     // Update UI
-                    document.querySelectorAll('#office-tab, #google-tab, #pdfjs-tab').forEach(btn => {
-                        btn.style.background = 'transparent';
+                    viewerTabs.forEach(t => {
+                        const btn = document.getElementById(t.id);
+                        if (btn) btn.style.background = 'transparent';
                     });
                     tabButton.style.background = '#555';
                     
-                    document.querySelectorAll('#office-tab-content, #google-tab-content, #pdfjs-tab-content').forEach(content => {
-                        content.style.display = 'none';
+                    viewerTabs.forEach(t => {
+                        const content = document.getElementById(`${t.id}-content`);
+                        if (content) content.style.display = 'none';
                     });
                     tabContent.style.display = 'block';
                 });
@@ -522,24 +690,11 @@ document.addEventListener("DOMContentLoaded", function() {
                 } 
                 else if (tab.id === 'google-tab') {
                     // Google Docs Viewer
-                    if (fileType === 'pdf') {
-                        const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}&embedded=true`;
-                        const iframe = createIframe(googleViewerUrl);
-                        tabContent.appendChild(iframe);
-                    } else {
-                        const message = document.createElement('div');
-                        message.style.cssText = `
-                            display: flex;
-                            justify-content: center;
-                            align-items: center;
-                            height: 100%;
-                            color: white;
-                        `;
-                        message.textContent = 'Google Viewer only supports PDF files for external URLs';
-                        tabContent.appendChild(message);
-                    }
+                    const googleViewerUrl = `https://docs.google.com/viewer?url=${encodeURIComponent(fileUrl)}&embedded=true`;
+                    const iframe = createIframe(googleViewerUrl);
+                    tabContent.appendChild(iframe);
                 }
-                else if (tab.id === 'pdfjs-tab' && fileType === 'pdf') {
+                else if (tab.id === 'pdfjs-tab') {
                     // PDF.js implementation
                     const pdfjsContainer = document.createElement('div');
                     pdfjsContainer.style.cssText = `
@@ -672,36 +827,20 @@ document.addEventListener("DOMContentLoaded", function() {
                         pageInfo.textContent = `Page ${num} of ${pdfDoc.numPages}`;
                     }
                 }
-                else {
-                    const message = document.createElement('div');
-                    message.style.cssText = `
-                        display: flex;
-                        justify-content: center;
-                        align-items: center;
-                        height: 100%;
-                        color: white;
-                    `;
-                    message.textContent = 'This viewer is only available for PDF files';
-                    tabContent.appendChild(message);
-                }
             });
             
             previewContainer.appendChild(tabContainer);
             previewContainer.appendChild(tabContentContainer);
-            content.appendChild(previewContainer);
         }
 
-        header.appendChild(title);
-        header.appendChild(downloadBtn);
-        header.appendChild(closeBtn);
-        modal.appendChild(header);
-        modal.appendChild(content);
-        document.body.appendChild(modal);
-        document.body.style.overflow = 'hidden';
+        if (!container) {
+            document.body.appendChild(previewContainer);
+            document.body.style.overflow = 'hidden';
 
-        const keyHandler = (e) => e.key === 'Escape' && document.body.removeChild(modal);
-        document.addEventListener('keydown', keyHandler);
-        modal.addEventListener('click', (e) => e.target === modal && document.body.removeChild(modal));
+            const keyHandler = (e) => e.key === 'Escape' && document.body.removeChild(previewContainer);
+            document.addEventListener('keydown', keyHandler);
+            previewContainer.addEventListener('click', (e) => e.target === previewContainer && document.body.removeChild(previewContainer));
+        }
     }
 
     function createIframe(src) {
@@ -765,12 +904,4 @@ document.addEventListener("DOMContentLoaded", function() {
         if (['ppt', 'pptx'].includes(extension)) return 'powerpoint';
         return '';
     }
-
-    // Handle document viewer errors
-    const iframes = document.querySelectorAll('.documents-content iframe');
-    iframes.forEach(iframe => {
-        iframe.addEventListener('error', function() {
-            this.contentDocument.body.innerHTML = '<div style="padding:20px;color:red;">Could not load document preview. Please download the file to view it.</div>';
-        });
-    });
 });
