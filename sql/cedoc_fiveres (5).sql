@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: localhost:3306
--- Generation Time: Apr 21, 2025 at 03:55 AM
+-- Generation Time: Apr 23, 2025 at 01:21 AM
 -- Server version: 8.4.3
 -- PHP Version: 8.3.16
 
@@ -74,7 +74,7 @@ CREATE TABLE `files` (
 --
 
 INSERT INTO `files` (`id`, `file_name`, `file_type`, `folder_name`, `temperature`, `water_level`, `air_quality`, `date_uploaded`, `date_modified`) VALUES
-(213, 'medical case.png', 'image/png', 'sample', NULL, NULL, NULL, '2025-04-21 01:55:05', '2025-04-21 01:55:05');
+(223, 'medical case.png', 'image/png', 'Heat Index', NULL, NULL, NULL, '2025-04-22 16:18:44', '2025-04-22 17:15:18');
 
 -- --------------------------------------------------------
 
@@ -94,7 +94,7 @@ CREATE TABLE `media_folders` (
 --
 
 INSERT INTO `media_folders` (`id`, `folder_name`, `num_contents`, `date_modified`) VALUES
-(79, 'sample', 1, '2025-04-21 01:55:05');
+(79, 'Heat Index', 1, '2025-04-22 17:07:38');
 
 -- --------------------------------------------------------
 
@@ -123,10 +123,10 @@ CREATE TABLE `users` (
 --
 
 INSERT INTO `users` (`id`, `employee_no`, `first_name`, `last_name`, `position`, `role`, `email`, `password`, `pin_code`, `created_at`, `updated_at`, `failed_attempts`, `locked_until`) VALUES
-(8, 'MZ-5062', 'Arthur Nathan', 'Alcantara', 'Head', 'Admin', 'nathantwotoy@gmail.com', '123', '111222', '2025-04-02 07:50:28', '2025-04-20 07:19:51', 0, NULL),
-(10, 'MZ-5063', 'brixter', 'luquing', 'Supervisor', 'Admin', 'biksterlooking@gmail.com', 'Brixter123', '123456', '2025-04-08 05:22:49', '2025-04-21 02:16:14', 0, NULL),
+(8, 'MZ-5062', 'Arthur Nathan', 'Alcantara', 'Supervisor', 'Admin', 'nathantwotoy@gmail.com', '123', '111111', '2025-04-02 07:50:28', '2025-04-22 15:33:00', 0, NULL),
+(10, 'MZ-5063', 'brixter', 'luquing', 'Supervisor', 'Admin', 'biksterlooking@gmail.com', 'Brixter123', NULL, '2025-04-08 05:22:49', '2025-04-22 05:01:59', 0, NULL),
 (16, 'SA001', 'John Michael', 'Montes', 'System Admin', 'Super Admin', 'montes.johnmichael@yahoo.com', '12345', '123456', '2025-04-17 07:46:01', '2025-04-21 00:59:52', 0, NULL),
-(21, 'JRU-102', 'Kian', 'Visaya', 'Employee', 'User', 'Visaya@gmail.com', '123', '', '2025-04-20 11:58:29', '2025-04-20 11:58:29', 0, NULL);
+(21, 'JRU-102', 'Kian', 'Visaya', 'Employee', 'User', 'Visaya@gmail.com', '123', '112233', '2025-04-20 11:58:29', '2025-04-22 14:35:21', 0, NULL);
 
 -- --------------------------------------------------------
 
@@ -142,12 +142,19 @@ CREATE TABLE `vehicle_runs` (
   `emergency_responders` text NOT NULL,
   `location` text NOT NULL,
   `dispatch_time` datetime NOT NULL,
-  `back_to_base_time` datetime NOT NULL,
+  `back_to_base_time` datetime DEFAULT NULL,
   `case_image` varchar(255) DEFAULT NULL,
   `created_by` int NOT NULL,
   `created_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `updated_at` timestamp NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci;
+
+--
+-- Dumping data for table `vehicle_runs`
+--
+
+INSERT INTO `vehicle_runs` (`id`, `vehicle_team`, `case_type`, `transport_officer`, `emergency_responders`, `location`, `dispatch_time`, `back_to_base_time`, `case_image`, `created_by`, `created_at`, `updated_at`) VALUES
+(38, 'Bravo', 'Medical Case', 'Brixter', 'dfcgvbycvb', 'san juan pinaglabanan', '2025-04-22 07:42:00', '2025-04-22 15:51:29', 'VehicleCaseUploads/case_6807aa6729e24.png', 8, '2025-04-22 07:42:35', '2025-04-22 15:51:29');
 
 --
 -- Indexes for dumped tables
@@ -201,7 +208,7 @@ ALTER TABLE `applicants`
 -- AUTO_INCREMENT for table `files`
 --
 ALTER TABLE `files`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=214;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=224;
 
 --
 -- AUTO_INCREMENT for table `media_folders`
@@ -219,7 +226,7 @@ ALTER TABLE `users`
 -- AUTO_INCREMENT for table `vehicle_runs`
 --
 ALTER TABLE `vehicle_runs`
-  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=37;
+  MODIFY `id` int NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=41;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
