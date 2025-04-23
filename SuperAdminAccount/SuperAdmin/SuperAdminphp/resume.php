@@ -18,7 +18,7 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>CEDOC FIVERES</title>
-        <link rel="stylesheet" href="../../Css/INTernResume.css">
+        <link rel="stylesheet" href="../../Css/SuperAdINTernResume.css">
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     </head>
 
@@ -108,13 +108,158 @@
                                 <th>Actions</th>
                             </tr>
                         </thead>
-                    <tbody id="resume">
-                        <!-- Users will be loaded here dynamically -->
+                        <tbody id="resume">
+                        <?php
+                        $applicants = $internResume->getApplicants();
+                        foreach ($applicants as $applicant) {
+                            echo '<tr>';
+                            echo '<td>' . htmlspecialchars($applicant['full_name']) . '</td>';
+                            echo '<td>' . htmlspecialchars($applicant['program_course']) . '</td>';
+                            echo '<td>' . htmlspecialchars($applicant['school_university']) . '</td>';
+                            echo '<td>' . htmlspecialchars($applicant['contact_number']) . '</td>';
+                            echo '<td>' . htmlspecialchars($applicant['email']) . '</td>';
+                            echo '<td>' . htmlspecialchars($applicant['ojt_hours']) . '</td>';
+                            echo '<td>' . htmlspecialchars($applicant['roles']) . '</td>';
+                            echo '<td>' . htmlspecialchars($applicant['status']) . '</td>';
+                            
+                            // Notes button and modal
+                            echo '<td><button class="view-notes-btn" data-id="' . $applicant['id'] . '" data-notes="' . htmlspecialchars($applicant['notes'] ?? '') . '">View Notes</button></td>';
+                            
+                            // Questions button and modal
+                            echo '<td><button class="view-questions-btn" data-id="' . $applicant['id'] . '" 
+                                data-q1="' . htmlspecialchars($applicant['q1']) . '"
+                                data-q2="' . htmlspecialchars($applicant['q2']) . '"
+                                data-q3="' . htmlspecialchars($applicant['q3']) . '"
+                                data-q4="' . htmlspecialchars($applicant['q4']) . '"
+                                data-q5="' . htmlspecialchars($applicant['q5']) . '">View Questions</button></td>';
+                            
+                            // Documents button and modal
+                            echo '<td><button class="view-documents-btn" data-id="' . $applicant['id'] . '" 
+                                data-resume="' . htmlspecialchars($applicant['resume_path']) . '"
+                                data-moa="' . htmlspecialchars($applicant['moa_path'] ?? '') . '"
+                                data-recom="' . htmlspecialchars($applicant['recom_path'] ?? '') . '">View Documents</button></td>';
+                            
+                            // Actions
+                            echo '<td>
+                                    <button class="edit-btn" data-id="' . $applicant['id'] . '">Edit</button>
+                                    <button class="delete-btn" data-id="' . $applicant['id'] . '">Delete</button>
+                                </td>';
+                            echo '</tr>';
+                        }
+                        ?>
                     </tbody>
                 </table>
             </div>
         </div>
 
-    <script src="../../js/SuperAdINTernResume.js"></script>
+        <!-- Modals -->
+<!-- Notes Modal -->
+<div id="notesModal" class="modal notes-modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Applicant Notes</h2>
+        <div class="notes-content">
+            <p id="notesText"></p>
+        </div>
+        <div class="notes-form">
+            <textarea id="newNotes" placeholder="Add or update notes..."></textarea>
+            <select id="statusSelect">
+                <option value="Pending">Pending</option>
+                <option value="Under Review">Under Review</option>
+                <option value="Accepted">Accepted</option>
+                <option value="Rejected">Rejected</option>
+            </select>
+            <button id="saveNotes">Save Changes</button>
+        </div>
+    </div>
+</div>
+
+<!-- Questions Modal -->
+<div id="questionsModal" class="modal questions-modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Applicant Questions</h2>
+        <div class="questions-content">
+            <div class="question-item">
+                <h3>Tell me about yourself?</h3>
+                <p id="q1Answer"></p>
+            </div>
+            <div class="question-item">
+                <h3>What are your strengths and weaknesses?</h3>
+                <p id="q2Answer"></p>
+            </div>
+            <div class="question-item">
+                <h3>What do you hope to gain from this internship?</h3>
+                <p id="q3Answer"></p>
+            </div>
+            <div class="question-item">
+                <h3>How do you handle deadlines and pressure?</h3>
+                <p id="q4Answer"></p>
+            </div>
+            <div class="question-item">
+                <h3>What makes you stand out from the rest?</h3>
+                <p id="q5Answer"></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Documents Modal -->
+<div id="documentsModal" class="modal documents-modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Applicant Documents</h2>
+        <div class="documents-content">
+            <div class="document-item">
+                <h3>Resume</h3>
+                <iframe id="resumeViewer" src="" frameborder="0"></iframe>
+                <a id="resumeDownload" href="" download class="download-btn">Download Resume</a>
+            </div>
+            <div class="document-item">
+                <h3>MOA (Memorandum of Agreement)</h3>
+                <iframe id="moaViewer" src="" frameborder="0"></iframe>
+                <a id="moaDownload" href="" download class="download-btn">Download MOA</a>
+            </div>
+            <div class="document-item">
+                <h3>Recommendation Letter</h3>
+                <iframe id="recomViewer" src="" frameborder="0"></iframe>
+                <a id="recomDownload" href="" download class="download-btn">Download Recommendation</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div id="deleteModal" class="modal delete-modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Confirm Delete</h2>
+        <p>Are you sure you want to delete this applicant's record?</p>
+        <div class="modal-buttons">
+            <button id="confirmDelete" class="confirm-btn">Delete</button>
+            <button id="cancelDelete" class="cancel-btn">Cancel</button>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Modal -->
+<div id="editModal" class="modal edit-modal">
+    <div class="modal-content">
+        <span class="close">&times;</span>
+        <h2>Edit Applicant Status</h2>
+        <div class="edit-form">
+            <select id="editStatusSelect">
+                <option value="Pending">Pending</option>
+                <option value="Under Review">Under Review</option>
+                <option value="Accepted">Accepted</option>
+                <option value="Rejected">Rejected</option>
+            </select>
+            <textarea id="editNotes" placeholder="Update notes..."></textarea>
+            <button id="saveEdit">Save Changes</button>
+        </div>
+    </div>
+</div>
+        
+    <script src="../../js/SuperAdminINTernResume.js"></script>
     </body>
     </html>

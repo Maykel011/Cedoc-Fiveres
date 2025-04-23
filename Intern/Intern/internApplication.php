@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     }
 
     // File upload directory - relative to server root
-    $uploadDir = $_SERVER['DOCUMENT_ROOT'] . "/Cedoc-Fiveres/Intern/Intern/uploads/internApplications/";
+    $uploadDir = $_SERVER['DOCUMENT_ROOT'] . "/Cedoc-Fiveres/InternDocuments/";
 
     // Create directory if it doesn't exist
     if (!file_exists($uploadDir)) {
@@ -57,36 +57,37 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $recomPath = '';
 
     // Function to handle file uploads
-    function uploadFile($file, $uploadDir, $allowedTypes = ['pdf', 'doc', 'docx']) {
-        if (!isset($file) || $file['error'] != UPLOAD_ERR_OK) {
-            return null;
-        }
-
-        // Get file extension
-        $fileExt = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
-
-        // Check if file type is allowed
-        if (!in_array($fileExt, $allowedTypes)) {
-            return null;
-        }
-
-        // Check file size (10MB max)
-        if ($file['size'] > 10 * 1024 * 1024) {
-            return null;
-        }
-
-        // Generate unique filename
-        $fileName = uniqid('', true) . '.' . $fileExt;
-        $relativePath = "/Cedoc-Fiveres/Intern/Intern/uploads/internApplications/" . $fileName;
-        $absolutePath = $uploadDir . $fileName;
-
-        // Move uploaded file
-        if (move_uploaded_file($file['tmp_name'], $absolutePath)) {
-            return $relativePath;
-        }
-
+    // Update the uploadFile function
+function uploadFile($file, $uploadDir, $allowedTypes = ['pdf', 'doc', 'docx']) {
+    if (!isset($file) || $file['error'] != UPLOAD_ERR_OK) {
         return null;
     }
+
+    // Get file extension
+    $fileExt = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+    // Check if file type is allowed
+    if (!in_array($fileExt, $allowedTypes)) {
+        return null;
+    }
+
+    // Check file size (10MB max)
+    if ($file['size'] > 10 * 1024 * 1024) {
+        return null;
+    }
+
+    // Generate unique filename
+    $fileName = uniqid('', true) . '.' . $fileExt;
+    $relativePath = "InternDocuments/" . $fileName;
+    $absolutePath = $uploadDir . $fileName;
+
+    // Move uploaded file
+    if (move_uploaded_file($file['tmp_name'], $absolutePath)) {
+        return $relativePath;
+    }
+
+    return null;
+}
 
     // Upload resume (required)
     if (isset($_FILES['resume']) && $_FILES['resume']['error'] == UPLOAD_ERR_OK) {

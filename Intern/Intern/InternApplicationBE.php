@@ -74,9 +74,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 }
 
 // Handles file upload and returns filename path
+// Change this function
 function handleFileUpload($inputName) {
     if (!empty($_FILES[$inputName]["name"]) && $_FILES[$inputName]["error"] == UPLOAD_ERR_OK) {
-        $uploadDir = "uploads/";
+        // Change this line to point to ../../InternDocuments
+        $uploadDir = "../../InternDocuments/";
+        
+        // Create directory if it doesn't exist
         if (!is_dir($uploadDir)) {
             mkdir($uploadDir, 0777, true);
         }
@@ -88,7 +92,8 @@ function handleFileUpload($inputName) {
         }
 
         // Validate file type
-        $allowedTypes = ['application/pdf', 'application/msword', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+        $allowedTypes = ['application/pdf', 'application/msword', 
+                         'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
         $fileType = mime_content_type($_FILES[$inputName]["tmp_name"]);
         if (!in_array($fileType, $allowedTypes)) {
             return null;
@@ -99,7 +104,8 @@ function handleFileUpload($inputName) {
         $targetPath = $uploadDir . $safeName;
 
         if (move_uploaded_file($_FILES[$inputName]["tmp_name"], $targetPath)) {
-            return $targetPath;
+            // Return relative path for database storage
+            return "InternDocuments/" . $safeName;
         }
     }
     return null;
