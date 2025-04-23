@@ -4,9 +4,166 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 
-// Display success/error messages if they exist
+// Database connection
+$servername = "localhost";
+$username = "root";
+$password = "";
+$dbname = "cedoc_fiveres";
+
+// Initialize variables
 $success = isset($_GET['success']) ? $_GET['success'] : null;
 $error = isset($_GET['error']) ? $_GET['error'] : null;
+
+// Only process the form if it's a POST request
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    try {
+        $conn = new PDO("mysql:host=$servername;dbname=$dbname", $username, $password);
+        $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+    } catch(PDOException $e) {
+        header("Location: internApplication.php?error=Database+connection+failed");
+        exit();
+    }
+
+    // File upload directory - relative to server root
+    $uploadDir = $_SERVER['DOCUMENT_ROOT'] . "/Cedoc-Fiveres/Intern/Intern/uploads/internApplications/";
+
+    // Create directory if it doesn't exist
+    if (!file_exists($uploadDir)) {
+        if (!mkdir($uploadDir, 0755, true)) {
+            header("Location: internApplication.php?error=Failed+to+create+upload+directory");
+            exit();
+        }
+    }
+
+    // Process form data
+    $full_name = $_POST['full_name'] ?? '';
+    $program_course = $_POST['program_course'] ?? '';
+    $school_university = $_POST['school_university'] ?? '';
+    $other_school = $_POST['other_school'] ?? '';
+    $address = $_POST['address'] ?? '';
+    $contact_number = $_POST['contact_number'] ?? '';
+    $email = $_POST['email'] ?? '';
+    $ojt_hours = $_POST['ojt_hours'] ?? '';
+    $roles = $_POST['roles'] ?? '';
+    $q1 = $_POST['q1'] ?? '';
+    $q2 = $_POST['q2'] ?? '';
+    $q3 = $_POST['q3'] ?? '';
+    $q4 = $_POST['q4'] ?? '';
+    $q5 = $_POST['q5'] ?? '';
+
+    // Handle file uploads
+    $resumePath = '';
+    $moaPath = '';
+    $recomPath = '';
+
+    // Function to handle file uploads
+    function uploadFile($file, $uploadDir, $allowedTypes = ['pdf', 'doc', 'docx']) {
+        if (!isset($file) || $file['error'] != UPLOAD_ERR_OK) {
+            return null;
+        }
+
+        // Get file extension
+        $fileExt = strtolower(pathinfo($file['name'], PATHINFO_EXTENSION));
+
+        // Check if file type is allowed
+        if (!in_array($fileExt, $allowedTypes)) {
+            return null;
+        }
+
+        // Check file size (10MB max)
+        if ($file['size'] > 10 * 1024 * 1024) {
+            return null;
+        }
+
+        // Generate unique filename
+        $fileName = uniqid('', true) . '.' . $fileExt;
+        $relativePath = "/Cedoc-Fiveres/Intern/Intern/uploads/internApplications/" . $fileName;
+        $absolutePath = $uploadDir . $fileName;
+
+        // Move uploaded file
+        if (move_uploaded_file($file['tmp_name'], $absolutePath)) {
+            return $relativePath;
+        }
+
+        return null;
+    }
+
+    // Upload resume (required)
+    if (isset($_FILES['resume']) && $_FILES['resume']['error'] == UPLOAD_ERR_OK) {
+        $resumePath = uploadFile($_FILES['resume'], $uploadDir);
+        if (!$resumePath) {
+            header("Location: internApplication.php?error=Invalid+resume+file");
+            exit();
+        }
+    } else {
+        header("Location: internApplication.php?error=Resume+is+required");
+        exit();
+    }
+
+    // Upload MOA (optional)
+    if (isset($_FILES['moa']) && $_FILES['moa']['error'] == UPLOAD_ERR_OK) {
+        $moaPath = uploadFile($_FILES['moa'], $uploadDir);
+    }
+
+    // Upload recommendation letter (optional)
+    if (isset($_FILES['recom']) && $_FILES['recom']['error'] == UPLOAD_ERR_OK) {
+        $recomPath = uploadFile($_FILES['recom'], $uploadDir);
+    }
+
+    // If school is "Others", use the other_school value
+    if ($school_university === 'Others' && !empty($other_school)) {
+        $school_university = $other_school;
+    }
+
+    // Insert data into database
+    try {
+        $stmt = $conn->prepare("INSERT INTO internship_applications (
+            full_name, program_course, school_university, address, contact_number, 
+            email, ojt_hours, roles, resume_path, moa_path, recom_path,
+            q1, q2, q3, q4, q5, application_date
+        ) VALUES (
+            :full_name, :program_course, :school_university, :address, :contact_number, 
+            :email, :ojt_hours, :roles, :resume_path, :moa_path, :recom_path,
+            :q1, :q2, :q3, :q4, :q5, NOW()
+        )");
+
+        $stmt->bindParam(':full_name', $full_name);
+        $stmt->bindParam(':program_course', $program_course);
+        $stmt->bindParam(':school_university', $school_university);
+        $stmt->bindParam(':address', $address);
+        $stmt->bindParam(':contact_number', $contact_number);
+        $stmt->bindParam(':email', $email);
+        $stmt->bindParam(':ojt_hours', $ojt_hours);
+        $stmt->bindParam(':roles', $roles);
+        $stmt->bindParam(':resume_path', $resumePath);
+        $stmt->bindParam(':moa_path', $moaPath);
+        $stmt->bindParam(':recom_path', $recomPath);
+        $stmt->bindParam(':q1', $q1);
+        $stmt->bindParam(':q2', $q2);
+        $stmt->bindParam(':q3', $q3);
+        $stmt->bindParam(':q4', $q4);
+        $stmt->bindParam(':q5', $q5);
+
+        $stmt->execute();
+
+        header("Location: internApplication.php?success=1");
+        exit();
+    } catch(PDOException $e) {
+        // Clean up uploaded files if database insert fails
+        if ($resumePath && file_exists($_SERVER['DOCUMENT_ROOT'] . $resumePath)) {
+            unlink($_SERVER['DOCUMENT_ROOT'] . $resumePath);
+        }
+        if ($moaPath && file_exists($_SERVER['DOCUMENT_ROOT'] . $moaPath)) {
+            unlink($_SERVER['DOCUMENT_ROOT'] . $moaPath);
+        }
+        if ($recomPath && file_exists($_SERVER['DOCUMENT_ROOT'] . $recomPath)) {
+            unlink($_SERVER['DOCUMENT_ROOT'] . $recomPath);
+        }
+        
+        header("Location: internApplication.php?error=Database+error");
+        exit();
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
