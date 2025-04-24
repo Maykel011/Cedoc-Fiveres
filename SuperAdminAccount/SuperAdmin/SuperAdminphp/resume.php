@@ -18,7 +18,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES</title>
-    <link rel="stylesheet" href="../../Css/SuperAdINTernResume.css">
+    <link rel="stylesheet" href="../../Css/SuperAdminInternsResume.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -159,7 +159,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
             <p id="notesText"></p>
         </div>
         <div class="notes-form">
-            <textarea id="newNotes" placeholder="Add or update notes..."></textarea>
+            <input id="newNotes" placeholder="Add or update notes..."></input>
             <select id="statusSelect">
                 <option value="Pending">Pending</option>
                 <option value="Under Review">Under Review</option>
@@ -226,12 +226,40 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                 <option value="Accepted">Accepted</option>
                 <option value="Rejected">Rejected</option>
             </select>
-            <textarea id="editNotes" placeholder="Update notes..."></textarea>
+            <input id="editNotes" placeholder="Update notes..."></input>
             <button id="saveEdit">Save Changes</button>
         </div>
     </div>
 </div>
+
+<!-- Saving Modal -->
+<div id="savingModal" class="custom-modal saving-modal" style="display: none;">
+  <div class="custom-modal-center">
+    <div class="custom-modal-content">
+      <div class="custom-modal-body">
+        <div class="loading-indicator">
+          <div class="loading-spinner"></div>
+          <p id="savingMessage" class="loading-text">Saving changes...</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Success Modal -->
+<div id="successModal" class="custom-modal success-modal" style="display: none;">
+  <div class="custom-modal-center">
+    <div class="custom-modal-content">
+      <div class="custom-modal-body">
+        <div class="success-indicator">
+          <i class="fas fa-check-circle success-icon"></i>
+          <p id="successMessage" class="success-text">Changes saved successfully!</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
     
-<script src="../../js/SuperAdminINTernResume.js"></script>
+<script src="../../js/SuperAdminInternsResume.js"></script>
 </body>
 </html>
