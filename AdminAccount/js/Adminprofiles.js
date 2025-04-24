@@ -6,6 +6,8 @@ document.addEventListener("DOMContentLoaded", function() {
     const logoutModal = document.getElementById('logoutModal');
     const logoutCancel = document.getElementById('logoutCancel');
     const logoutConfirm = document.getElementById('logoutConfirm');
+    const messageModal = document.getElementById('messageModal');
+    const modalCloseButton = document.getElementById('modalCloseButton');
 
     // Toggle dropdown visibility
     function toggleDropdown(show = null) {
@@ -26,6 +28,9 @@ document.addEventListener("DOMContentLoaded", function() {
         if (logoutModal) {
             logoutModal.style.display = 'none';
             document.body.style.overflow = '';
+        }
+        if (messageModal) {
+            messageModal.classList.remove('active');
         }
     }
 
@@ -83,6 +88,11 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
+    // Message modal close button
+    if (modalCloseButton) {
+        modalCloseButton.addEventListener('click', closeAll);
+    }
+
     // Close with ESC key
     document.addEventListener('keydown', function(e) {
         if (e.key === 'Escape') {
@@ -98,40 +108,15 @@ document.addEventListener("DOMContentLoaded", function() {
             }
         }
     });
-});
 
-// 6 digit PIN code
-document.addEventListener("DOMContentLoaded", function () {
-    const pinForm = document.querySelector(".delete-passkey-container form");
-
-    pinForm.addEventListener("submit", function (event) {
-        event.preventDefault(); // Prevent page reload
-
-        const newPin = document.getElementById("new-passkey").value;
-        const confirmNewPin = document.getElementById("confirm-new-passkey").value;
-
-        // Validate 6-digit PIN
-        if (newPin.length !== 6 || confirmNewPin.length !== 6) {
-            alert("PIN code must be exactly 6 digits!");
-            return;
-        }
-
-        if (newPin !== confirmNewPin) {
-            alert("New PIN and Confirm PIN do not match!");
-            return;
-        }
-
-        // Display the masked PIN (e.g., "******")
-        const pinDisplay = document.createElement("p");
-        pinDisplay.textContent = "New PIN Code: ******";
-        pinDisplay.style.fontWeight = "bold";
-        pinDisplay.style.color = "#28a745"; // Green color
-
-        // Append below the form
-        const formContainer = document.querySelector(".delete-passkey-container");
-        formContainer.appendChild(pinDisplay);
-
-        // Clear the input fields
-        pinForm.reset();
+    // PIN code input handling
+    const pinInputs = document.querySelectorAll('input[type="password"][maxlength="6"]');
+    pinInputs.forEach(input => {
+        input.addEventListener('input', function() {
+            this.value = this.value.replace(/\D/g, ''); // Only allow digits
+            if (this.value.length > 6) {
+                this.value = this.value.slice(0, 6);
+            }
+        });
     });
 });
