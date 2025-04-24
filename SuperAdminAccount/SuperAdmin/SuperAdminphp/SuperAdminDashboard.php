@@ -85,6 +85,13 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
             <option value="year" <?php echo $filter === 'year' ? 'selected' : ''; ?>>This Year</option>
         </select>
     </div>
+    <!-- Environmental Data Dashboard -->
+    <div class="dashboard-container">
+    <h2>Environmental Data (This Week)</h2>
+    <div class="chart-container">
+        <canvas id="environmentalChart"></canvas>
+    </div>
+</div>
 
 
         <div class="dashboard-container">
@@ -153,6 +160,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
                 </div>
             </div>
         </div>
+        
 
 <script>
     // Initialize charts
@@ -202,7 +210,107 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
     function applyFilter(filterValue) {
         // Reload page with filter parameter
         window.location.href = `?filter=${filterValue}`;
+        
     }
+// Environmental Data Chart
+document.addEventListener('DOMContentLoaded', function() {
+    const environmentalCtx = document.getElementById('environmentalChart').getContext('2d');
+    const environmentalChart = new Chart(environmentalCtx, {
+        type: 'line',
+        data: {
+            labels: <?php echo json_encode($environmentalData['labels']); ?>,
+            datasets: [
+                {
+                    label: 'Temperature (°C)',
+                    data: <?php echo json_encode($environmentalData['datasets']['temperature']); ?>,
+                    borderColor: 'rgba(255, 99, 132, 1)',
+                    backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                    borderWidth: 2,
+                    yAxisID: 'y',
+                    tension: 0.1
+                },
+                {
+                    label: 'Water Level (m)',
+                    data: <?php echo json_encode($environmentalData['datasets']['water_level']); ?>,
+                    borderColor: 'rgba(54, 162, 235, 1)',
+                    backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                    borderWidth: 2,
+                    yAxisID: 'y1',
+                    tension: 0.1
+                },
+                {
+                    label: 'Air Quality (AQI)',
+                    data: <?php echo json_encode($environmentalData['datasets']['air_quality']); ?>,
+                    borderColor: 'rgba(75, 192, 192, 1)',
+                    backgroundColor: 'rgba(75, 192, 192, 0.2)',
+                    borderWidth: 2,
+                    yAxisID: 'y2',
+                    tension: 0.1
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            interaction: {
+                mode: 'index',
+                intersect: false,
+            },
+            scales: {
+                x: {
+                    title: {
+                        display: true,
+                        text: 'Day of Week'
+                    }
+                },
+                y: {
+                    type: 'linear',
+                    display: true,
+                    position: 'left',
+                    title: {
+                        display: true,
+                        text: 'Temperature (°C)'
+                    },
+                    grid: {
+                        drawOnChartArea: true,
+                    }
+                },
+                y1: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Water Level (m)'
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                    // Adjust these based on your typical water level values
+                    min: 0,
+                    max: 100
+                },
+                y2: {
+                    type: 'linear',
+                    display: true,
+                    position: 'right',
+                    title: {
+                        display: true,
+                        text: 'Air Quality (AQI)'
+                    },
+                    grid: {
+                        drawOnChartArea: false,
+                    },
+                    // Adjust these based on your typical AQI values
+                    min: 0,
+                    max: 100,
+                    // Position this axis slightly offset from y1
+                    offset: true
+                }
+            }
+        }
+    });
+});
     </script>
 
 <script src="../../js/SuperAdminDashboard.js"></script>

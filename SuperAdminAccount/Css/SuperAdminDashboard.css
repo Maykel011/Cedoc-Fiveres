@@ -165,7 +165,7 @@ body, html {
     display: flex;
     flex-direction: column;
     height: auto; /* Changed from fixed height */
-    min-height: 40%; /* Reduced from 550px */
+    min-height: 400px; /* Reduced from 550px */
     min-width: 0;
 }
 
@@ -401,4 +401,63 @@ body, html {
         margin-left: 60px;
         width: calc(100% - 60px);
     }
+}
+.environmental-charts {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    margin-top: 20px;
+}
+
+.chart-wrapper {
+    flex: 1;
+    min-width: 300px;
+    background: white;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+}
+
+.chart-wrapper h3 {
+    margin-top: 0;
+    text-align: center;
+    color: #333;
+}
+
+.bar-chart {
+    display: flex;
+    height: 200px;
+    align-items: flex-end;
+    justify-content: space-around;
+    margin-top: 20px;
+    padding: 0 10px;
+}
+
+.bar-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    width: 12%;
+}
+
+.bar-value {
+    font-size: 12px;
+    margin-bottom: 5px;
+    text-align: center;
+    font-weight: bold;
+    color: #333;
+}
+
+.bar {
+    width: 80%;
+    background: #9c0000;
+    border-radius: 5px 5px 0 0;
+    transition: height 0.5s ease;
+    position: relative;
+}
+
+.bar-label {
+    margin-top: 5px;
+    font-size: 12px;
+    color: #666;
 }

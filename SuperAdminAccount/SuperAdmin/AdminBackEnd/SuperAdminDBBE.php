@@ -128,4 +128,52 @@ try {
 } catch (Exception $e) {
     die("Error: " . $e->getMessage());
 }
+// Initialize environmental data array with proper structure
+$environmentalData = [
+    'labels' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
+    'datasets' => [
+        'temperature' => array_fill(0, 7, 0),
+        'water_level' => array_fill(0, 7, 0),
+        'air_quality' => array_fill(0, 7, 0)
+    ]
+];
+
+try {
+    // Get the start and end of the current week (Monday to Sunday)
+    $currentWeekStart = date('Y-m-d', strtotime('monday this week'));
+    $currentWeekEnd = date('Y-m-d', strtotime('sunday this week'));
+    
+    // Query to get environmental data by day of week
+    $query = "SELECT 
+                DAYOFWEEK(date_uploaded) as day_num,
+                AVG(CAST(temperature AS DECIMAL(10,2))) as avg_temp,
+                AVG(water_level) as avg_water,
+                AVG(air_quality) as avg_air
+              FROM files
+              WHERE DATE(date_uploaded) BETWEEN :week_start AND :week_end
+              GROUP BY DAYOFWEEK(date_uploaded)
+              ORDER BY day_num";
+    
+    $stmt = $conn->prepare($query);
+    $stmt->bindParam(':week_start', $currentWeekStart);
+    $stmt->bindParam(':week_end', $currentWeekEnd);
+    $stmt->execute();
+    
+    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    
+    // Map database results to our structure
+    foreach ($results as $row) {
+        // Adjust day index (MySQL returns 1=Sunday, 2=Monday, etc. We want 0=Monday)
+        $day_index = ($row['day_num'] - 2 + 7) % 7;
+        
+        if ($day_index >= 0 && $day_index < 7) {
+            $environmentalData['datasets']['temperature'][$day_index] = (float)$row['avg_temp'];
+            $environmentalData['datasets']['water_level'][$day_index] = (float)$row['avg_water'];
+            $environmentalData['datasets']['air_quality'][$day_index] = (float)$row['avg_air'];
+        }
+    }
+    
+} catch (PDOException $e) {
+    error_log("Environmental data error: " . $e->getMessage());
+}
 ?>
