@@ -71,7 +71,7 @@ if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION[
             </ul>
         </aside>
         <div class="main-content">
-            <h1 class="main-title">Admin Dashboard</h1>
+            <h1 class="main-title">Dashboard</h1>
     
     <div class="dashboard-filter">
         <select id="timeFilter" class="filter-select" onchange="applyFilter(this.value)">
