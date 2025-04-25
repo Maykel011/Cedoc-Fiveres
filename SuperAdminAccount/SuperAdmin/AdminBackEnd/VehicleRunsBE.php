@@ -1,76 +1,51 @@
 <?php
 include '../connection/Connection.php';
 
-// Only execute API functionality if this is an AJAX call with an action parameter
-if (isset($_REQUEST['action'])) {
-    handleRequest();
-}
-
-/**
- * Main request handler function
- */
-function handleRequest() {
+// Start session if not already started
+if (session_status() === PHP_SESSION_NONE) {
     session_start();
-    
-    // Check authentication
-    if (!isset($_SESSION['user_id'])) {
-        die(json_encode(['success' => false, 'message' => 'Unauthorized access']));
-    }
-
-    // Set JSON response header
-    header('Content-Type: application/json');
-
-    try {
-        // Get action parameter from GET or POST
-        $action = $_REQUEST['action'] ?? '';
-        
-        switch ($action) {
-            case 'create':
-                handleCreate();
-                break;
-            case 'read':
-                handleRead();
-                break;
-            case 'get':
-                handleGet();
-                break;
-            case 'update':
-                handleUpdate();
-                break;
-            case 'delete':
-                handleDelete();
-                break;
-            case 'removeImage':
-                handleRemoveImage();
-                break;
-            case 'searchOfficers':
-                handleSearchOfficers();
-                break;
-            default:
-                throw new Exception('Invalid action');
-        }
-    } catch (Exception $e) {
-        echo json_encode([
-            'success' => false, 
-            'message' => $e->getMessage(),
-            'error' => $e->getTraceAsString() // Remove in production
-        ]);
-    }
 }
 
-/**
- * Get vehicle runs data for frontend display
- */
+// Check if user is logged in and has admin privileges
+if (!isset($_SESSION['user_id'])) {
+    echo json_encode(['success' => false, 'message' => 'Unauthorized access']);
+    exit();
+}
+
+$action = $_GET['action'] ?? '';
+
+switch ($action) {
+    case 'get':
+        getVehicleRun();
+        break;
+    case 'create':
+        createVehicleRun();
+        break;
+    case 'update':
+        updateVehicleRun();
+        break;
+    case 'delete':
+        deleteVehicleRun();
+        break;
+    case 'searchOfficers':
+        searchOfficers();
+        break;
+    case 'removeImage':
+        removeCaseImage();
+        break;
+    case 'setBTBTime':
+        setBTBTime();
+        break;
+    default:
+        getVehicleRunsData();
+        break;
+}
+
 function getVehicleRunsData() {
     global $conn;
     
     $query = "SELECT * FROM vehicle_runs ORDER BY dispatch_time DESC";
     $result = $conn->query($query);
-    
-    if (!$result) {
-        error_log("Database error: " . $conn->error);
-        return [];
-    }
     
     $vehicleRuns = [];
     while ($row = $result->fetch_assoc()) {
@@ -80,372 +55,303 @@ function getVehicleRunsData() {
     return $vehicleRuns;
 }
 
-/**
- * Handle case creation
- */
-function handleCreate() {
+function getVehicleRun() {
     global $conn;
-
-    // Validate required fields
-    $requiredFields = ['vehicleTeam', 'caseType', 'emergencyResponders', 'location', 'dispatchTime', 'backToBaseTime'];
-    foreach ($requiredFields as $field) {
-        if (empty($_POST[$field])) {
-            throw new Exception("Missing required field: $field");
-        }
-    }
-
-    // Process file upload
-    $caseImagePath = handleFileUpload();
-
-    // Prepare data
-    $vehicleTeam = cleanInput($_POST['vehicleTeam']);
-    $caseType = cleanInput($_POST['caseType']);
-    $transportOfficer = !empty($_POST['transportOfficer']) ? cleanInput($_POST['transportOfficer']) : null;
-    $emergencyResponders = cleanInput($_POST['emergencyResponders']);
-    $location = cleanInput($_POST['location']);
-    $dispatchTime = formatDateTime($_POST['dispatchTime']);
-    $backToBaseTime = formatDateTime($_POST['backToBaseTime']);
-    $createdBy = $_SESSION['user_id'];
-
-    // Insert into database
-    $stmt = $conn->prepare("INSERT INTO vehicle_runs (
-        vehicle_team, case_type, transport_officer, emergency_responders, 
-        location, dispatch_time, back_to_base_time, case_image, created_by
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)");
-
-    $stmt->bind_param(
-        "ssssssssi", 
-        $vehicleTeam, 
-        $caseType, 
-        $transportOfficer, 
-        $emergencyResponders, 
-        $location, 
-        $dispatchTime, 
-        $backToBaseTime, 
-        $caseImagePath, 
-        $createdBy
-    );
-
-    if (!$stmt->execute()) {
-        throw new Exception('Database error: ' . $stmt->error);
-    }
-
-    echo json_encode(['success' => true, 'message' => 'Case added successfully']);
-    $stmt->close();
-}
-
-/**
- * Handle file upload
- */
-function handleFileUpload() {
-    if (!isset($_FILES['caseImage']) || $_FILES['caseImage']['error'] !== UPLOAD_ERR_OK) {
-        return null;
-    }
-
-    $uploadDir = '../../../VehicleCaseUploads/';
-    if (!is_dir($uploadDir)) {
-        mkdir($uploadDir, 0755, true);
-    }
-
-    // Validate file type
-    $allowedTypes = ['image/jpeg', 'image/png', 'image/gif'];
-    $fileType = mime_content_type($_FILES['caseImage']['tmp_name']);
-    if (!in_array($fileType, $allowedTypes)) {
-        throw new Exception('Invalid file type. Only JPG, PNG, and GIF are allowed.');
-    }
-
-    // Generate unique filename
-    $fileExt = pathinfo($_FILES['caseImage']['name'], PATHINFO_EXTENSION);
-    $fileName = uniqid('case_') . '.' . $fileExt;
-    $targetPath = $uploadDir . $fileName;
-
-    if (!move_uploaded_file($_FILES['caseImage']['tmp_name'], $targetPath)) {
-        throw new Exception('Failed to upload image');
-    }
-
-    return 'VehicleCaseUploads/' . $fileName;
-}
-
-/**
- * Handle case retrieval (list)
- */
-function handleRead() {
-    global $conn;
-
-    $query = "SELECT * FROM vehicle_runs ORDER BY dispatch_time DESC";
-    $result = $conn->query($query);
-
-    if (!$result) {
-        throw new Exception('Database error: ' . $conn->error);
-    }
-
-    $vehicleRuns = [];
-    while ($row = $result->fetch_assoc()) {
-        $vehicleRuns[] = $row;
-    }
-
-    echo json_encode(['success' => true, 'vehicleRuns' => $vehicleRuns]);
-}
-
-/**
- * Handle single case retrieval
- */
-function handleGet() {
-    global $conn;
-
-    if (empty($_GET['id'])) {
-        throw new Exception('Missing case ID');
-    }
-
-    $caseId = (int)$_GET['id'];
-    $stmt = $conn->prepare("SELECT * FROM vehicle_runs WHERE id = ?");
-    $stmt->bind_param("i", $caseId);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    if ($result->num_rows === 0) {
-        throw new Exception('Case not found');
-    }
-
-    $caseData = $result->fetch_assoc();
-    echo json_encode(['success' => true, 'caseData' => $caseData]);
-    $stmt->close();
-}
-
-/**
- * Handle case update
- */
-function handleUpdate() {
-    global $conn;
-
-    if (empty($_POST['id'])) {
-        throw new Exception('Missing case ID');
-    }
-
-    $caseId = (int)$_POST['id'];
-
-    // Validate required fields
-    $requiredFields = ['vehicleTeam', 'caseType', 'emergencyResponders', 'location', 'dispatchTime', 'backToBaseTime'];
-    foreach ($requiredFields as $field) {
-        if (empty($_POST[$field])) {
-            throw new Exception("Missing required field: $field");
-        }
-    }
-
-    // Get existing case data
-    $existingData = getCaseById($caseId);
-
-    // Process file upload
-    $caseImagePath = $existingData['case_image'];
-    if (isset($_FILES['caseImage']) && $_FILES['caseImage']['error'] === UPLOAD_ERR_OK) {
-        // Delete old image if exists
-        if ($caseImagePath && file_exists('../../../' . $caseImagePath)) {
-            unlink('../../../' . $caseImagePath);
-        }
-        $caseImagePath = handleFileUpload();
-    }
-
-    // Prepare data
-    $vehicleTeam = cleanInput($_POST['vehicleTeam']);
-    $caseType = cleanInput($_POST['caseType']);
-    $transportOfficer = !empty($_POST['transportOfficer']) ? cleanInput($_POST['transportOfficer']) : null;
-    $emergencyResponders = cleanInput($_POST['emergencyResponders']);
-    $location = cleanInput($_POST['location']);
-    $dispatchTime = formatDateTime($_POST['dispatchTime']);
-    $backToBaseTime = formatDateTime($_POST['backToBaseTime']);
-
-    // Update database
-    $stmt = $conn->prepare("UPDATE vehicle_runs SET
-        vehicle_team = ?, case_type = ?, transport_officer = ?, 
-        emergency_responders = ?, location = ?, dispatch_time = ?, 
-        back_to_base_time = ?, case_image = ? WHERE id = ?");
-
-    $stmt->bind_param(
-        "ssssssssi", 
-        $vehicleTeam, 
-        $caseType, 
-        $transportOfficer, 
-        $emergencyResponders, 
-        $location, 
-        $dispatchTime, 
-        $backToBaseTime, 
-        $caseImagePath, 
-        $caseId
-    );
-
-    if (!$stmt->execute()) {
-        throw new Exception('Database error: ' . $stmt->error);
-    }
-
-    echo json_encode(['success' => true, 'message' => 'Case updated successfully']);
-    $stmt->close();
-}
-
-/**
- * Handle case deletion
- */
-function handleDelete() {
-    global $conn;
-
-    $input = json_decode(file_get_contents('php://input'), true);
     
-    // Check if PIN code is provided and valid
-    if (empty($input['pinCode'])) {
-        throw new Exception('PIN code is required for deletion');
-    }
-
-    // Get the user's stored PIN code
-    $userId = $_SESSION['user_id'];
-    $userStmt = $conn->prepare("SELECT pin_code FROM users WHERE id = ?");
-    $userStmt->bind_param("i", $userId);
-    $userStmt->execute();
-    $userResult = $userStmt->get_result();
-    
-    if ($userResult->num_rows === 0) {
-        throw new Exception('User not found');
-    }
-    
-    $userData = $userResult->fetch_assoc();
-    $storedPin = $userData['pin_code'];
-    
-    // Verify PIN code
-    if (empty($storedPin)) {
-        throw new Exception('No PIN code set for this user');
-    }
-    
-    if ($input['pinCode'] !== $storedPin) {
-        throw new Exception('Invalid PIN code');
-    }
-
-    if (empty($input['ids'])) {
-        throw new Exception('No cases selected for deletion');
-    }
-
-    $ids = array_map('intval', $input['ids']);
-    $placeholders = implode(',', array_fill(0, count($ids), '?'));
-    $types = str_repeat('i', count($ids));
-
-    // First get image paths to delete files
-    $stmt = $conn->prepare("SELECT case_image FROM vehicle_runs WHERE id IN ($placeholders) AND case_image IS NOT NULL");
-    $stmt->bind_param($types, ...$ids);
-    $stmt->execute();
-    $result = $stmt->get_result();
-    
-    while ($row = $result->fetch_assoc()) {
-        if ($row['case_image'] && file_exists('../../../' . $row['case_image'])) {
-            unlink('../../../' . $row['case_image']);
-        }
-    }
-
-    // Delete records
-    $stmt = $conn->prepare("DELETE FROM vehicle_runs WHERE id IN ($placeholders)");
-    $stmt->bind_param($types, ...$ids);
-    
-    if (!$stmt->execute()) {
-        throw new Exception('Database error: ' . $stmt->error);
-    }
-
-    echo json_encode([
-        'success' => true, 
-        'message' => 'Cases deleted successfully', 
-        'deletedCount' => $stmt->affected_rows
-    ]);
-    $stmt->close();
-}
-
-/**
- * Handle image removal
- */
-function handleRemoveImage() {
-    global $conn;
-
-    $input = json_decode(file_get_contents('php://input'), true);
-    if (empty($input['id'])) {
-        throw new Exception('Missing case ID');
-    }
-
-    $caseId = (int)$input['id'];
-    $existingData = getCaseById($caseId);
-
-    // Delete the image file if exists
-    if ($existingData['case_image'] && file_exists('../../../' . $existingData['case_image'])) {
-        if (!unlink('../../../' . $existingData['case_image'])) {
-            throw new Exception('Failed to delete image file');
-        }
-    }
-
-    // Update database
-    $stmt = $conn->prepare("UPDATE vehicle_runs SET case_image = NULL WHERE id = ?");
-    $stmt->bind_param("i", $caseId);
-
-    if (!$stmt->execute()) {
-        throw new Exception('Database error: ' . $stmt->error);
-    }
-
-    echo json_encode(['success' => true, 'message' => 'Image removed successfully']);
-    $stmt->close();
-}
-
-/**
- * Handle officer search for autocomplete
- */
-function handleSearchOfficers() {
-    global $conn;
-
-    if (empty($_GET['query'])) {
-        echo json_encode(['success' => true, 'officers' => []]);
+    $id = $_GET['id'] ?? null;
+    if (!$id) {
+        echo json_encode(['success' => false, 'message' => 'Missing ID']);
         return;
     }
-
-    $query = '%' . cleanInput($_GET['query']) . '%';
-    $stmt = $conn->prepare("SELECT CONCAT(first_name, ' ', last_name) AS officer_name 
-                           FROM users 
-                           WHERE (first_name LIKE ? OR last_name LIKE ?) 
-                           AND role = 'Officer' 
-                           LIMIT 10");
-    $stmt->bind_param("ss", $query, $query);
-    $stmt->execute();
-    $result = $stmt->get_result();
-
-    $officers = [];
-    while ($row = $result->fetch_assoc()) {
-        $officers[] = $row['officer_name'];
-    }
-
-    echo json_encode(['success' => true, 'officers' => $officers]);
-    $stmt->close();
-}
-
-/**
- * Helper function to get case by ID
- */
-function getCaseById($id) {
-    global $conn;
-
-    $stmt = $conn->prepare("SELECT * FROM vehicle_runs WHERE id = ?");
+    
+    $query = "SELECT * FROM vehicle_runs WHERE id = ?";
+    $stmt = $conn->prepare($query);
     $stmt->bind_param("i", $id);
     $stmt->execute();
     $result = $stmt->get_result();
+    
+    if ($result->num_rows > 0) {
+        $row = $result->fetch_assoc();
+        echo json_encode(['success' => true, 'caseData' => $row]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Case not found']);
+    }
+}
 
-    if ($result->num_rows === 0) {
-        throw new Exception('Case not found');
+function createVehicleRun() {
+    global $conn;
+
+    // Handle file upload
+    $caseImagePath = '';
+    if (!empty($_FILES['caseImage']['name'])) {
+        // Change this line:
+        $uploadDir = '../../../VehicleCaseUploads/';
+        
+        if (!file_exists($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+
+        $fileName = basename($_FILES['caseImage']['name']);
+        $targetPath = $uploadDir . $fileName;
+
+        if (move_uploaded_file($_FILES['caseImage']['tmp_name'], $targetPath)) {
+            // Change this line to match the relative path you want to store in DB
+            $caseImagePath = 'VehicleCaseUploads/' . $fileName;
+        }
     }
 
-    $data = $result->fetch_assoc();
-    $stmt->close();
-    return $data;
+    // Get form data
+    $vehicleTeam = $_POST['vehicleTeam'] ?? '';
+    $caseType = $_POST['caseType'] ?? '';
+    $transportOfficer = $_POST['transportOfficer'] ?? '';
+    $emergencyResponders = $_POST['emergencyResponders'] ?? '';
+    $location = $_POST['location'] ?? '';
+    $dispatchTime = $_POST['dispatchTime'] ?? '';
+    $createdBy = $_SESSION['user_id']; // ✅ Add this line
+
+    $dispatchTime = date('Y-m-d H:i:s', strtotime($dispatchTime));
+
+    // ✅ Updated query and parameters
+    $query = "INSERT INTO vehicle_runs (vehicle_team, case_type, transport_officer, emergency_responders, location, dispatch_time, case_image, created_by) 
+              VALUES (?, ?, ?, ?, ?, ?, ?, ?)";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("sssssssi", $vehicleTeam, $caseType, $transportOfficer, $emergencyResponders, $location, $dispatchTime, $caseImagePath, $createdBy);
+
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true, 'message' => 'Case created successfully']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Failed to create case']);
+    }
 }
 
-/**
- * Helper function to clean input data
- */
-function cleanInput($data) {
-    return htmlspecialchars(strip_tags(trim($data)));
+
+function updateVehicleRun() {
+    global $conn;
+    
+    $id = $_POST['id'] ?? null;
+    if (!$id) {
+        echo json_encode(['success' => false, 'message' => 'Missing ID']);
+        return;
+    }
+    
+    // Get existing case data
+    $query = "SELECT case_image FROM vehicle_runs WHERE id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $existingData = $result->fetch_assoc();
+    
+    // Handle file upload
+    $caseImagePath = $existingData['case_image'] ?? '';
+    if (!empty($_FILES['caseImage']['name'])) {
+        // Delete old image if exists
+        if (!empty($caseImagePath)) {
+            $oldImagePath = '../../../' . $caseImagePath;
+            if (file_exists($oldImagePath)) {
+                unlink($oldImagePath);
+            }
+        }
+        
+        // Change this line:
+        $uploadDir = '../../../VehicleCaseUploads/';
+        if (!file_exists($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+        
+        $fileName = basename($_FILES['caseImage']['name']);
+        $targetPath = $uploadDir . $fileName;
+        
+        if (move_uploaded_file($_FILES['caseImage']['tmp_name'], $targetPath)) {
+            // Change this line to match the relative path you want to store in DB
+            $caseImagePath = 'VehicleCaseUploads/' . $fileName;
+        }
+    }
+    
+    // Get other form data
+    $vehicleTeam = $_POST['vehicleTeam'] ?? '';
+    $caseType = $_POST['caseType'] ?? '';
+    $transportOfficer = $_POST['transportOfficer'] ?? '';
+    $emergencyResponders = $_POST['emergencyResponders'] ?? '';
+    $location = $_POST['location'] ?? '';
+    $dispatchTime = $_POST['dispatchTime'] ?? '';
+    $backToBaseTime = $_POST['backToBaseTime'] ?? '';
+    
+    // Convert datetime format for MySQL
+    $dispatchTime = date('Y-m-d H:i:s', strtotime($dispatchTime));
+    $backToBaseTime = date('Y-m-d H:i:s', strtotime($backToBaseTime));
+    
+    $query = "UPDATE vehicle_runs SET 
+                vehicle_team = ?, 
+                case_type = ?, 
+                transport_officer = ?, 
+                emergency_responders = ?, 
+                location = ?, 
+                dispatch_time = ?, 
+                back_to_base_time = ?, 
+                case_image = ? 
+              WHERE id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("ssssssssi", $vehicleTeam, $caseType, $transportOfficer, $emergencyResponders, $location, $dispatchTime, $backToBaseTime, $caseImagePath, $id);
+    
+    if ($stmt->execute()) {
+        echo json_encode(['success' => true, 'message' => 'Case updated successfully']);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Failed to update case']);
+    }
 }
 
-/**
- * Helper function to format datetime
- */
-function formatDateTime($datetime) {
-    return date('Y-m-d H:i:s', strtotime($datetime));
+function deleteVehicleRun() {
+    global $conn;
+    
+    $data = json_decode(file_get_contents('php://input'), true);
+    $ids = $data['ids'] ?? [];
+    $pinCode = $data['pinCode'] ?? '';
+    
+    if (empty($ids)) {
+        echo json_encode(['success' => false, 'message' => 'No cases selected']);
+        return;
+    }
+    
+    // Verify PIN code (you should implement your own PIN verification logic)
+    if (!verifyPinCode($pinCode)) {
+        echo json_encode(['success' => false, 'message' => 'Invalid PIN code']);
+        return;
+    }
+    
+    // Convert single ID to array for consistency
+    if (!is_array($ids)) {
+        $ids = [$ids];
+    }
+    
+    // Prepare placeholders for the query
+    $placeholders = implode(',', array_fill(0, count($ids), '?'));
+    $types = str_repeat('i', count($ids));
+    
+    // First get image paths to delete files
+    $query = "SELECT case_image FROM vehicle_runs WHERE id IN ($placeholders)";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param($types, ...$ids);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    $imagesToDelete = [];
+    while ($row = $result->fetch_assoc()) {
+        if (!empty($row['case_image'])) {
+            $imagesToDelete[] = '../../../' . $row['case_image'];
+        }
+    }
+    
+    // Delete the records
+    $query = "DELETE FROM vehicle_runs WHERE id IN ($placeholders)";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param($types, ...$ids);
+    
+    if ($stmt->execute()) {
+        // Delete associated image files
+        foreach ($imagesToDelete as $imagePath) {
+            if (file_exists($imagePath)) {
+                unlink($imagePath);
+            }
+        }
+        
+        echo json_encode(['success' => true, 'deletedCount' => $stmt->affected_rows]);
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Failed to delete cases']);
+    }
+}
+
+function searchOfficers() {
+    global $conn;
+    
+    $query = $_GET['query'] ?? '';
+    if (strlen($query) < 2) {
+        echo json_encode(['success' => false, 'message' => 'Query too short']);
+        return;
+    }
+    
+    $searchTerm = "%$query%";
+    $stmt = $conn->prepare("SELECT DISTINCT transport_officer FROM vehicle_runs WHERE transport_officer LIKE ? LIMIT 10");
+    $stmt->bind_param("s", $searchTerm);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    
+    $officers = [];
+    while ($row = $result->fetch_assoc()) {
+        if (!empty($row['transport_officer'])) {
+            $officers[] = $row['transport_officer'];
+        }
+    }
+    
+    echo json_encode(['success' => true, 'officers' => $officers]);
+}
+
+function removeCaseImage() {
+    global $conn;
+    
+    $data = json_decode(file_get_contents('php://input'), true);
+    $id = $data['id'] ?? null;
+    
+    if (!$id) {
+        echo json_encode(['success' => false, 'message' => 'Missing ID']);
+        return;
+    }
+    
+    // Get current image path
+    $query = "SELECT case_image FROM vehicle_runs WHERE id = ?";
+    $stmt = $conn->prepare($query);
+    $stmt->bind_param("i", $id);
+    $stmt->execute();
+    $result = $stmt->get_result();
+    $row = $result->fetch_assoc();
+    
+    if ($row && !empty($row['case_image'])) {
+        $imagePath = '../../../' . $row['case_image'];
+        
+        // Delete the file
+        if (file_exists($imagePath)) {
+            unlink($imagePath);
+        }
+        
+        // Update database
+        $query = "UPDATE vehicle_runs SET case_image = NULL WHERE id = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("i", $id);
+        
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Database update failed']);
+        }
+    } else {
+        echo json_encode(['success' => false, 'message' => 'No image found']);
+    }
+}
+
+function setBTBTime() {
+    global $conn;
+    
+    $data = json_decode(file_get_contents('php://input'), true);
+    $id = $data['id'] ?? null;
+    $backToBaseTime = $data['backToBaseTime'] ?? null;
+    
+    if ($id && $backToBaseTime) {
+        $query = "UPDATE vehicle_runs SET back_to_base_time = ? WHERE id = ?";
+        $stmt = $conn->prepare($query);
+        $stmt->bind_param("si", $backToBaseTime, $id);
+        
+        if ($stmt->execute()) {
+            echo json_encode(['success' => true]);
+        } else {
+            echo json_encode(['success' => false, 'message' => 'Database update failed']);
+        }
+    } else {
+        echo json_encode(['success' => false, 'message' => 'Missing required parameters']);
+    }
+}
+
+function verifyPinCode($pinCode) {
+    // Implement your PIN verification logic here
+    // This is just a placeholder - you should replace with your actual verification
+    return strlen($pinCode) === 6 && is_numeric($pinCode);
 }

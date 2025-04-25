@@ -1659,3 +1659,55 @@ input:invalid:focus, select:invalid:focus, textarea:invalid:focus {
     }
 }
 
+
+.set-btb-btn {
+    background-color: #2563eb; /* Emerald-500 */
+    color: white;
+    border: none;
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.set-btb-btn:hover {
+    background-color: #1635a3; /* Emerald-600 */
+    transform: scale(1.05);
+    box-shadow: 0 3px 6px rgba(34, 197, 94, 0.25);
+}
+  
+
+  .set-btb-btn-edit {
+    background-color: #4f46e5; /* Indigo-600 */
+    color: white;
+    border: none;
+    padding: 6px 12px;
+    font-size: 12px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    margin-left: 10px;
+}
+
+.set-btb-btn-edit:hover {
+    background-color: #4338ca; /* Indigo-700 */
+    transform: scale(1.05);
+    box-shadow: 0 4px 8px rgba(79, 70, 229, 0.2);
+}
+
+.form-group label {
+    font-weight: bold;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+}
+
+#editBackToBaseTime {
+    padding: 8px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+    width: 100%;
+    max-width: 300px;
+}
