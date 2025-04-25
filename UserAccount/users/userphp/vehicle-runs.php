@@ -1,7 +1,7 @@
 <?php
 include '../connection/Connection.php';
 include '../userBackEnd/VehicleRunsBE.php';
-session_start();
+
 
 // Corrected check (using 'role' instead of 'user_role')
 if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Super Admin' && $_SESSION['role'] !== 'User')) {
@@ -21,7 +21,7 @@ $vehicleRuns = getVehicleRunsData();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES</title>
-    <link rel="stylesheet" href="../../Css/UsersVHLruns.css">
+    <link rel="stylesheet" href="../../Css/UsersVehicleRuns.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
@@ -61,7 +61,7 @@ $vehicleRuns = getVehicleRunsData();
                 <i class="fas fa-sign-out-alt"></i>
             </div>
             <h3>Confirm Logout</h3>
-            <p>Are you sure you want to logout from your admin account?</p>
+            <p>Are you sure you want to logout from your account?</p>
             <div class="logout-modal-buttons">
                 <button id="logoutCancel" class="logout-modal-btn logout-modal-cancel">Cancel</button>
                 <button id="logoutConfirm" class="logout-modal-btn logout-modal-confirm">Logout</button>
@@ -73,7 +73,7 @@ $vehicleRuns = getVehicleRunsData();
     <aside class="sidebar">
         <ul>
             <li class="dashboard">
-                <a href="userDashboard.php"><img src="../../Assets/Icon/Analysis.png" alt="Dashboard Icon" class="sidebar-icon"> Dashboard</a>
+                <a href="SuperAdminDashboard.php"><img src="../../Assets/Icon/Analysis.png" alt="Dashboard Icon" class="sidebar-icon">Dashboard</a>
             </li>
             <li class="media-files">
                 <a href="media-files.php"><img src="../../Assets/Icon/file.png" alt="Media Files Icon" class="sidebar-icon"> Media Files</a>
@@ -84,7 +84,9 @@ $vehicleRuns = getVehicleRunsData();
             <li class="vehicle-runs">
                 <a href="vehicle-runs.php"><img src="../../assets/icon/vruns.png" alt="Vehicle Runs Icon" class="sidebar-icon"> Vehicle Runs</a>
             </li>
-         
+            <li class="manage-users">
+                <a href="manage-users.php"><img src="../../Assets/Icon/user-management.png" alt="Manage Users Icon" class="sidebar-icon"> Manage Users</a>
+            </li>
         </ul>
     </aside>
 
@@ -111,11 +113,10 @@ $vehicleRuns = getVehicleRunsData();
                             </div>
                         </div>
                     </div>
-                   
+                    
                 </div>
-                
 
-                <!-- Second Line: Vehicle Team | Case Type | Clear Filter -->
+                <!-- Second Line: Vehicle Team | Case Type | Clear Filter | (Delete Selected on right) -->
                 <div class="second-line-controls">
                     <div class="left-controls">
                         <div class="filter-container">
@@ -148,71 +149,74 @@ $vehicleRuns = getVehicleRunsData();
                     </div>
                 </div>
           
-            <table>
-                <thead>
-                    <tr>
-                        <th>Vehicle Team</th>
-                        <th>Case Type</th>
-                        <th>Transport Officer</th>
-                        <th>Emergency Responders</th>
-                        <th>Location</th>
-                        <th>Dispatch Time</th>
-                        <th>Back to Base Time</th>
-                        <th>Case Image</th>
-                        <th>Case Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (!empty($vehicleRuns)): ?>
-                        <?php foreach ($vehicleRuns as $run): ?>
-                            <?php
-                            $dispatchTime = date('m/d/Y H:i', strtotime($run['dispatch_time']));
-                            $backToBaseTime = date('m/d/Y H:i', strtotime($run['back_to_base_time']));
-                            $imageHtml = 'No image';
-                            if (!empty($run['case_image'])) {
-                                $filename = basename($run['case_image']);
-                                $imageHtml = '<a href="../../../' . htmlspecialchars($run['case_image']) . '" target="_blank" class="image-preview-link" data-filename="' . htmlspecialchars($filename) . '">View Image</a>';
-                            }
-                            $transportOfficer = !empty($run['transport_officer']) ? htmlspecialchars($run['transport_officer']) : 'N/A';
-                            ?>
-                            <tr>
-                                <td><?= htmlspecialchars($run['vehicle_team']) ?></td>
-                                <td><?= htmlspecialchars($run['case_type']) ?></td>
-                                <td><?= $transportOfficer ?></td>
-                                <td><?= htmlspecialchars($run['emergency_responders']) ?></td>
-                                <td><?= htmlspecialchars($run['location']) ?></td>
-                                <td><?= $dispatchTime ?></td>
-                                <td><?= $backToBaseTime ?></td>
-                                <td><?= $imageHtml ?></td>
-                                <td>
-    <button class="edit-btn" data-id="<?= htmlspecialchars($run['id']) ?>">
-        <i class="fas fa-edit"></i> Edit
-    </button>
-</td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="9" class="no-data">No vehicle runs found</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                <table>
+    <thead>
+        <tr>
+            <th>Vehicle Team</th>
+            <th>Case Type</th>
+            <th>Transport Officer</th>
+            <th>Emergency Responders</th>
+            <th>Location</th>
+            <th>Dispatch Time</th>
+            <th>Back to Base Time</th>
+            <th>Case Image</th>
+            <th>Case Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (!empty($vehicleRuns)): ?>
+            <?php foreach ($vehicleRuns as $run): ?>
+                <?php
+                // Format dispatch time with validation
+                $dispatchTime = 'N/A';
+                if (!empty($run['dispatch_time']) && $run['dispatch_time'] != '0000-00-00 00:00:00') {
+                    $dispatchTime = date('m/d/Y H:i', strtotime($run['dispatch_time']));
+                }
+                
+                // Handle case image
+                $imageHtml = 'No image';
+                if (!empty($run['case_image'])) {
+                    $filename = basename($run['case_image']);
+                    $imageHtml = '<a href="../../../' . htmlspecialchars($run['case_image']) . '" target="_blank" class="image-preview-link" data-filename="' . htmlspecialchars($filename) . '">View Image</a>';
+                }
+                
+                // Handle transport officer
+                $transportOfficer = !empty($run['transport_officer']) ? htmlspecialchars($run['transport_officer']) : 'N/A';
+                ?>
+                <tr>
+                    
+                    <td><?= htmlspecialchars($run['vehicle_team']) ?></td>
+                    <td><?= htmlspecialchars($run['case_type']) ?></td>
+                    <td><?= $transportOfficer ?></td>
+                    <td><?= htmlspecialchars($run['emergency_responders']) ?></td>
+                    <td><?= htmlspecialchars($run['location']) ?></td>
+                    <td><?= $dispatchTime ?></td>
+                    <td>
+                        <?php if (!empty($run['back_to_base_time']) && $run['back_to_base_time'] != '0000-00-00 00:00:00'): ?>
+                            <?= date('m/d/Y H:i', strtotime($run['back_to_base_time'])) ?>
+                        <?php else: ?>
+                            <button class="set-btb-btn" data-id="<?= htmlspecialchars($run['id']) ?>">Set BTB Time</button>
+                        <?php endif; ?>
+                    </td>
+                    <td><?= $imageHtml ?></td>
+                    <td class="action-buttons">
+                        <button class="edit-btn" data-id="<?= htmlspecialchars($run['id']) ?>">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <tr>
+                <td colspan="9" class="no-data">No vehicle runs found</td>
+            </tr>
+        <?php endif; ?>
+    </tbody>
+</table>
         </div>
     </div>
     </div>
     
-
-<div id="confirmDeleteImageModal" class="modal">
-    <div class="modal-content">
-        <p>Are you sure you want to remove this image?</p>
-        <div class="modal-actions">
-            <button id="confirmImageDelete" class="btn btn-danger">Delete</button>
-            <button id="cancelImageDelete" class="btn btn-secondary">Cancel</button>
-        </div>
-    </div>
-</div>
-
 
     <!-- Upload Case Modal -->
     <div id="uploadCaseModal" class="upload-modal-content">
@@ -222,6 +226,7 @@ $vehicleRuns = getVehicleRunsData();
                 <span class="upload-modal-close">&times;</span>
             </div>
             <div class="upload-modal-body">
+               <!-- In the upload modal form, remove the Back to Base Time field completely -->
                 <form id="caseUploadForm" enctype="multipart/form-data">
                     <div class="form-row">
                         <div class="form-group">
@@ -265,15 +270,9 @@ $vehicleRuns = getVehicleRunsData();
                         <input type="text" id="location" name="location" required placeholder="Enter case location">
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="dispatchTime">Dispatch Time</label>
-                            <input type="datetime-local" id="dispatchTime" name="dispatchTime" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="backToBaseTime">Back to Base Time</label>
-                            <input type="datetime-local" id="backToBaseTime" name="backToBaseTime" required>
-                        </div>
+                    <div class="form-group">
+                        <label for="dispatchTime">Dispatch Time</label>
+                        <input type="datetime-local" id="dispatchTime" name="dispatchTime" required>
                     </div>
 
                     <div class="form-group">
@@ -295,6 +294,13 @@ $vehicleRuns = getVehicleRunsData();
             </div>
         </div>
     </div>
+    
+    <button onclick="openEditModal(<?= $file['id'] ?>, '<?= htmlspecialchars($file['file_name']) ?>', <?= $file['temperature'] ?? 'null' ?>, <?= $file['water_level'] ?? 'null' ?>, <?= $file['air_quality'] ?? 'null' ?>)">
+                    <i class="fas fa-edit"></i> Edit
+                </button>
+                <button onclick="openDeleteModal(<?= $file['id'] ?>, '<?= $file['file_name'] ?>')">
+                    <i class="fas fa-trash"></i> Delete
+                </button>
 
     <!-- Edit Case Modal -->
     <div id="editCaseModal" class="upload-modal-content">
@@ -355,9 +361,14 @@ $vehicleRuns = getVehicleRunsData();
                             <input type="datetime-local" id="editDispatchTime" name="dispatchTime" required>
                         </div>
                         <div class="form-group">
-                            <label for="editBackToBaseTime">Back to Base Time</label>
-                            <input type="datetime-local" id="editBackToBaseTime" name="backToBaseTime" required>
-                        </div>
+    <label for="editBackToBaseTime">
+        Back to Base Time 
+        <button type="button" class="set-btb-btn-edit" id="setCurrentBTBTime">
+            ⏱ Set Current Time
+        </button>
+    </label>
+    <input type="datetime-local" id="editBackToBaseTime" name="backToBaseTime" required>
+</div>
                     </div>
 
                     <div class="form-group">
@@ -381,6 +392,11 @@ $vehicleRuns = getVehicleRunsData();
         </div>
     </div>
 
+
+
+
+
+
 <!-- Upload Success Modal -->
 <div id="uploadSuccessModal" class="deletesuccess-modal" style="display: none;">
     <div class="success-modal-content">
@@ -389,7 +405,52 @@ $vehicleRuns = getVehicleRunsData();
     </div>
 </div>
 
-    <script src="../../js/UsersVHLRuns.js"></script>
-</body>
 
+<!-- Success Modal -->
+<div id="deleteSuccessModal" class="deletesuccess-modal" style="display: none;">
+    <div class="success-modal-content">
+        <span class="successclose" onclick="closeModal('deleteSuccessModal')"></span>
+        <h2 id="deleteSuccessMessage">Deleted Successfully</h2>
+    </div>
+</div>
+
+<!-- Modern Image Removal Confirmation Modal -->
+<div id="removeImageConfirmationModal" class="modern-modal" style="display: none;">
+    <div class="modal-overlay" onclick="hideImageRemoveModal()"></div>
+    <div class="modal-content">
+        <button class="modal-close-btn" onclick="hideImageRemoveModal()">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="modal-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        
+        <h3 class="modal-title">Confirm Image Removal</h3>
+        
+        <p class="modal-message">Are you sure you want to permanently remove this case image?</p>
+        
+        <div class="modal-actions">
+            <button id="cancelImageRemove" class="modal-btn secondary-btn">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button id="confirmImageRemove" class="modal-btn danger-btn">
+                <i class="fas fa-trash-alt"></i> Remove
+            </button>
+        </div>
+    </div>
+</div>
+
+    <script src="../../js/UsersVehicleRuns.js"></script>
+
+    <script>
+    document.getElementById('setCurrentBTBTime').addEventListener('click', function () {
+        const now = new Date();
+        const localDatetime = now.toISOString().slice(0, 16);
+        document.getElementById('editBackToBaseTime').value = localDatetime;
+    });
+</script>
+
+
+</body>
 </html>

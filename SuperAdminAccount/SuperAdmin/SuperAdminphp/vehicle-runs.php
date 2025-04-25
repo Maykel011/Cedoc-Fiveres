@@ -448,21 +448,9 @@ $vehicleRuns = getVehicleRunsData();
         <h2 id="deleteSuccessMessage">Deleted Successfully</h2>
     </div>
 </div>
-    <script src="../../js/SAdminVehicleRuns.js"></script>
-
-    <script>
-    document.getElementById('setCurrentBTBTime').addEventListener('click', function () {
-        const now = new Date();
-        const localDatetime = now.toISOString().slice(0, 16);
-        document.getElementById('editBackToBaseTime').value = localDatetime;
-    });
-</script>
-
-
-</body>
 
 <!-- Modern Image Removal Confirmation Modal -->
-<div id="removeImageConfirmationModal" class="modern-modal">
+<div id="removeImageConfirmationModal" class="modern-modal" style="display: none;">
     <div class="modal-overlay" onclick="hideImageRemoveModal()"></div>
     <div class="modal-content">
         <button class="modal-close-btn" onclick="hideImageRemoveModal()">
@@ -487,5 +475,20 @@ $vehicleRuns = getVehicleRunsData();
         </div>
     </div>
 </div>
+
+    <script src="../../js/SAdminVehicleRuns.js"></script>
+
+    <script>
+    document.getElementById('setCurrentBTBTime').addEventListener('click', function () {
+        const now = new Date();
+        const localDatetime = now.toISOString().slice(0, 16);
+        document.getElementById('editBackToBaseTime').value = localDatetime;
+    });
+</script>
+
+
+</body>
+
+
 
 </html>

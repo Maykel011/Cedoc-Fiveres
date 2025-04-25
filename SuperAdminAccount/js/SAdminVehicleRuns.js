@@ -7,9 +7,20 @@ document.addEventListener("DOMContentLoaded", function() {
     initializeTransportOfficerAutocomplete();
     initializeDeleteModals();
     initializeImagePreview();
+    
+    // Initialize image removal modal handlers
+    document.getElementById('confirmImageRemove')?.addEventListener('click', function() {
+        if (currentImageRemovalCaseId) {
+            removeCaseImage(currentImageRemovalCaseId);
+        } else {
+            console.error('No case ID set for image removal');
+        }
+    });
+
+    document.getElementById('cancelImageRemove')?.addEventListener('click', hideImageRemoveModal);
 });
 
-let currentImageRemovalCaseId = null;
+
 
 /////////////////////////User Dropdown Functionality/////////////////////////
 function initializeUserDropdown() {
@@ -621,9 +632,7 @@ function initializeEditModal() {
     editCancelBtn.addEventListener('click', closeEditModal);
 
     editModal.addEventListener('click', function(e) {
-        if (e.target === editModal) {
-            closeEditModal();
-        }
+        e.stopPropagation(); // Prevent closing when clicking inside modal
     });
 
     let editSelectedFile = null;
@@ -712,16 +721,45 @@ function initializeEditModal() {
             editCase(caseId);
         }
     });
-
-    // Initialize "Set Current Time" button
-    document.getElementById('setCurrentBTBTime')?.addEventListener('click', function() {
-        const now = new Date();
-        const timezoneOffset = now.getTimezoneOffset() * 60000;
-        const localISOTime = new Date(now - timezoneOffset).toISOString().slice(0, 16);
-        document.getElementById('editBackToBaseTime').value = localISOTime;
-    });
 }
 
+// Global variable to track which case's image we're removing
+let currentImageRemovalCaseId = null;
+
+// Modern modal functions with animations
+function showImageRemoveModal(caseId) {
+    currentImageRemovalCaseId = caseId;
+    const modal = document.getElementById('removeImageConfirmationModal');
+    modal.style.display = 'flex';
+    setTimeout(() => {
+        modal.classList.add('modal-visible');
+    }, 10);
+    document.body.style.overflow = 'hidden';
+}
+
+function hideImageRemoveModal() {
+    const modal = document.getElementById('removeImageConfirmationModal');
+    modal.classList.remove('modal-visible');
+    setTimeout(() => {
+        modal.style.display = 'none';
+        currentImageRemovalCaseId = null;
+    }, 300);
+    document.body.style.overflow = 'auto';
+}
+
+// Initialize modal events when DOM loads
+document.addEventListener('DOMContentLoaded', function() {
+    document.getElementById('confirmImageRemove')?.addEventListener('click', function() {
+        if (currentImageRemovalCaseId) {
+            removeCaseImage(currentImageRemovalCaseId);
+        }
+        hideImageRemoveModal();
+    });
+    
+    document.getElementById('cancelImageRemove')?.addEventListener('click', hideImageRemoveModal);
+});
+
+// Updated editCase function with modern image removal
 function editCase(caseId) {
     fetch(`../AdminBackEnd/VehicleRunsBE.php?action=get&id=${caseId}`)
     .then(response => response.json())
@@ -730,6 +768,7 @@ function editCase(caseId) {
             const caseData = data.caseData;
             const editModal = document.getElementById('editCaseModal');
             
+            // Populate form fields
             document.getElementById('editCaseId').value = caseData.id;
             document.getElementById('editVehicleTeam').value = caseData.vehicle_team;
             document.getElementById('editCaseType').value = caseData.case_type;
@@ -737,14 +776,13 @@ function editCase(caseId) {
             document.getElementById('editEmergencyResponders').value = caseData.emergency_responders;
             document.getElementById('editLocation').value = caseData.location;
             
+            // Set time values
             const dispatchTime = new Date(caseData.dispatch_time);
-            const backToBaseTime = caseData.back_to_base_time && caseData.back_to_base_time !== '0000-00-00 00:00:00' 
-                ? new Date(caseData.back_to_base_time) 
-                : new Date();
-            
+            const backToBaseTime = new Date(caseData.back_to_base_time);
             document.getElementById('editDispatchTime').value = dispatchTime.toISOString().slice(0, 16);
             document.getElementById('editBackToBaseTime').value = backToBaseTime.toISOString().slice(0, 16);
             
+            // Handle image display
             const currentImageContainer = document.getElementById('currentImageContainer');
             currentImageContainer.innerHTML = '';
             
@@ -763,34 +801,29 @@ function editCase(caseId) {
                     </div>
                 `;
                 
+                // Add modern click handler with modal confirmation
                 document.querySelector('.remove-image-btn')?.addEventListener('click', function() {
                     showImageRemoveModal(caseData.id);
                 });
             }
             
+            // Show the edit modal
             editModal.style.display = 'flex';
             document.body.style.overflow = 'hidden';
         } else {
-            alert('Error loading case data: ' + (data.message || 'Unknown error'));
+            showErrorAlert('Error loading case data', data.message);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert('An error occurred while loading case data');
+        showErrorAlert('Loading Error', 'An error occurred while loading case data');
     });
 }
 
-/////////////////////////Image Removal Functionality/////////////////////////
-function showImageRemoveModal(caseId) {
-    currentImageRemovalCaseId = caseId;
-    document.getElementById('removeImageConfirmationModal').style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-
-function hideImageRemoveModal() {
-    document.getElementById('removeImageConfirmationModal').style.display = 'none';
-    document.body.style.overflow = '';
-    currentImageRemovalCaseId = null;
+// Helper function for error display (optional)
+function showErrorAlert(title, message) {
+    // You could replace this with a modern alert/notification system
+    alert(`${title}: ${message}`);
 }
 
 function removeCaseImage(caseId) {
@@ -809,15 +842,14 @@ function removeCaseImage(caseId) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            const currentImageContainer = document.getElementById('currentImageContainer');
-            if (currentImageContainer) {
-                currentImageContainer.innerHTML = '';
+            alert('Image removed successfully');
+            document.getElementById('currentImageContainer').innerHTML = '';
+            // Instead of reloading, just clear the current image display
+            const editModal = document.getElementById('editCaseModal');
+            if (editModal.style.display === 'flex') {
+                // If modal is open, just update the display
+                document.querySelector('#editCaseModal .file-upload-filename').textContent = 'No file chosen';
             }
-            const editFileNameDisplay = document.querySelector('#editCaseModal .file-upload-filename');
-            if (editFileNameDisplay) {
-                editFileNameDisplay.textContent = 'No file chosen';
-            }
-            hideImageRemoveModal();
         } else {
             alert('Error: ' + (data.message || 'Failed to remove image'));
         }
@@ -827,7 +859,6 @@ function removeCaseImage(caseId) {
         alert('An error occurred while removing image');
     });
 }
-
 /////////////////////////Transport Officer Autocomplete/////////////////////////
 function initializeTransportOfficerAutocomplete() {
     const transportOfficerInput = document.getElementById('transportOfficer');

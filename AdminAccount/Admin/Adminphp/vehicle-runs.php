@@ -1,14 +1,14 @@
 <?php
 include '../connection/Connection.php';
 include '../AdminBackEnd/VehicleRunsBE.php';
-session_start();
 
-// Check admin access
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
+
+// Corrected check (using 'role' instead of 'user_role')
+if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Super Admin')) {
+    // Redirect to login page (not logout!)
     header("Location: ../../../login/login.php");
     exit();
 }
-
 // Get vehicle runs data
 $vehicleRuns = getVehicleRunsData();
 ?>
@@ -20,7 +20,7 @@ $vehicleRuns = getVehicleRunsData();
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES</title>
-    <link rel="stylesheet" href="../../Css/AdminVehicleRuns.css">
+    <link rel="stylesheet" href="../../Css/AdminVehiclesRuns.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
 </head>
@@ -60,7 +60,7 @@ $vehicleRuns = getVehicleRunsData();
                 <i class="fas fa-sign-out-alt"></i>
             </div>
             <h3>Confirm Logout</h3>
-            <p>Are you sure you want to logout from your admin account?</p>
+            <p>Are you sure you want to logout from your account?</p>
             <div class="logout-modal-buttons">
                 <button id="logoutCancel" class="logout-modal-btn logout-modal-cancel">Cancel</button>
                 <button id="logoutConfirm" class="logout-modal-btn logout-modal-confirm">Logout</button>
@@ -72,7 +72,7 @@ $vehicleRuns = getVehicleRunsData();
     <aside class="sidebar">
         <ul>
             <li class="dashboard">
-                <a href="adminDashboard.php"><img src="../../Assets/Icon/Analysis.png" alt="Dashboard Icon" class="sidebar-icon">Dashboard</a>
+                <a href="SuperAdminDashboard.php"><img src="../../Assets/Icon/Analysis.png" alt="Dashboard Icon" class="sidebar-icon">Dashboard</a>
             </li>
             <li class="media-files">
                 <a href="media-files.php"><img src="../../Assets/Icon/file.png" alt="Media Files Icon" class="sidebar-icon"> Media Files</a>
@@ -152,57 +152,74 @@ $vehicleRuns = getVehicleRunsData();
                     </div>
                 </div>
           
-            <table>
-                <thead>
-                    <tr>
-                        <th><input type="checkbox" id="selectAll"> Select all</th>
-                        <th>Vehicle Team</th>
-                        <th>Case Type</th>
-                        <th>Transport Officer</th>
-                        <th>Emergency Responders</th>
-                        <th>Location</th>
-                        <th>Dispatch Time</th>
-                        <th>Back to Base Time</th>
-                        <th>Case Image</th>
-                        <th>Case Action</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <?php if (!empty($vehicleRuns)): ?>
-                        <?php foreach ($vehicleRuns as $run): ?>
-                            <?php
-                            $dispatchTime = date('m/d/Y H:i', strtotime($run['dispatch_time']));
-                            $backToBaseTime = date('m/d/Y H:i', strtotime($run['back_to_base_time']));
-                            $imageHtml = 'No image';
-                            if (!empty($run['case_image'])) {
-                                $filename = basename($run['case_image']);
-                                $imageHtml = '<a href="../../../' . htmlspecialchars($run['case_image']) . '" target="_blank" class="image-preview-link" data-filename="' . htmlspecialchars($filename) . '">View Image</a>';
-                            }
-                            $transportOfficer = !empty($run['transport_officer']) ? htmlspecialchars($run['transport_officer']) : 'N/A';
-                            ?>
-                            <tr>
-                                <td><input type="checkbox" value="<?= htmlspecialchars($run['id']) ?>"></td>
-                                <td><?= htmlspecialchars($run['vehicle_team']) ?></td>
-                                <td><?= htmlspecialchars($run['case_type']) ?></td>
-                                <td><?= $transportOfficer ?></td>
-                                <td><?= htmlspecialchars($run['emergency_responders']) ?></td>
-                                <td><?= htmlspecialchars($run['location']) ?></td>
-                                <td><?= $dispatchTime ?></td>
-                                <td><?= $backToBaseTime ?></td>
-                                <td><?= $imageHtml ?></td>
-                                <td class="action-buttons">
-                                    <button class="edit-btn" data-id="<?= htmlspecialchars($run['id']) ?>"><i class="fas fa-edit"></i> Edit</button>
-                                    <button class="delete-btn" data-id="<?= htmlspecialchars($run['id']) ?>"><i class="fas fa-trash"></i> Delete</button>
-                                </td>
-                            </tr>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <tr>
-                            <td colspan="10" class="no-data">No vehicle runs found</td>
-                        </tr>
-                    <?php endif; ?>
-                </tbody>
-            </table>
+                <table>
+    <thead>
+        <tr>
+            <th><input type="checkbox" id="selectAll"> Select all</th>
+            <th>Vehicle Team</th>
+            <th>Case Type</th>
+            <th>Transport Officer</th>
+            <th>Emergency Responders</th>
+            <th>Location</th>
+            <th>Dispatch Time</th>
+            <th>Back to Base Time</th>
+            <th>Case Image</th>
+            <th>Case Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        <?php if (!empty($vehicleRuns)): ?>
+            <?php foreach ($vehicleRuns as $run): ?>
+                <?php
+                // Format dispatch time with validation
+                $dispatchTime = 'N/A';
+                if (!empty($run['dispatch_time']) && $run['dispatch_time'] != '0000-00-00 00:00:00') {
+                    $dispatchTime = date('m/d/Y H:i', strtotime($run['dispatch_time']));
+                }
+                
+                // Handle case image
+                $imageHtml = 'No image';
+                if (!empty($run['case_image'])) {
+                    $filename = basename($run['case_image']);
+                    $imageHtml = '<a href="../../../' . htmlspecialchars($run['case_image']) . '" target="_blank" class="image-preview-link" data-filename="' . htmlspecialchars($filename) . '">View Image</a>';
+                }
+                
+                // Handle transport officer
+                $transportOfficer = !empty($run['transport_officer']) ? htmlspecialchars($run['transport_officer']) : 'N/A';
+                ?>
+                <tr>
+                    <td><input type="checkbox" class="case-checkbox" value="<?= htmlspecialchars($run['id']) ?>"></td>
+                    <td><?= htmlspecialchars($run['vehicle_team']) ?></td>
+                    <td><?= htmlspecialchars($run['case_type']) ?></td>
+                    <td><?= $transportOfficer ?></td>
+                    <td><?= htmlspecialchars($run['emergency_responders']) ?></td>
+                    <td><?= htmlspecialchars($run['location']) ?></td>
+                    <td><?= $dispatchTime ?></td>
+                    <td>
+                        <?php if (!empty($run['back_to_base_time']) && $run['back_to_base_time'] != '0000-00-00 00:00:00'): ?>
+                            <?= date('m/d/Y H:i', strtotime($run['back_to_base_time'])) ?>
+                        <?php else: ?>
+                            <button class="set-btb-btn" data-id="<?= htmlspecialchars($run['id']) ?>">Set BTB Time</button>
+                        <?php endif; ?>
+                    </td>
+                    <td><?= $imageHtml ?></td>
+                    <td class="action-buttons">
+                        <button class="edit-btn" data-id="<?= htmlspecialchars($run['id']) ?>">
+                            <i class="fas fa-edit"></i> Edit
+                        </button>
+                        <button class="delete-btn" data-id="<?= htmlspecialchars($run['id']) ?>">
+                            <i class="fas fa-trash"></i> Delete
+                        </button>
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+        <?php else: ?>
+            <tr>
+                <td colspan="10" class="no-data">No vehicle runs found</td>
+            </tr>
+        <?php endif; ?>
+    </tbody>
+</table>
         </div>
     </div>
     </div>
@@ -216,6 +233,7 @@ $vehicleRuns = getVehicleRunsData();
                 <span class="upload-modal-close">&times;</span>
             </div>
             <div class="upload-modal-body">
+               <!-- In the upload modal form, remove the Back to Base Time field completely -->
                 <form id="caseUploadForm" enctype="multipart/form-data">
                     <div class="form-row">
                         <div class="form-group">
@@ -259,15 +277,9 @@ $vehicleRuns = getVehicleRunsData();
                         <input type="text" id="location" name="location" required placeholder="Enter case location">
                     </div>
 
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="dispatchTime">Dispatch Time</label>
-                            <input type="datetime-local" id="dispatchTime" name="dispatchTime" required>
-                        </div>
-                        <div class="form-group">
-                            <label for="backToBaseTime">Back to Base Time</label>
-                            <input type="datetime-local" id="backToBaseTime" name="backToBaseTime" required>
-                        </div>
+                    <div class="form-group">
+                        <label for="dispatchTime">Dispatch Time</label>
+                        <input type="datetime-local" id="dispatchTime" name="dispatchTime" required>
                     </div>
 
                     <div class="form-group">
@@ -289,6 +301,7 @@ $vehicleRuns = getVehicleRunsData();
             </div>
         </div>
     </div>
+    
     <button onclick="openEditModal(<?= $file['id'] ?>, '<?= htmlspecialchars($file['file_name']) ?>', <?= $file['temperature'] ?? 'null' ?>, <?= $file['water_level'] ?? 'null' ?>, <?= $file['air_quality'] ?? 'null' ?>)">
                     <i class="fas fa-edit"></i> Edit
                 </button>
@@ -355,9 +368,14 @@ $vehicleRuns = getVehicleRunsData();
                             <input type="datetime-local" id="editDispatchTime" name="dispatchTime" required>
                         </div>
                         <div class="form-group">
-                            <label for="editBackToBaseTime">Back to Base Time</label>
-                            <input type="datetime-local" id="editBackToBaseTime" name="backToBaseTime" required>
-                        </div>
+    <label for="editBackToBaseTime">
+        Back to Base Time 
+        <button type="button" class="set-btb-btn-edit" id="setCurrentBTBTime">
+            ⏱ Set Current Time
+        </button>
+    </label>
+    <input type="datetime-local" id="editBackToBaseTime" name="backToBaseTime" required>
+</div>
                     </div>
 
                     <div class="form-group">
@@ -381,32 +399,6 @@ $vehicleRuns = getVehicleRunsData();
         </div>
     </div>
 
-<!-- Modern Image Removal Confirmation Modal -->
-<div id="removeImageConfirmationModal" class="modern-modal">
-    <div class="modal-overlay" onclick="hideImageRemoveModal()"></div>
-    <div class="modal-content">
-        <button class="modal-close-btn" onclick="hideImageRemoveModal()">
-            <i class="fas fa-times"></i>
-        </button>
-        
-        <div class="modal-icon">
-            <i class="fas fa-exclamation-triangle"></i>
-        </div>
-        
-        <h3 class="modal-title">Confirm Image Removal</h3>
-        
-        <p class="modal-message">Are you sure you want to permanently remove this case image?</p>
-        
-        <div class="modal-actions">
-            <button id="cancelImageRemove" class="modal-btn secondary-btn">
-                <i class="fas fa-times"></i> Cancel
-            </button>
-            <button id="confirmImageRemove" class="modal-btn danger-btn">
-                <i class="fas fa-trash-alt"></i> Remove
-            </button>
-        </div>
-    </div>
-</div>
 
 <!-- Single Delete Modal -->
 <div id="deleteModal" class="deletecustom-modal">
@@ -457,7 +449,44 @@ $vehicleRuns = getVehicleRunsData();
         <h2 id="deleteSuccessMessage">Deleted Successfully</h2>
     </div>
 </div>
-    <script src="../../js/AdminVehicleRuns.js"></script>
-</body>
 
+<!-- Modern Image Removal Confirmation Modal -->
+<div id="removeImageConfirmationModal" class="modern-modal" style="display: none;">
+    <div class="modal-overlay" onclick="hideImageRemoveModal()"></div>
+    <div class="modal-content">
+        <button class="modal-close-btn" onclick="hideImageRemoveModal()">
+            <i class="fas fa-times"></i>
+        </button>
+        
+        <div class="modal-icon">
+            <i class="fas fa-exclamation-triangle"></i>
+        </div>
+        
+        <h3 class="modal-title">Confirm Image Removal</h3>
+        
+        <p class="modal-message">Are you sure you want to permanently remove this case image?</p>
+        
+        <div class="modal-actions">
+            <button id="cancelImageRemove" class="modal-btn secondary-btn">
+                <i class="fas fa-times"></i> Cancel
+            </button>
+            <button id="confirmImageRemove" class="modal-btn danger-btn">
+                <i class="fas fa-trash-alt"></i> Remove
+            </button>
+        </div>
+    </div>
+</div>
+
+    <script src="../../js/AdminVehiclesRuns.js"></script>
+
+    <script>
+    document.getElementById('setCurrentBTBTime').addEventListener('click', function () {
+        const now = new Date();
+        const localDatetime = now.toISOString().slice(0, 16);
+        document.getElementById('editBackToBaseTime').value = localDatetime;
+    });
+</script>
+
+
+</body>
 </html>

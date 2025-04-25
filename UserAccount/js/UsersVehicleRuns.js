@@ -6,7 +6,21 @@ document.addEventListener("DOMContentLoaded", function() {
     initializeEditModal();
     initializeTransportOfficerAutocomplete();
     initializeDeleteModals();
+    initializeImagePreview();
+    
+    // Initialize image removal modal handlers
+    document.getElementById('confirmImageRemove')?.addEventListener('click', function() {
+        if (currentImageRemovalCaseId) {
+            removeCaseImage(currentImageRemovalCaseId);
+        } else {
+            console.error('No case ID set for image removal');
+        }
+    });
+
+    document.getElementById('cancelImageRemove')?.addEventListener('click', hideImageRemoveModal);
 });
+
+
 
 /////////////////////////User Dropdown Functionality/////////////////////////
 function initializeUserDropdown() {
@@ -83,11 +97,13 @@ function initializeLogoutModal() {
 /////////////////////////Table Controls Functionality/////////////////////////
 function initializeTableControls() {
     initializeSelectAll();
+    initializeBTBButtons();
     initializeSearch();
     initializeVehicleTeamFilter();
     initializeCaseTypeFilter();
     initializeDateFilters();
     initializeDeleteSelected();
+    initializeClearFilters();
 }
 
 function initializeSelectAll() {
@@ -100,6 +116,56 @@ function initializeSelectAll() {
             checkbox.checked = this.checked;
         });
     });
+}
+
+function initializeBTBButtons() {
+    document.addEventListener('click', function(e) {
+        if (e.target.classList.contains('set-btb-btn')) {
+            e.preventDefault();
+            const button = e.target;
+            const caseId = button.getAttribute('data-id');
+            
+            const now = new Date();
+            const timezoneOffset = now.getTimezoneOffset() * 60000;
+            const localISOTime = new Date(now - timezoneOffset).toISOString().slice(0, 19).replace('T', ' ');
+            
+            fetch('../userBackEnd/VehicleRunsBE.php?action=setBTBTime', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: caseId,
+                    backToBaseTime: localISOTime
+                })
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    const formattedTime = formatDateTime(localISOTime);
+                    button.parentElement.innerHTML = formattedTime;
+                } else {
+                    alert('Failed to update BTB time: ' + (data.message || 'Unknown error'));
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while updating BTB time');
+            });
+        }
+    });
+}
+
+function formatDateTime(dateTimeString) {
+    const date = new Date(dateTimeString);
+    return date.toLocaleDateString('en-US', {
+        month: '2-digit',
+        day: '2-digit',
+        year: 'numeric',
+        hour: '2-digit',
+        minute: '2-digit',
+        hour12: false
+    }).replace(',', '');
 }
 
 function initializeSearch() {
@@ -150,7 +216,24 @@ function initializeDateFilters() {
     });
 }
 
-/////////////////////////Table Filtering Functionality/////////////////////////
+function initializeClearFilters() {
+    const clearFiltersBtn = document.getElementById('clearFilters');
+    if (!clearFiltersBtn) return;
+
+    clearFiltersBtn.addEventListener('click', function() {
+        document.getElementById('vehicleTeamFilter').value = '';
+        document.getElementById('caseTypeFilter').value = '';
+        document.querySelector('.search-input').value = '';
+        document.getElementById('dateFrom').value = '';
+        document.getElementById('dateTo').value = '';
+        
+        filterTable();
+        
+        this.classList.add('clicked');
+        setTimeout(() => this.classList.remove('clicked'), 300);
+    });
+}
+
 function filterTable() {
     const searchTerm = document.querySelector('.search-input')?.value.toLowerCase() || '';
     const selectedTeam = document.getElementById('vehicleTeamFilter')?.value || '';
@@ -184,42 +267,19 @@ function filterTable() {
     });
 }
 
-/////////////////////////
-// CLEAR FILTERS BUTTON //
-/////////////////////////
-document.getElementById('clearFilters').addEventListener('click', function() {
-    document.getElementById('vehicleTeamFilter').value = '';
-    document.getElementById('caseTypeFilter').value = '';
-    document.querySelector('.search-input').value = '';
-    document.getElementById('dateFrom').value = '';
-    document.getElementById('dateTo').value = '';
-    
-    filterTable();
-    
-    this.classList.add('clicked');
-    setTimeout(() => this.classList.remove('clicked'), 300);
-});
-
-/////////////////////////
-// DELETE FUNCTIONALITY //
-/////////////////////////
-
+/////////////////////////Delete Functionality/////////////////////////
 function initializeDeleteModals() {
     // Single delete button handlers
     document.addEventListener('click', function(e) {
-        if (e.target.closest('.delete-btn')) {
+        if (e.target.closest('.delete-btn') && !e.target.closest('#deleteSelected')) {
             const caseId = e.target.closest('.delete-btn').getAttribute('data-id');
             showDeleteModal(caseId);
         }
     });
 
-    // Initialize delete modals
-    const deleteModal = document.getElementById('deleteModal');
-    const multipleDeleteModal = document.getElementById('multipleDeleteModal');
-    
     // Single delete confirmation
     document.getElementById('deleteFileBtn')?.addEventListener('click', function() {
-        const caseId = deleteModal.dataset.caseId;
+        const caseId = document.getElementById('deleteModal').dataset.caseId;
         const pinCode = document.getElementById('deletePinCode').value;
         
         if (!pinCode || pinCode.length !== 6) {
@@ -276,77 +336,6 @@ function initializeDeleteModals() {
     });
 }
 
-function showDeleteModal(caseId) {
-    const deleteModal = document.getElementById('deleteModal');
-    deleteModal.dataset.caseId = caseId;
-    document.getElementById('deletePinCode').value = '';
-    document.getElementById('deletePinError').style.display = 'none';
-    deleteModal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-
-function showBulkDeleteModal(selectedCount) {
-    const multipleDeleteModal = document.getElementById('multipleDeleteModal');
-    document.getElementById('multipleDeleteMessage').textContent = 
-        `Are you sure you want to delete ${selectedCount} selected ${selectedCount > 1 ? 'cases' : 'case'}?`;
-    document.getElementById('multipleDeletePinCode').value = '';
-    document.getElementById('multipleDeletePinError').style.display = 'none';
-    multipleDeleteModal.style.display = 'flex';
-    document.body.style.overflow = 'hidden';
-}
-
-function closeModal(modalId) {
-    const modal = document.getElementById(modalId);
-    if (modal) {
-        modal.style.display = 'none';
-        document.body.style.overflow = '';
-    }
-}
-
-function deleteCase(caseId, pinCode) {
-    fetch('../AdminBackEnd/VehicleRunsBE.php?action=delete', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ 
-            ids: [caseId],
-            pinCode: pinCode
-        })
-    })
-    .then(response => response.json())
-    .then(data => {
-        if (data.success) {
-            // Close the delete modal
-            closeModal('deleteModal');
-            // Show the success modal
-            showSuccessModal('Case deleted successfully!');
-            setTimeout(() => {
-                window.location.reload();
-            }, 500);
-        } else {
-            document.getElementById('deletePinError').textContent = data.message || 'Failed to delete case';
-            document.getElementById('deletePinError').style.display = 'block';
-        }
-    })
-    .catch(error => {
-        console.error('Error:', error);
-        document.getElementById('deletePinError').textContent = 'An error occurred while deleting the case';
-        document.getElementById('deletePinError').style.display = 'block';
-    });
-}
-
-function showSuccessModal(message) {
-    const successModal = document.getElementById('deleteSuccessModal');
-    document.getElementById('deleteSuccessMessage').textContent = message;
-    successModal.style.display = 'flex';
-    
-    // Auto-close after 1.5 seconds
-    setTimeout(() => {
-        closeModal('deleteSuccessModal');
-    }, 500);
-}
-
 function initializeDeleteSelected() {
     const deleteSelectedBtn = document.getElementById('deleteSelected');
     if (!deleteSelectedBtn) return;
@@ -364,8 +353,70 @@ function initializeDeleteSelected() {
     });
 }
 
+function showDeleteModal(caseId) {
+    const deleteModal = document.getElementById('deleteModal');
+    if (!deleteModal) return;
+    
+    deleteModal.dataset.caseId = caseId;
+    document.getElementById('deletePinCode').value = '';
+    document.getElementById('deletePinError').style.display = 'none';
+    deleteModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function showBulkDeleteModal(selectedCount) {
+    const multipleDeleteModal = document.getElementById('multipleDeleteModal');
+    if (!multipleDeleteModal) return;
+
+    document.getElementById('multipleDeleteMessage').textContent = 
+        `Are you sure you want to delete ${selectedCount} selected ${selectedCount > 1 ? 'cases' : 'case'}?`;
+    document.getElementById('multipleDeletePinCode').value = '';
+    document.getElementById('multipleDeletePinError').style.display = 'none';
+    multipleDeleteModal.style.display = 'flex';
+    document.body.style.overflow = 'hidden';
+}
+
+function closeModal(modalId) {
+    const modal = document.getElementById(modalId);
+    if (modal) {
+        modal.style.display = 'none';
+        document.body.style.overflow = '';
+    }
+}
+
+function deleteCase(caseId, pinCode) {
+    fetch('../userBackEnd/VehicleRunsBE.php?action=delete', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ 
+            ids: [caseId],
+            pinCode: pinCode
+        })
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            closeModal('deleteModal');
+            showSuccessModal('Case deleted successfully!');
+            setTimeout(() => {
+                window.location.reload();
+            }, 1500);
+        } else {
+            document.getElementById('deletePinError').textContent = data.message || 'Failed to delete case';
+            document.getElementById('deletePinError').style.display = 'block';
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+        document.getElementById('deletePinError').textContent = 'An error occurred while deleting the case';
+        document.getElementById('deletePinError').style.display = 'block';
+    });
+}
+
 function deleteSelectedCases(ids, pinCode) {
-    fetch('../AdminBackEnd/VehicleRunsBE.php?action=delete', {
+    fetch('../userBackEnd/VehicleRunsBE.php?action=delete', {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -378,13 +429,11 @@ function deleteSelectedCases(ids, pinCode) {
     .then(response => response.json())
     .then(data => {
         if (data.success) {
-            // Close the multiple delete modal
             closeModal('multipleDeleteModal');
-            // Show the success modal
             showSuccessModal(`${data.deletedCount} ${data.deletedCount > 1 ? 'cases' : 'case'} deleted successfully!`);
             setTimeout(() => {
                 window.location.reload();
-            }, 500);
+            }, 1500);
         } else {
             document.getElementById('multipleDeletePinError').textContent = data.message || 'Failed to delete cases';
             document.getElementById('multipleDeletePinError').style.display = 'block';
@@ -397,9 +446,17 @@ function deleteSelectedCases(ids, pinCode) {
     });
 }
 
-/////////////////////////
-// UPLOAD CASE MODAL //
-/////////////////////////
+function showSuccessModal(message) {
+    const successModal = document.getElementById('deleteSuccessModal');
+    document.getElementById('deleteSuccessMessage').textContent = message;
+    successModal.style.display = 'flex';
+    
+    setTimeout(() => {
+        closeModal('deleteSuccessModal');
+    }, 1500);
+}
+
+/////////////////////////Upload Case Modal/////////////////////////
 function initializeUploadCaseModal() {
     const uploadCaseBtn = document.getElementById('uploadCase');
     const uploadModal = document.getElementById('uploadCaseModal');
@@ -430,7 +487,9 @@ function initializeUploadCaseModal() {
     cancelBtn.addEventListener('click', closeUploadModal);
 
     uploadModal.addEventListener('click', function(e) {
-        e.stopPropagation(); // Prevent closing when clicking inside modal
+        if (e.target === uploadModal) {
+            closeUploadModal();
+        }
     });
 
     let selectedFile = null;
@@ -446,7 +505,6 @@ function initializeUploadCaseModal() {
         fileInput.addEventListener('change', function() {
             if (this.files.length > 0) {
                 selectedFile = this.files[0];
-                // Store the original filename in a data attribute
                 fileNameDisplay.textContent = selectedFile.name;
                 fileNameDisplay.dataset.originalName = selectedFile.name;
             } else {
@@ -468,7 +526,7 @@ function initializeUploadCaseModal() {
         caseUploadForm.addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const requiredFields = ['vehicleTeam', 'caseType', 'emergencyResponders', 'location', 'dispatchTime', 'backToBaseTime'];
+            const requiredFields = ['vehicleTeam', 'caseType', 'emergencyResponders', 'location', 'dispatchTime'];
             let isValid = true;
             
             requiredFields.forEach(fieldId => {
@@ -486,26 +544,15 @@ function initializeUploadCaseModal() {
                 return;
             }
             
-            const dispatchTime = new Date(document.getElementById('dispatchTime').value);
-            const backToBaseTime = new Date(document.getElementById('backToBaseTime').value);
-            
-            if (dispatchTime >= backToBaseTime) {
-                alert('Dispatch time must be before back to base time');
-                return;
-            }
-            
             const formData = new FormData();
-            
             formData.append('vehicleTeam', document.getElementById('vehicleTeam').value);
             formData.append('caseType', document.getElementById('caseType').value);
             formData.append('transportOfficer', document.getElementById('transportOfficer').value);
             formData.append('emergencyResponders', document.getElementById('emergencyResponders').value);
             formData.append('location', document.getElementById('location').value);
             formData.append('dispatchTime', document.getElementById('dispatchTime').value);
-            formData.append('backToBaseTime', document.getElementById('backToBaseTime').value);
             
             if (selectedFile) {
-                // Create a new File object with the original name if it was modified
                 const originalName = fileNameDisplay.dataset.originalName || selectedFile.name;
                 const renamedFile = new File([selectedFile], originalName, {
                     type: selectedFile.type,
@@ -514,11 +561,7 @@ function initializeUploadCaseModal() {
                 formData.append('caseImage', renamedFile);
             }
             
-            if (this.dataset.editId) {
-                formData.append('id', this.dataset.editId);
-            }
-            
-            submitCaseForm(formData, this.dataset.editId ? 'update' : 'create');
+            submitCaseForm(formData, 'create');
         });
     }
 }
@@ -529,37 +572,39 @@ function submitCaseForm(formData, action) {
     submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> ' + (action === 'update' ? 'Updating...' : 'Uploading...');
     submitBtn.disabled = true;
     
-    fetch(`../AdminBackEnd/VehicleRunsBE.php?action=${action}`, {
+    fetch(`../userBackEnd/VehicleRunsBE.php?action=${action}`, {
         method: 'POST',
         body: formData
     })
-    .then(response => response.json())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok');
+        }
+        return response.json();
+    })
     .then(data => {
         if (data.success) {
-            // Close the appropriate modal
             const modalToClose = action === 'update' ? 'editCaseModal' : 'uploadCaseModal';
             closeModal(modalToClose);
             
-            // Show the success modal
             const successModal = document.getElementById('uploadSuccessModal');
             if (successModal) {
                 document.getElementById('uploadSuccessMessage').textContent = 
                     `Case ${action === 'update' ? 'updated' : 'uploaded'} successfully!`;
                 successModal.style.display = 'flex';
                 
-                // Close success modal and reload after 1.5 seconds
                 setTimeout(() => {
                     closeModal('uploadSuccessModal');
                     window.location.reload();
-                }, 500);
+                }, 1500);
             }
         } else {
-            alert('Error: ' + (data.message || `Failed to ${action} case`));
+            throw new Error(data.message || `Failed to ${action} case`);
         }
     })
     .catch(error => {
         console.error('Error:', error);
-        alert(`An error occurred while ${action === 'update' ? 'updating' : 'uploading'} the case`);
+        alert(`An error occurred while ${action === 'update' ? 'updating' : 'uploading'} the case: ${error.message}`);
     })
     .finally(() => {
         submitBtn.textContent = originalBtnText;
@@ -567,9 +612,7 @@ function submitCaseForm(formData, action) {
     });
 }
 
-/////////////////////////
-// EDIT CASE MODAL //
-/////////////////////////
+/////////////////////////Edit Case Modal/////////////////////////
 function initializeEditModal() {
     const editModal = document.getElementById('editCaseModal');
     const editCloseModal = document.querySelector('.edit-modal-close');
@@ -718,7 +761,7 @@ document.addEventListener('DOMContentLoaded', function() {
 
 // Updated editCase function with modern image removal
 function editCase(caseId) {
-    fetch(`../AdminBackEnd/VehicleRunsBE.php?action=get&id=${caseId}`)
+    fetch(`../userBackEnd/VehicleRunsBE.php?action=get&id=${caseId}`)
     .then(response => response.json())
     .then(data => {
         if (data.success) {
@@ -789,7 +832,7 @@ function removeCaseImage(caseId) {
         return;
     }
 
-    fetch(`../AdminBackEnd/VehicleRunsBE.php?action=removeImage`, {
+    fetch(`../userBackEnd/VehicleRunsBE.php?action=removeImage`, {
         method: 'POST',
         headers: {
             'Content-Type': 'application/json',
@@ -816,10 +859,7 @@ function removeCaseImage(caseId) {
         alert('An error occurred while removing image');
     });
 }
-
-/////////////////////////
-// TRANSPORT OFFICER AUTOCOMPLETE //
-/////////////////////////
+/////////////////////////Transport Officer Autocomplete/////////////////////////
 function initializeTransportOfficerAutocomplete() {
     const transportOfficerInput = document.getElementById('transportOfficer');
     const officerSuggestions = document.getElementById('officerSuggestions');
@@ -834,7 +874,7 @@ function initializeTransportOfficerAutocomplete() {
             suggestionsElement.innerHTML = '';
             
             if (query.length > 1) {
-                fetch(`../AdminBackEnd/VehicleRunsBE.php?action=searchOfficers&query=${encodeURIComponent(query)}`)
+                fetch(`../userBackEnd/VehicleRunsBE.php?action=searchOfficers&query=${encodeURIComponent(query)}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success && data.officers.length > 0) {
@@ -873,10 +913,33 @@ function initializeTransportOfficerAutocomplete() {
     setupAutocomplete(editTransportOfficerInput, editOfficerSuggestions);
 }
 
-// View Image & Data
+/////////////////////////Image Preview Functionality/////////////////////////
+function initializeImagePreview() {
+    document.addEventListener('click', function(e) {
+        if (e.target.closest('.image-preview-link')) {
+            e.preventDefault();
+            const link = e.target.closest('.image-preview-link');
+            const imageUrl = link.getAttribute('href');
+            const fileName = link.dataset.filename || imageUrl.split('/').pop().split('?')[0];
+            
+            const row = link.closest('tr');
+            const caseDetails = {
+                vehicleTeam: row.querySelector('td:nth-child(2)').textContent,
+                caseType: row.querySelector('td:nth-child(3)').textContent,
+                transportOfficer: row.querySelector('td:nth-child(4)').textContent,
+                emergencyResponders: row.querySelector('td:nth-child(5)').textContent,
+                location: row.querySelector('td:nth-child(6)').textContent,
+                dispatchTime: row.querySelector('td:nth-child(7)').textContent,
+                backToBaseTime: row.querySelector('td:nth-child(8)').textContent
+            };
+            
+            showImageModal(imageUrl, fileName, caseDetails);
+        }
+    });
+}
+
 function showImageModal(fileUrl, fileName, caseDetails = null) {
     const displayName = fileName || fileUrl.split('/').pop().split('?')[0];
-    // Create modal container
     const modal = document.createElement('div');
     modal.className = 'file-preview-modal';
     modal.style.cssText = `
@@ -891,7 +954,6 @@ function showImageModal(fileUrl, fileName, caseDetails = null) {
         flex-direction: column;
     `;
 
-    // Create header
     const header = document.createElement('div');
     header.style.cssText = `
         display: grid;
@@ -902,7 +964,6 @@ function showImageModal(fileUrl, fileName, caseDetails = null) {
         color: white;
     `;
 
-    // Create title container (empty since we're removing the name)
     const titleContainer = document.createElement('div');
     titleContainer.style.cssText = `
         grid-column: 1;
@@ -910,7 +971,6 @@ function showImageModal(fileUrl, fileName, caseDetails = null) {
         max-width: 70%;
     `;
 
-    // Create subtitle for Vehicle Team and Case Type if caseDetails exists
     if (caseDetails) {
         const subtitle = document.createElement('div');
         subtitle.style.cssText = `
@@ -921,7 +981,6 @@ function showImageModal(fileUrl, fileName, caseDetails = null) {
             text-overflow: ellipsis;
         `;
         
-        // Build subtitle text
         let subtitleText = '';
         if (caseDetails.vehicleTeam) subtitleText += `Team: ${caseDetails.vehicleTeam}`;
         if (caseDetails.caseType) subtitleText += ` | Type: ${caseDetails.caseType}`;
@@ -930,7 +989,6 @@ function showImageModal(fileUrl, fileName, caseDetails = null) {
         titleContainer.appendChild(subtitle);
     }
 
-    // Create close button
     const closeBtn = document.createElement('button');
     closeBtn.innerHTML = '&times;';
     closeBtn.style.cssText = `
@@ -950,7 +1008,6 @@ function showImageModal(fileUrl, fileName, caseDetails = null) {
     `;
     closeBtn.addEventListener('click', () => document.body.removeChild(modal));
 
-    // Create action buttons container (empty now since we moved buttons to details)
     const actionsContainer = document.createElement('div');
     actionsContainer.style.cssText = `
         display: flex;
@@ -959,7 +1016,6 @@ function showImageModal(fileUrl, fileName, caseDetails = null) {
         justify-self: center;
     `;
 
-    // Create content container
     const content = document.createElement('div');
     content.style.cssText = `
         flex: 1;
@@ -969,7 +1025,6 @@ function showImageModal(fileUrl, fileName, caseDetails = null) {
         gap: 20px;
     `;
 
-    // Create image container (only if fileUrl exists)
     if (fileUrl) {
         const imageContainer = document.createElement('div');
         imageContainer.style.cssText = `
@@ -997,7 +1052,6 @@ function showImageModal(fileUrl, fileName, caseDetails = null) {
         content.appendChild(imageContainer);
     }
 
-    // Create details container (if caseDetails exists)
     if (caseDetails) {
         const detailsContainer = document.createElement('div');
         detailsContainer.style.cssText = `
@@ -1021,7 +1075,6 @@ function showImageModal(fileUrl, fileName, caseDetails = null) {
         `;
         detailsContainer.appendChild(detailsTitle);
 
-        // Create details table
         const detailsTable = document.createElement('div');
         detailsTable.style.cssText = `
             display: grid;
@@ -1029,7 +1082,6 @@ function showImageModal(fileUrl, fileName, caseDetails = null) {
             gap: 12px 20px;
         `;
 
-        // Helper function to add detail row
         const addDetailRow = (label, value) => {
             if (!value) return;
             
@@ -1051,18 +1103,18 @@ function showImageModal(fileUrl, fileName, caseDetails = null) {
             detailsTable.appendChild(valueCell);
         };
 
-        // Add all case details
         addDetailRow('Vehicle Team:', caseDetails.vehicleTeam);
         addDetailRow('Case Type:', caseDetails.caseType);
         addDetailRow('Transport Officer:', caseDetails.transportOfficer);
-        addDetailRow('Emergency Responders:', caseDetails.emergencyResponders);
+        const responders = caseDetails.emergencyResponders.split(',').map(name => name.trim());
+        const formattedResponders = responders.join('<br>');
+        addDetailRow('Emergency Responders:', formattedResponders);
         addDetailRow('Location:', caseDetails.location);
         addDetailRow('Dispatch Time:', formatDateTime(caseDetails.dispatchTime));
         addDetailRow('Back to Base:', formatDateTime(caseDetails.backToBaseTime));
 
         detailsContainer.appendChild(detailsTable);
         
-        // Add horizontal line
         const horizontalLine = document.createElement('hr');
         horizontalLine.style.cssText = `
             border: none;
@@ -1072,7 +1124,6 @@ function showImageModal(fileUrl, fileName, caseDetails = null) {
         `;
         detailsContainer.appendChild(horizontalLine);
 
-        // Create buttons container
         const buttonsContainer = document.createElement('div');
         buttonsContainer.style.cssText = `
             display: flex;
@@ -1080,7 +1131,6 @@ function showImageModal(fileUrl, fileName, caseDetails = null) {
             margin-top: 20px;
         `;
 
-        // Create download all button
         const downloadAllBtn = document.createElement('button');
         downloadAllBtn.innerHTML = '<i class="fas fa-download"></i> Download All';
         downloadAllBtn.style.cssText = `
@@ -1109,7 +1159,6 @@ function showImageModal(fileUrl, fileName, caseDetails = null) {
         });
         buttonsContainer.appendChild(downloadAllBtn);
 
-        // Create print button
         const printBtn = document.createElement('button');
         printBtn.innerHTML = '<i class="fas fa-print"></i> Print';
         printBtn.style.cssText = `
@@ -1142,17 +1191,34 @@ function showImageModal(fileUrl, fileName, caseDetails = null) {
         content.appendChild(detailsContainer);
     }
 
-    // Helper function to format date/time
-    function formatDateTime(dateString) {
-        if (!dateString) return 'N/A';
-        const date = new Date(dateString);
-        return date.toLocaleString();
-    }
+    header.appendChild(titleContainer);
+    header.appendChild(actionsContainer);
+    header.appendChild(closeBtn);
+    
+    modal.appendChild(header);
+    modal.appendChild(content);
 
+    document.body.appendChild(modal);
+    document.body.style.overflow = 'hidden';
 
- // Function to download all content as PDF
+    document.addEventListener('keydown', function handleKeyDown(e) {
+        if (e.key === 'Escape') {
+            document.body.removeChild(modal);
+            document.body.style.overflow = '';
+            document.removeEventListener('keydown', handleKeyDown);
+        }
+    });
+
+    modal.addEventListener('click', function(e) {
+        if (e.target === modal) {
+            document.body.removeChild(modal);
+            document.body.style.overflow = '';
+            document.removeEventListener('keydown', handleKeyDown);
+        }
+    });
+}
+
 function downloadAllContentAsPDF(fileUrl, fileName, caseDetails) {
-    // Show loading indicator
     const loadingIndicator = document.createElement('div');
     loadingIndicator.textContent = 'Preparing PDF...';
     loadingIndicator.style.cssText = `
@@ -1168,7 +1234,6 @@ function downloadAllContentAsPDF(fileUrl, fileName, caseDetails) {
     `;
     document.body.appendChild(loadingIndicator);
 
-    // Create HTML content
     const htmlContent = `
     <html>
         <head>
@@ -1184,6 +1249,11 @@ function downloadAllContentAsPDF(fileUrl, fileName, caseDetails) {
                     margin-bottom: 20px;
                     font-size: 16px;
                     color: #555;
+                }
+                .detail-row br {
+                    display: block;
+                    content: "";
+                    margin-bottom: 5px;
                 }
                 .generated-on { font-size: 12px; color: #666; text-align: right; margin-top: 10px; }
                 .section { margin-bottom: 30px; }
@@ -1227,7 +1297,10 @@ function downloadAllContentAsPDF(fileUrl, fileName, caseDetails) {
                 <div class="detail-row"><span class="detail-label">Vehicle Team:</span> ${caseDetails.vehicleTeam || 'N/A'}</div>
                 <div class="detail-row"><span class="detail-label">Case Type:</span> ${caseDetails.caseType || 'N/A'}</div>
                 <div class="detail-row"><span class="detail-label">Transport Officer:</span> ${caseDetails.transportOfficer || 'N/A'}</div>
-                <div class="detail-row"><span class="detail-label">Emergency Responders:</span> ${caseDetails.emergencyResponders || 'N/A'}</div>
+                <div class="detail-row">
+                    <span class="detail-label">Emergency Responders:</span> 
+                    ${caseDetails.emergencyResponders ? caseDetails.emergencyResponders.split(',').map(name => name.trim()).join('<br>') : 'N/A'}
+                </div>
                 <div class="detail-row"><span class="detail-label">Location:</span> ${caseDetails.location || 'N/A'}</div>
                 <div class="detail-row"><span class="detail-label">Dispatch Time:</span> ${formatDateTime(caseDetails.dispatchTime)}</div>
                 <div class="detail-row"><span class="detail-label">Back to Base:</span> ${formatDateTime(caseDetails.backToBaseTime)}</div>
@@ -1241,15 +1314,12 @@ function downloadAllContentAsPDF(fileUrl, fileName, caseDetails) {
     </html>
 `;
 
-    // Create a temporary element to hold our HTML
     const element = document.createElement('div');
     element.innerHTML = htmlContent;
     document.body.appendChild(element);
     
-    // Determine the filename - use caseType if available, otherwise fall back to the provided fileName or default
     const pdfFilename = caseDetails?.caseType ? caseDetails.caseType : (fileName || 'case_details');
     
-    // Options for html2pdf
     const opt = {
         margin: 10,
         filename: `${pdfFilename.replace(/\.[^/.]+$/, '')}.pdf`,
@@ -1263,7 +1333,6 @@ function downloadAllContentAsPDF(fileUrl, fileName, caseDetails) {
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // Generate PDF
     html2pdf().set(opt).from(element).save()
         .then(() => {
             document.body.removeChild(loadingIndicator);
@@ -1277,9 +1346,7 @@ function downloadAllContentAsPDF(fileUrl, fileName, caseDetails) {
         });
 }
 
-// Function to print content as PDF
 function printContentAsPDF(fileUrl, fileName, caseDetails) {
-    // Show loading indicator
     const loadingIndicator = document.createElement('div');
     loadingIndicator.textContent = 'Preparing for printing...';
     loadingIndicator.style.cssText = `
@@ -1295,7 +1362,6 @@ function printContentAsPDF(fileUrl, fileName, caseDetails) {
     `;
     document.body.appendChild(loadingIndicator);
 
-    // Create HTML content
     const htmlContent = `
     <html>
         <head>
@@ -1374,15 +1440,12 @@ function printContentAsPDF(fileUrl, fileName, caseDetails) {
     </html>
 `;
 
-    // Create a temporary element to hold our HTML
     const element = document.createElement('div');
     element.innerHTML = htmlContent;
     document.body.appendChild(element);
     
-    // Determine the filename - use caseType if available, otherwise fall back to the provided fileName or default
     const pdfFilename = caseDetails?.caseType ? caseDetails.caseType : (fileName || 'case_details');
     
-    // Options for html2pdf
     const opt = {
         margin: 10,
         filename: `${pdfFilename.replace(/\.[^/.]+$/, '')}.pdf`,
@@ -1396,19 +1459,15 @@ function printContentAsPDF(fileUrl, fileName, caseDetails) {
         jsPDF: { unit: 'mm', format: 'a4', orientation: 'portrait' }
     };
 
-    // Generate PDF and open print dialog
     html2pdf().set(opt).from(element).toPdf().get('pdf').then(function(pdf) {
         document.body.removeChild(loadingIndicator);
         document.body.removeChild(element);
         
-        // Create a blob URL and open in new window for printing
         const blobUrl = pdf.output('bloburl');
         const printWindow = window.open(blobUrl, '_blank');
         
-        // Add a fallback in case popup is blocked
         if (!printWindow) {
             alert('Pop-up was blocked. Please allow pop-ups for this site to print.');
-            // Alternative: download the PDF instead
             html2pdf().set(opt).from(element).save();
         }
     }).catch(err => {
@@ -1418,60 +1477,3 @@ function printContentAsPDF(fileUrl, fileName, caseDetails) {
         document.body.removeChild(element);
     });
 }
-    // Assemble the modal
-    header.appendChild(titleContainer);
-    header.appendChild(actionsContainer);
-    header.appendChild(closeBtn);
-    
-    modal.appendChild(header);
-    modal.appendChild(content);
-
-    // Add to document
-    document.body.appendChild(modal);
-    document.body.style.overflow = 'hidden';
-
-    // Close on ESC key
-    document.addEventListener('keydown', function handleKeyDown(e) {
-        if (e.key === 'Escape') {
-            document.body.removeChild(modal);
-            document.body.style.overflow = '';
-            document.removeEventListener('keydown', handleKeyDown);
-        }
-    });
-
-    // Close on click outside content
-    modal.addEventListener('click', function(e) {
-        if (e.target === modal) {
-            document.body.removeChild(modal);
-            document.body.style.overflow = '';
-            document.removeEventListener('keydown', handleKeyDown);
-        }
-    });
-}
-
-// Initialize image preview links with case details
-document.addEventListener("DOMContentLoaded", function() {
-    document.addEventListener('click', function(e) {
-        if (e.target.closest('.image-preview-link')) {
-            e.preventDefault();
-            const link = e.target.closest('.image-preview-link');
-            const imageUrl = link.getAttribute('href');
-            // Get the file name from a data attribute or parse it from the URL
-            const fileName = link.dataset.filename || imageUrl.split('/').pop().split('?')[0];
-            
-            // Get case details from the table row
-            const row = link.closest('tr');
-            const caseDetails = {
-                vehicleTeam: row.querySelector('td:nth-child(2)').textContent,
-                caseType: row.querySelector('td:nth-child(3)').textContent,
-                transportOfficer: row.querySelector('td:nth-child(4)').textContent,
-                emergencyResponders: row.querySelector('td:nth-child(5)').textContent,
-                location: row.querySelector('td:nth-child(6)').textContent,
-                dispatchTime: row.querySelector('td:nth-child(7)').textContent,
-                backToBaseTime: row.querySelector('td:nth-child(8)').textContent
-            };
-            
-            showImageModal(imageUrl, fileName, caseDetails);
-        }
-    });
-});
