@@ -1,6 +1,4 @@
 <?php
-include '../connection/Connection.php';
-
 class SuperAdminProfile {
     private $conn;
 

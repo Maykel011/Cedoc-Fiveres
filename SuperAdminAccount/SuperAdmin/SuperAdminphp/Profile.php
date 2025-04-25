@@ -1,12 +1,20 @@
 <?php
-include '../connection/Connection.php';
-include '../AdminBackEnd/SaAdminProfileBE.php';
+error_reporting(E_ALL);
+ini_set('display_errors', 1);
+
+include __DIR__ . '/../connection/Connection.php';
+include __DIR__ . '/../AdminBackEnd/SaAdminProfileBE.php';
 session_start();
 
 // Check for Super Admin access
 if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Super Admin') {
     header("Location: ../../../login/login.php");
     exit();
+}
+
+// Verify class exists
+if (!class_exists('SuperAdminProfile')) {
+    die('Error: SuperAdminProfile class not found. Check include paths.');
 }
 
 $profile = new SuperAdminProfile($conn);
@@ -152,7 +160,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         .error .modal-button:hover {
             background-color: #d32f2f;
         }
-        
     </style>
 </head>
 
