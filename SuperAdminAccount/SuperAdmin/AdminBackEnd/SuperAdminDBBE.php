@@ -35,10 +35,6 @@ $stats = [
 $filter = $_GET['filter'] ?? 'all';
 
 try {
-    // Database connection
-    $conn = new PDO("mysql:host=localhost;dbname=cedoc_fiveres", "root", "");
-    $conn->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    
     // Determine date conditions based on filter
     $dateConditions = [
         'today' => [
@@ -76,8 +72,8 @@ try {
                 SUM(status = 'Rejected') as rejected
               FROM applicants
               WHERE $appCondition";
-    $stmt = $conn->query($query);
-    $stats['applicants'] = array_merge($stats['applicants'], $stmt->fetch(PDO::FETCH_ASSOC));
+    $result = $conn->query($query);
+    $stats['applicants'] = array_merge($stats['applicants'], $result->fetch_assoc());
     
     // Monthly applicant data
     $query = "SELECT 
@@ -87,30 +83,39 @@ try {
               WHERE $appCondition
               GROUP BY DATE_FORMAT(application_date, '%Y-%m')
               ORDER BY month";
-    $stmt = $conn->query($query);
-    $stats['applicants']['by_month'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $result = $conn->query($query);
+    $stats['applicants']['by_month'] = [];
+    while ($row = $result->fetch_assoc()) {
+        $stats['applicants']['by_month'][] = $row;
+    }
     
     /* VEHICLE RUN STATISTICS */
     // Total runs
     $query = "SELECT COUNT(*) as total FROM vehicle_runs WHERE $runCondition";
-    $stmt = $conn->query($query);
-    $stats['vehicle_runs']['total'] = $stmt->fetchColumn();
+    $result = $conn->query($query);
+    $stats['vehicle_runs']['total'] = $result->fetch_row()[0];
     
     // Runs by team
     $query = "SELECT vehicle_team, COUNT(*) as count 
               FROM vehicle_runs 
               WHERE $runCondition
               GROUP BY vehicle_team";
-    $stmt = $conn->query($query);
-    $stats['vehicle_runs']['by_team'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $result = $conn->query($query);
+    $stats['vehicle_runs']['by_team'] = [];
+    while ($row = $result->fetch_assoc()) {
+        $stats['vehicle_runs']['by_team'][] = $row;
+    }
     
     // Runs by case type
     $query = "SELECT case_type, COUNT(*) as count 
               FROM vehicle_runs 
               WHERE $runCondition
               GROUP BY case_type";
-    $stmt = $conn->query($query);
-    $stats['vehicle_runs']['by_case_type'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $result = $conn->query($query);
+    $stats['vehicle_runs']['by_case_type'] = [];
+    while ($row = $result->fetch_assoc()) {
+        $stats['vehicle_runs']['by_case_type'][] = $row;
+    }
     
     // Monthly run data
     $query = "SELECT 
@@ -120,14 +125,16 @@ try {
               WHERE $runCondition
               GROUP BY DATE_FORMAT(created_at, '%Y-%m')
               ORDER BY month";
-    $stmt = $conn->query($query);
-    $stats['vehicle_runs']['by_month'] = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $result = $conn->query($query);
+    $stats['vehicle_runs']['by_month'] = [];
+    while ($row = $result->fetch_assoc()) {
+        $stats['vehicle_runs']['by_month'][] = $row;
+    }
     
-} catch (PDOException $e) {
-    die("Database Error: " . $e->getMessage());
 } catch (Exception $e) {
     die("Error: " . $e->getMessage());
 }
+
 // Initialize environmental data array with proper structure
 $environmentalData = [
     'labels' => ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
@@ -150,16 +157,19 @@ try {
                 AVG(water_level) as avg_water,
                 AVG(air_quality) as avg_air
               FROM files
-              WHERE DATE(date_uploaded) BETWEEN :week_start AND :week_end
+              WHERE DATE(date_uploaded) BETWEEN ? AND ?
               GROUP BY DAYOFWEEK(date_uploaded)
               ORDER BY day_num";
     
     $stmt = $conn->prepare($query);
-    $stmt->bindParam(':week_start', $currentWeekStart);
-    $stmt->bindParam(':week_end', $currentWeekEnd);
+    $stmt->bind_param('ss', $currentWeekStart, $currentWeekEnd);
     $stmt->execute();
+    $result = $stmt->get_result();
     
-    $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    $results = [];
+    while ($row = $result->fetch_assoc()) {
+        $results[] = $row;
+    }
     
     // Map database results to our structure
     foreach ($results as $row) {
@@ -173,7 +183,7 @@ try {
         }
     }
     
-} catch (PDOException $e) {
+} catch (Exception $e) {
     error_log("Environmental data error: " . $e->getMessage());
 }
 ?>

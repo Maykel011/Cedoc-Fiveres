@@ -84,9 +84,7 @@ $vehicleRuns = getVehicleRunsData();
             <li class="vehicle-runs">
                 <a href="vehicle-runs.php"><img src="../../assets/icon/vruns.png" alt="Vehicle Runs Icon" class="sidebar-icon"> Vehicle Runs</a>
             </li>
-            <li class="manage-users">
-                <a href="manage-users.php"><img src="../../Assets/Icon/user-management.png" alt="Manage Users Icon" class="sidebar-icon"> Manage Users</a>
-            </li>
+            
         </ul>
     </aside>
 
