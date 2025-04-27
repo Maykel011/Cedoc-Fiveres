@@ -2,13 +2,6 @@
 include '../connection/Connection.php'; // Database connection
 session_start();
 
-// Corrected check (using 'role' instead of 'user_role')
-if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Super Admin')) {
-    // Redirect to login page (not logout!)
-    header("Location: ../../../login/login.php");
-    exit();
-}
-
 // Enable error reporting for debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);

@@ -3,8 +3,9 @@ session_start();
 include '../connection/Connection.php';
 include '../AdminBackEnd/AdminProfilesBE.php';
 
-// Check for admin role
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') {
+// Corrected check (using 'role' instead of 'user_role')
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'Admin' vs 'admin'
+    // Redirect to login page (not logout!)
     header("Location: ../../../login/login.php");
     exit();
 }

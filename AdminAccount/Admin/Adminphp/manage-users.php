@@ -4,13 +4,12 @@
 
 
 
-    // Corrected check (using 'role' instead of 'user_role')
-    if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Super Admin' && $_SESSION['role'] !== 'User')) {
-        // Redirect to login page (not logout!)
-        header("Location: ../../../login/login.php");
-        exit();
-    }
-
+   // Corrected check (using 'role' instead of 'user_role')
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'Admin' vs 'admin'
+    // Redirect to login page (not logout!)
+    header("Location: ../../../login/login.php");
+    exit();
+}
     ?>
 
     <!DOCTYPE html>

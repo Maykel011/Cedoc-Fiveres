@@ -36,13 +36,15 @@ $vehicleRuns = getVehicleRunsData();
                 <div class="user" id="userContainer">
                     <img src="../../assets/icon/users.png" alt="User" class="icon" id="userIcon">
                     <span class="admin-text">
-                        <?php
-                        if (isset($_SESSION['first_name']) && isset($_SESSION['last_name'])) {
-                            echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']);
-                        } else {
-                            echo 'Admin';
-                        }
-                        ?>
+                    <?php 
+if (isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin') {
+    if (isset($_SESSION['first_name'], $_SESSION['last_name'])) {
+        echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']);
+    } else {
+        echo 'Super Admin';
+    }
+}
+?>
                     </span>
                     <div class="user-dropdown" id="userDropdown">
                         <a href="profile.php"><img src="../../assets/icon/updateuser.png" alt="Profile Icon" class="dropdown-icon"> Profile</a>
