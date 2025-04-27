@@ -30,25 +30,25 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Super Admin') {
 <header class="header">
     <div class="header-content">
         <div class="left-side">
-            <img src="../../assets/img/Logo.png" alt="Logo" class="logo">
+        <img src="../../Assets/img/logo.png" alt="Logo" class="logo">
         </div>
         <div class="right-side">
             <div class="user" id="userContainer">
-                <img src="../../assets/icon/users.png" alt="User" class="icon" id="userIcon">
+            <img src="../../Assets/Icon/users.png" alt="User" class="icon" id="userIcon">
                 <span class="admin-text">
                 <?php 
-if (isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin') {
-    if (isset($_SESSION['first_name'], $_SESSION['last_name'])) {
-        echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']);
-    } else {
-        echo 'Super Admin';
-    }
-}
-?>
+                if (isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin') {
+                    if (isset($_SESSION['first_name'], $_SESSION['last_name'])) {
+                        echo htmlspecialchars($_SESSION['first_name'] . ' ' . $_SESSION['last_name']);
+                    } else {
+                        echo 'Super Admin';
+                    }
+                }
+                ?>
                 </span>
                 <div class="user-dropdown" id="userDropdown">
-                    <a href="profile.php"><img src="../../assets/icon/updateuser.png" alt="Profile Icon" class="dropdown-icon"> Profile</a>
-                    <a href="#" id="logoutLink"><img src="../../assets/icon/logout.png" alt="Logout Icon" class="dropdown-icon"> Logout</a>
+                <a href="Profile.php"><img src="../../Assets/Icon/updateuser.png" alt="Profile Icon" class="dropdown-icon"> Profile</a>
+                <a href="#" id="logoutLink"><img src="../../Assets/Icon/logout.png" alt="Logout Icon" class="dropdown-icon"> Logout</a>
                 </div>
             </div>
         </div>
@@ -73,16 +73,16 @@ if (isset($_SESSION['role']) && $_SESSION['role'] === 'Super Admin') {
     <aside class="sidebar">
         <ul>
             <li class="dashboard">
-                <a href="SuperAdminDashboard.php"><img src="../../Assets/Icon/Analysis.png" alt="Dashboard Icon" class="sidebar-icon">Dashboard</a>
+                <a href="SuperAdminDashboard.php"><img src="../../Assets/Icon/analysis.png" alt="Dashboard Icon" class="sidebar-icon">Dashboard</a>
             </li>
             <li class="media-files">
                 <a href="media-files.php"><img src="../../Assets/Icon/file.png" alt="Media Files Icon" class="sidebar-icon"> Media Files</a>
             </li>
             <li class="resume">
-                <a href="resume.php"><img src="../../Assets/Icon/Resume.png" alt="Resume Icon" class="sidebar-icon">Intern Application</a>
+                <a href="resume.php"><img src="../../Assets/Icon/resume.png" alt="Resume Icon" class="sidebar-icon">Intern Application</a>
             </li>
             <li class="vehicle-runs">
-                <a href="vehicle-runs.php"><img src="../../assets/icon/vruns.png" alt="Vehicle Runs Icon" class="sidebar-icon"> Vehicle Runs</a>
+                <a href="vehicle-runs.php"><img src="../../Assets/Icon/vruns.png" alt="Vehicle Runs Icon" class="sidebar-icon"> Vehicle Runs</a>
             </li>
             <li class="manage-users">
                 <a href="manage-users.php"><img src="../../Assets/Icon/user-management.png" alt="Manage Users Icon" class="sidebar-icon"> Manage Users</a>
