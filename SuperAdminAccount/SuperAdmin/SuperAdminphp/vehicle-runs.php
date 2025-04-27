@@ -4,7 +4,7 @@ include '../AdminBackEnd/VehicleRunsBE.php';
 
 
 // Corrected check (using 'role' instead of 'user_role')
-if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Super Admin')) {
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Super Admin') { 
     // Redirect to login page (not logout!)
     header("Location: ../../../login/login.php");
     exit();

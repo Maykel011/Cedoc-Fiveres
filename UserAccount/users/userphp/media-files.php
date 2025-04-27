@@ -4,12 +4,13 @@ include '../userBackEnd/MediaFilesBE.php';
 
 session_start();
 
-// Corrected check (using 'role' instead of 'user_role')
-if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Super Admin' && $_SESSION['role'] !== 'User')) {
-    // Redirect to login page (not logout!)
+// Corrected check (only allowing 'User')
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'User') {
+    // Redirect to login page
     header("Location: ../../../login/login.php");
     exit();
 }
+
 
 ?>
 

@@ -3,12 +3,6 @@ include '../connection/Connection.php'; // Database connection
 // Start session first
 session_start();
 
-// Check authentication and admin role
-if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Super Admin' && $_SESSION['role'] !== 'User')) {
-    // Redirect to login page (not logout!)
-    header("Location: ../../../login/login.php");
-    exit();
-}
 
 // Enable error reporting for debugging
 error_reporting(E_ALL);

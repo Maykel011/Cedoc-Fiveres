@@ -6,8 +6,9 @@ include __DIR__ . '/../connection/Connection.php';
 include __DIR__ . '/../AdminBackEnd/SaAdminProfileBE.php';
 session_start();
 
-// Check for Super Admin access
-if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Super Admin') {
+// Corrected check (using 'role' instead of 'user_role')
+if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Super Admin') { 
+    // Redirect to login page (not logout!)
     header("Location: ../../../login/login.php");
     exit();
 }

@@ -2,12 +2,6 @@
 include '../connection/Connection.php'; // Database connection
 session_start();
 
-// Corrected check (using 'role' instead of 'user_role')
-if (!isset($_SESSION['user_id']) || ($_SESSION['role'] !== 'Admin' && $_SESSION['role'] !== 'Super Admin' && $_SESSION['role'] !== 'User')) {
-    // Redirect to login page (not logout!)
-    header("Location: ../../../login/login.php");
-    exit();
-}
 
 class ProfileBE {
     private $conn;
