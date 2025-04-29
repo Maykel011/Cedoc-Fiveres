@@ -70,7 +70,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'Admin') { // Note: 'A
         <aside class="sidebar">
             <ul>
                 <li class="dashboard">
-                    <a href="AdminDashboard.php"><img src="../Assets/Icon/analysis.png" alt="Dashboard Icon" class="sidebar-icon">Dashboard</a>
+                    <a href="adminDashboard.php"><img src="../Assets/Icon/analysis.png" alt="Dashboard Icon" class="sidebar-icon">Dashboard</a>
                 </li>
                 <li class="media-files">
                     <a href="media-files.php"><img src="../Assets/Icon/file.png" alt="Media Files Icon" class="sidebar-icon"> Media Files</a>
