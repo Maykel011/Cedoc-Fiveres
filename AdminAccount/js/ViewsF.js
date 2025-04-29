@@ -570,7 +570,7 @@ function setupProfileDropdown() {
             const form = document.createElement('form');
             form.method = 'POST';
             form.action = '../../login/logout.php';
-            
+
             if (csrfToken) {
                 const csrfInput = document.createElement('input');
                 csrfInput.type = 'hidden';

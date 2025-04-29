@@ -71,7 +71,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '../../../login/logout.php';
+            form.action = '../../login/logout.php';
             
             if (csrfToken) {
                 const csrfInput = document.createElement('input');
@@ -477,7 +477,7 @@ document.addEventListener("DOMContentLoaded", function() {
             // Add download button specifically for Recommendation Letter
             if (doc.downloadBtn) {
                 const downloadBtn = document.createElement('a');
-                downloadBtn.href = '../../../' + doc.path;
+                downloadBtn.href = '../../CedocIntern/' + doc.path;
                 downloadBtn.download = doc.name;
                 downloadBtn.innerHTML = '<i class="fas fa-download"></i> Download';
                 downloadBtn.style.cssText = `
@@ -536,7 +536,7 @@ document.addEventListener("DOMContentLoaded", function() {
     function showDocument(filePath, fileType, container) {
         container.innerHTML = ''; // Clear previous content
         
-        const fullPath = '../../../' + filePath;
+        const fullPath = '../../CedocIntern/' + filePath;
         
         // SIMPLE PDF VIEWER
         if (fileType === 'pdf') {

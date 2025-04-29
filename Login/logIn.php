@@ -5,11 +5,11 @@ include './connection/Connection.php';
 // Check if user is already logged in
 if(isset($_SESSION['user_id'])) {
     if($_SESSION['role'] == 'Super Admin') {
-        header("Location: ../SuperAdminAccount/SuperAdmin/SuperAdminphp/SuperAdminDashboard.php");
+        header("Location: ../SuperAdminAccount/SuperAdmin/SuperAdminDashboard.php");
     } elseif($_SESSION['role'] == 'Admin') {
-        header("Location: ../AdminAccount/Admin/Adminphp/adminDashboard.php");
+        header("Location: ../AdminAccount/Admin/adminDashboard.php");
     } else {
-        header("Location: ../UserAccount/users/userphp/userDashboard.php");
+        header("Location: ../UserAccount/user/userDashboard.php");
     }
     exit();
 }
@@ -56,11 +56,11 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 
                 // Redirect based on role
                 if($user['role'] == 'Super Admin') {
-                    header("Location: ../SuperAdminAccount/SuperAdmin/SuperAdminphp/SuperAdminDashboard.php");
+                    header("Location: ../SuperAdminAccount/SuperAdmin/SuperAdminDashboard.php");
                 } elseif($user['role'] == 'Admin') {
-                    header("Location: ../AdminAccount/Admin/Adminphp/adminDashboard.php");
+                    header("Location: ../AdminAccount/Admin/adminDashboard.php");
                 } else {
-                    header("Location: ../UserAccount/users/userphp/userDashboard.php");
+                    header("Location: ../UserAccount/users/userDashboard.php");
                 }
                 exit();
             } else {

@@ -64,7 +64,7 @@ function initializeLogoutModal() {
     logoutCancel.addEventListener('click', closeAll);
 
     logoutConfirm.addEventListener('click', function() {
-        window.location.href = '../../../login/logout.php';
+        window.location.href = '../../login/logout.php';
     });
 
     logoutModal.addEventListener('click', function(e) {

@@ -198,7 +198,7 @@ function setupDeleteHandlers() {
 // ========== FILE PREVIEW FUNCTIONALITY ==========
 function setupFilePreview() {
     // Change this constant at the top of your JavaScript
-const BASE_UPLOADS_PATH = '../../../Mediaupload/';
+const BASE_UPLOADS_PATH = '../../Mediaupload/';
 
     document.querySelectorAll('.file-link').forEach(link => {
         link.addEventListener('click', function(e) {
@@ -207,11 +207,11 @@ const BASE_UPLOADS_PATH = '../../../Mediaupload/';
             let fileUrl = this.getAttribute('href');
             
             if (!fileUrl.startsWith('http') && !fileUrl.startsWith('/')) {
-                if (fileUrl.startsWith('../uploads/')) {
-                    fileUrl = fileUrl.replace('../uploads/', BASE_UPLOADS_PATH);
+                if (fileUrl.startsWith('../../Mediaupload/')) {
+                    fileUrl = fileUrl.replace('../../Mediaupload/', BASE_UPLOADS_PATH);
                 }
-                else if (fileUrl.startsWith('uploads/')) {
-                    fileUrl = BASE_UPLOADS_PATH + fileUrl.substring('uploads/'.length);
+                else if (fileUrl.startsWith('Mediaupload/')) {
+                    fileUrl = BASE_UPLOADS_PATH + fileUrl.substring('Mediaupload/'.length);
                 }
             }
 
@@ -569,7 +569,7 @@ function setupProfileDropdown() {
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '../../../login/logout.php';
+            form.action = '../../login/logout.php';
             
             if (csrfToken) {
                 const csrfInput = document.createElement('input');

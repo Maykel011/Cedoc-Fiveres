@@ -6,7 +6,7 @@ document.addEventListener("DOMContentLoaded", function() {
     const logoutModal = document.getElementById('logoutModal');
     const logoutCancel = document.getElementById('logoutCancel');
     const logoutConfirm = document.getElementById('logoutConfirm');
-    const statusModal = document.getElementById('statusModal');
+    const messageModal = document.getElementById('messageModal');
     const modalCloseButton = document.getElementById('modalCloseButton');
 
     // Toggle dropdown visibility
@@ -29,12 +29,12 @@ document.addEventListener("DOMContentLoaded", function() {
             logoutModal.style.display = 'none';
             document.body.style.overflow = '';
         }
-        if (statusModal) {
-            statusModal.classList.remove('active');
+        if (messageModal) {
+            messageModal.classList.remove('active');
         }
     }
 
-    // Initialize dropdown
+    // Initialize dropdown - moved before other event listeners
     if (userContainer && userDropdown) {
         userContainer.addEventListener("click", function(event) {
             event.stopPropagation();
@@ -79,25 +79,19 @@ document.addEventListener("DOMContentLoaded", function() {
         });
     }
 
-    // Close modals when clicking outside
-    document.addEventListener('click', function(e) {
-        // User dropdown
-        if (userDropdown && userDropdown.classList.contains("show")) {
-            if (!userContainer.contains(e.target) && !userDropdown.contains(e.target)) {
-                toggleDropdown(false);
+    // Close modal when clicking outside
+    if (logoutModal) {
+        logoutModal.addEventListener('click', function(e) {
+            if (e.target === logoutModal) {
+                closeAll();
             }
-        }
-        
-        // Logout modal
-        if (logoutModal && e.target === logoutModal) {
-            closeAll();
-        }
-        
-        // Status modal
-        if (statusModal && e.target === statusModal) {
-            closeAll();
-        }
-    });
+        });
+    }
+
+    // Message modal close button
+    if (modalCloseButton) {
+        modalCloseButton.addEventListener('click', closeAll);
+    }
 
     // Close with ESC key
     document.addEventListener('keydown', function(e) {
@@ -106,46 +100,12 @@ document.addEventListener("DOMContentLoaded", function() {
         }
     });
 
-    // Close status modal button
-    if (modalCloseButton) {
-        modalCloseButton.addEventListener('click', closeAll);
-    }
-});
-
-// 6 digit PIN code (if still needed)
-document.addEventListener("DOMContentLoaded", function () {
-    const pinForm = document.querySelector(".delete-passkey-container form");
-
-    if (pinForm) {
-        pinForm.addEventListener("submit", function (event) {
-            event.preventDefault();
-
-            const newPin = document.getElementById("new-passkey").value;
-            const confirmNewPin = document.getElementById("confirm-new-passkey").value;
-
-            // Validate 6-digit PIN
-            if (newPin.length !== 6 || confirmNewPin.length !== 6) {
-                alert("PIN code must be exactly 6 digits!");
-                return;
+    // Close dropdown when clicking outside
+    document.addEventListener("click", function(event) {
+        if (userDropdown && userDropdown.classList.contains("show")) {
+            if (!userContainer.contains(event.target) && !userDropdown.contains(event.target)) {
+                toggleDropdown(false);
             }
-
-            if (newPin !== confirmNewPin) {
-                alert("New PIN and Confirm PIN do not match!");
-                return;
-            }
-
-            // Display the masked PIN (e.g., "******")
-            const pinDisplay = document.createElement("p");
-            pinDisplay.textContent = "New PIN Code: ******";
-            pinDisplay.style.fontWeight = "bold";
-            pinDisplay.style.color = "#28a745";
-
-            // Append below the form
-            const formContainer = document.querySelector(".delete-passkey-container");
-            formContainer.appendChild(pinDisplay);
-
-            // Clear the input fields
-            pinForm.reset();
-        });
-    }
+        }
+    });
 });

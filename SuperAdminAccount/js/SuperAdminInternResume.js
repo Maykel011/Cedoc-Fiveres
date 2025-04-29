@@ -182,7 +182,7 @@ document.addEventListener("DOMContentLoaded", function() {
         savingModal.style.display = "block";
         savingMessage.textContent = "Saving changes...";
         
-        fetch('../AdminBackEnd/AdminInternResumeBE.php?action=updateStatus', {
+        fetch('../AdminBackEnd/InternResumeBE.php?action=updateStatus', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -236,7 +236,7 @@ document.addEventListener("DOMContentLoaded", function() {
             currentApplicantId = this.getAttribute("data-id");
             
             // Fetch applicant data via AJAX
-            fetch(`../AdminBackEnd/AdminInternResumeBE.php?action=getApplicantData&id=${currentApplicantId}`)
+            fetch(`../AdminBackEnd/InternResumeBE.php?action=getApplicantData&id=${currentApplicantId}`)
                 .then(response => response.json())
                 .then(data => {
                     if (data.success) {
@@ -263,7 +263,7 @@ document.addEventListener("DOMContentLoaded", function() {
 
     // Confirm Delete
     document.getElementById("confirmDelete").addEventListener("click", function() {
-        fetch('../AdminBackEnd/AdminInternResumeBE.php?action=delete', {
+        fetch('../AdminBackEnd/InternResumeBE.php?action=delete', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',
@@ -316,7 +316,7 @@ document.addEventListener("DOMContentLoaded", function() {
         savingModal.style.display = "block";
         savingMessage.textContent = "Saving changes...";
         
-        fetch('../AdminBackEnd/AdminInternResumeBE.php?action=updateStatus', {
+        fetch('../AdminBackEnd/InternResumeBE.php?action=updateStatus', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/x-www-form-urlencoded',

@@ -78,7 +78,7 @@ function initializeLogoutModal() {
     logoutCancel.addEventListener('click', closeAll);
 
     logoutConfirm.addEventListener('click', function() {
-        window.location.href = '../../../login/logout.php';
+        window.location.href = '../../login/logout.php';
     });
 
     logoutModal.addEventListener('click', function(e) {
@@ -791,7 +791,7 @@ function editCase(caseId) {
                     <div class="current-image-wrapper">
                         <p class="image-label">Current Case Image</p>
                         <div class="image-preview-container">
-                            <img src="../../../${caseData.case_image}" alt="Case Image" class="case-preview-image">
+                            <img src="../../${caseData.case_image}" alt="Case Image" class="case-preview-image">
                             <div class="image-actions">
                                 <button type="button" class="remove-image-btn" data-case-id="${caseData.id}">
                                     <i class="fas fa-trash-alt"></i> Remove Image
@@ -1269,7 +1269,7 @@ function downloadAllContentAsPDF(fileUrl, fileName, caseDetails) {
         <body>
             <div class="header">
                 <div class="logo-container">
-                    <img class="logo" src="../../assets/img/Logo.png" alt="Organization Logo">
+                    <img class="logo" src="../assets/img/Logo.png" alt="Organization Logo">
                 </div>
                 <div class="header-content">
                     <!-- Empty now since we moved the title -->
@@ -1398,7 +1398,7 @@ function printContentAsPDF(fileUrl, fileName, caseDetails) {
         <body>
             <div class="header">
                 <div class="logo-container">
-                    <img class="logo" src="../../assets/img/Logo.png" alt="Organization Logo">
+                    <img class="logo" src="../assets/img/Logo.png" alt="Organization Logo">
                 </div>
                 <div class="header-content">
                     <!-- Empty now since we moved the title -->

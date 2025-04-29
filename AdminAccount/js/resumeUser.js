@@ -59,7 +59,7 @@ document.addEventListener("DOMContentLoaded", function() {
             const csrfToken = document.querySelector('meta[name="csrf-token"]')?.content || '';
             const form = document.createElement('form');
             form.method = 'POST';
-            form.action = '../../../login/logout.php';
+            form.action = '../../login/logout.php';
             
             if (csrfToken) {
                 const csrfInput = document.createElement('input');
