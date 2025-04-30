@@ -1,42 +1,3 @@
-// ========== AUTO-HIDE EMPTY COLUMNS FUNCTIONALITY ==========
-function autoHideEmptyColumns() {
-    const rows = document.querySelectorAll('tbody tr');
-    if (rows.length === 0) return;
-
-    // Check which columns have data
-    const columns = [
-        { index: 4, selector: '.temperature-col', hasData: false }, // Temperature
-        { index: 5, selector: '.water-level-col', hasData: false }, // Water Level
-        { index: 6, selector: '.air-quality-col', hasData: false }  // Air Quality
-    ];
-
-    // Check each row for data in these columns
-    rows.forEach(row => {
-        columns.forEach(col => {
-            const cell = row.cells[col.index];
-            if (cell && cell.textContent.trim() !== '') {
-                col.hasData = true;
-            }
-        });
-    });
-
-    // Show/hide columns based on data presence
-    columns.forEach(col => {
-        const headerCells = document.querySelectorAll(`th${col.selector}`);
-        const dataCells = document.querySelectorAll(`td:nth-child(${col.index + 1})`);
-        
-        if (col.hasData) {
-            // Show column
-            headerCells.forEach(cell => cell.classList.remove('hidden-column'));
-            dataCells.forEach(cell => cell.classList.remove('hidden-column'));
-        } else {
-            // Hide column
-            headerCells.forEach(cell => cell.classList.add('hidden-column'));
-            dataCells.forEach(cell => cell.classList.add('hidden-column'));
-        }
-    });
-}
-
 // ========== MODAL CONTROL FUNCTIONS ==========
 function showModal(modalId) {
     document.getElementById(modalId).style.display = "flex";
@@ -114,7 +75,6 @@ function setupSorting() {
 
         tbody.innerHTML = "";
         rows.forEach(row => tbody.appendChild(row));
-        autoHideEmptyColumns(); // Re-check after sorting
     });
 }
 
@@ -237,7 +197,8 @@ function setupDeleteHandlers() {
 
 // ========== FILE PREVIEW FUNCTIONALITY ==========
 function setupFilePreview() {
-    const BASE_UPLOADS_PATH = '../../Mediaupload/';
+    // Change this constant at the top of your JavaScript
+const BASE_UPLOADS_PATH = '../../Mediaupload/';
 
     document.querySelectorAll('.file-link').forEach(link => {
         link.addEventListener('click', function(e) {
@@ -654,7 +615,6 @@ document.addEventListener("DOMContentLoaded", function() {
     setupDeleteHandlers();
     setupFilePreview();
     setupProfileDropdown();
-    autoHideEmptyColumns(); // Initialize column visibility
 
     // Upload button
     document.getElementById("uploadBtn")?.addEventListener("click", function() {
