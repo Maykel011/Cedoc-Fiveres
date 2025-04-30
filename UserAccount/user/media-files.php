@@ -202,6 +202,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'User') {
     </div>
 </div>
 
-<script src="../js/mediafiles1234.js"></script>
+<script src="../js/mediafiles.js"></script>
 </body>
 </html>

@@ -19,7 +19,7 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'User') {
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CEDOC FIVERES - View Folder</title>
-    <link rel="stylesheet" href="../Css/Viewsfi.css">
+    <link rel="stylesheet" href="../Css/Viewsfolder.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 </head>
 
@@ -109,17 +109,17 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'User') {
     </div>
     <table>
     <thead>
-        <tr>
-            <th>Select</th>
-            <th>Name</th>
-            <th>Date Modified</th>
-            <th>Type</th>
-            <th>Temperature (°C)</th>
-            <th>Water Level (M)</th>
-            <th>Air Quality (PM2.5)</th>
-            <th>Actions</th>
-        </tr>
-    </thead>
+    <tr>
+        <th>Select</th>
+        <th>Name</th>
+        <th>Date Modified</th>
+        <th>Type</th>
+        <th class="temperature-col">Temperature (°C)</th>
+        <th class="water-level-col">Water Level (M)</th>
+        <th class="air-quality-col">Air Quality (PM2.5)</th>
+        <th>Actions</th>
+    </tr>
+</thead>
     <tbody>
     <?php foreach ($files as $file): 
     // Correct path construction - matches where files are actually stored
@@ -323,6 +323,6 @@ if (!isset($_SESSION['user_id']) || $_SESSION['role'] !== 'User') {
     </div>
 </div>
 
-<script src="../js/Views.js"></script>
+<script src="../js/Viewfolder.js"></script>
 </body>
 </html>

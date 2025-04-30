@@ -60,7 +60,7 @@ if($_SERVER['REQUEST_METHOD'] == 'POST') {
                 } elseif($user['role'] == 'Admin') {
                     header("Location: ../AdminAccount/Admin/adminDashboard.php");
                 } else {
-                    header("Location: ../UserAccount/users/userDashboard.php");
+                    header("Location: ../UserAccount/user/userDashboard.php");
                 }
                 exit();
             } else {

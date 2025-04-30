@@ -22,6 +22,36 @@ function showSuccessMessage(message) {
     setTimeout(() => closeModal("deleteSuccessModal"), 2000);
 }
 
+// ========== AUTO-HIDE EMPTY COLUMNS ==========
+function autoHideEmptyColumns() {
+    // Get all table rows
+    const rows = document.querySelectorAll('tbody tr');
+    if (rows.length === 0) return;
+
+    // Check which columns have data
+    const hasTemperature = Array.from(rows).some(row => row.cells[4].textContent.trim() !== '');
+    const hasWaterLevel = Array.from(rows).some(row => row.cells[5].textContent.trim() !== '');
+    const hasAirQuality = Array.from(rows).some(row => row.cells[6].textContent.trim() !== '');
+
+    // Toggle column visibility
+    document.querySelectorAll('.temperature-col').forEach(el => {
+        el.style.display = hasTemperature ? '' : 'none';
+    });
+    document.querySelectorAll('.water-level-col').forEach(el => {
+        el.style.display = hasWaterLevel ? '' : 'none';
+    });
+    document.querySelectorAll('.air-quality-col').forEach(el => {
+        el.style.display = hasAirQuality ? '' : 'none';
+    });
+
+    // Toggle corresponding cells in each row
+    rows.forEach(row => {
+        row.cells[4].style.display = hasTemperature ? '' : 'none';
+        row.cells[5].style.display = hasWaterLevel ? '' : 'none';
+        row.cells[6].style.display = hasAirQuality ? '' : 'none';
+    });
+}
+
 // ========== ENHANCED SEARCH FUNCTIONALITY ==========
 function setupSearch() {
     const searchInput = document.querySelector(".search-input");
@@ -75,6 +105,7 @@ function setupSorting() {
 
         tbody.innerHTML = "";
         rows.forEach(row => tbody.appendChild(row));
+        autoHideEmptyColumns(); // Re-check after sorting
     });
 }
 
@@ -197,8 +228,7 @@ function setupDeleteHandlers() {
 
 // ========== FILE PREVIEW FUNCTIONALITY ==========
 function setupFilePreview() {
-    // Change this constant at the top of your JavaScript
-const BASE_UPLOADS_PATH = '../../Mediaupload/';
+    const BASE_UPLOADS_PATH = '../../Mediaupload/';
 
     document.querySelectorAll('.file-link').forEach(link => {
         link.addEventListener('click', function(e) {
@@ -448,10 +478,9 @@ function openOfficePreview(fileUrl, fileName, fileType) {
             max-width: 600px;
         `;
         localMessage.innerHTML = `
-            <h3>Office File Preview Not Available Locally</h3>
-            <p>For security reasons, Office files cannot be previewed directly when running on localhost.</p>
-            <p>Please download the file to view it, or deploy the application to your hosting server for full preview functionality.</p>
-            <p>When deployed, this system will use Microsoft Office Online Viewer for seamless previews.</p>
+            <h3>Office File Preview Not Available</h3>
+            <p>For security reasons, Office files cannot be previewed.</p>
+            <p>Please download the file to view it.</p>
         `;
         content.appendChild(localMessage);
     } else {
@@ -615,6 +644,7 @@ document.addEventListener("DOMContentLoaded", function() {
     setupDeleteHandlers();
     setupFilePreview();
     setupProfileDropdown();
+    autoHideEmptyColumns(); // Initialize column visibility
 
     // Upload button
     document.getElementById("uploadBtn")?.addEventListener("click", function() {

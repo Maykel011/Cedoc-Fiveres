@@ -20,7 +20,6 @@ body,html {
     font-family: 'Akrobat', sans-serif;
     height: 100%;
     overflow: hidden; /* Prevent full page scrolling */
-
 }
 
 
@@ -983,4 +982,13 @@ button[type="submit"]:hover {
         color: #e74c3c;
         margin-bottom: 15px;
     }
-/* Pin Code */
+
+    /* Add this to your ViewFi.css file */
+th.temperature-col,
+th.water-level-col,
+th.air-quality-col,
+td.temperature-col,
+td.water-level-col,
+td.air-quality-col {
+    transition: all 0.3s ease;
+}

@@ -979,4 +979,18 @@ button[type="submit"]:hover {
         color: #e74c3c;
         margin-bottom: 15px;
     }
-/* Pin Code */
+
+    /* Add column hiding transitions */
+.temperature-col, .water-level-col, .air-quality-col,
+td:nth-child(5), td:nth-child(6), td:nth-child(7) {
+    transition: all 0.3s ease;
+}
+
+/* Hide class for columns */
+.hidden-column {
+    display: none !important;
+    width: 0 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    border: none !important;
+}
