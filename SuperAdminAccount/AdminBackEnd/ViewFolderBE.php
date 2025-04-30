@@ -3,7 +3,7 @@ include '../connection/Connection.php';
 
 // Verify admin PIN code function
 function verifyAdminPin($conn, $pinCode) {
-    $stmt = $conn->prepare("SELECT id FROM users WHERE role = 'Admin' AND pin_code = ?");
+    $stmt = $conn->prepare("SELECT id FROM users WHERE role = 'Super Admin' AND pin_code = ?");
     $stmt->bind_param("s", $pinCode);
     $stmt->execute();
     $stmt->store_result();
